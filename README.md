@@ -2,7 +2,6 @@
 
 A lightweight, powerful, and private multi-currency money management application built for Android.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-1.1.0-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Android-brightgreen.svg)
 
