@@ -1,0 +1,10 @@
+{
+    "appId": "com.moneymanagement.app",
+    "appName": "Money Manager",
+    "webDir": "www",
+    "bundledWebRuntime": false,
+    "android": {
+        "allowMixedContent": true,
+        "backgroundColor": "#0a0e27"
+    }
+}

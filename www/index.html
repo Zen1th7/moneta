@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0e27">
+  <meta name="description" content="Multi-currency money management app for tracking finances across IDR, USD, and NTD">
+  <title>Money Manager</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+
+<body>
+  <!-- SPLASH SCREEN -->
+  <div id="splash-screen">
+    <div class="splash-content">
+      <div class="splash-logo-wrap">
+        <img src="assets/logo.png" alt="Money Manager Logo" class="splash-logo">
+      </div>
+      <h1 class="splash-title">Money Manager</h1>
+      <p class="splash-slogan">Smart tracking, better living.</p>
+      <div class="splash-loader"></div>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <!-- HEADER -->
+    <!-- TOP HEADER (TITLE ONLY) -->
+    <div class="app-top-bar">
+      <div class="app-brand">
+        <div class="app-logo-wrap">
+          <img src="assets/logo.png" alt="Logo" class="app-logo-img">
+        </div>
+        <h1 class="app-title">Money Manager</h1>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <!-- VIEW: WALLETS -->
+      <div id="view-wallets" class="view-section active">
+        <!-- NET WORTH HEADER (ONLY IN WALLETS) -->
+        <header class="app-header">
+          <div class="app-header-content">
+            <div class="header-center">
+              <div class="net-worth" id="dashboard">
+                <div class="net-worth-label">Total Net Worth</div>
+                <div class="net-worth-grid">
+                  <div class="net-worth-item">
+                    <span class="currency-label">NTD</span>
+                    <span class="net-worth-amount small" id="totalNTD">NT$ 0</span>
+                  </div>
+                  <div class="net-worth-item">
+                    <span class="currency-label">USD</span>
+                    <span class="net-worth-amount small" id="totalUSD">US$ 0</span>
+                  </div>
+                  <div class="net-worth-item">
+                    <span class="currency-label">IDR</span>
+                    <span class="net-worth-amount small" id="totalIDR">Rp 0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- CURRENCY TABS -->
+        <section class="section">
+          <div class="tabs" id="currencyTabs">
+            <button class="tab active" data-currency="ALL">All</button>
+            <button class="tab" data-currency="NTD">NT$ (NTD)</button>
+            <button class="tab" data-currency="USD">US$ (USD)</button>
+            <button class="tab" data-currency="IDR">Rp (IDR)</button>
+          </div>
+        </section>
+
+        <!-- WALLETS SECTION -->
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">👛 Wallets</h2>
+            <button class="btn btn-sm btn-primary" id="addWalletBtn">
+              + Add Wallet
+            </button>
+          </div>
+          <div id="walletsContainer" class="grid gap-md">
+            <!-- Wallets will be dynamically inserted here -->
+            <div class="card text-center">
+              <p class="color-text-tertiary">No wallets yet. Add your first wallet to get started!</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- VIEW: TRANSACTIONS -->
+      <div id="view-transactions" class="view-section">
+        <!-- TRANSACTION FORM -->
+        <section class="section" id="transactions-form">
+          <div class="section-header">
+            <h2 class="section-title">⚡ Transaction</h2>
+          </div>
+          <div class="card">
+            <form id="transactionForm">
+              <!-- ... form contents ... -->
+              <div class="form-group" id="field-type">
+                <label class="form-label" for="transactionType">Type</label>
+                <select id="transactionType" class="form-select">
+                  <option value="expense">Expense</option>
+                  <option value="income">Income</option>
+                  <option value="transfer">Transfer</option>
+                </select>
+              </div>
+
+              <div class="form-group" id="field-category">
+                <label class="form-label" for="transactionCategory">Category</label>
+                <select id="transactionCategory" class="form-select">
+                  <!-- Categories will be populated by JavaScript based on type -->
+                </select>
+              </div>
+
+              <div class="form-group" id="field-wallet">
+                <label class="form-label" for="transactionWallet">Wallet/Account</label>
+                <select id="transactionWallet" class="form-select">
+                  <option value="">Select wallet...</option>
+                  <!-- Wallets will be populated dynamically -->
+                </select>
+              </div>
+
+              <div class="form-group hidden" id="field-target">
+                <label class="form-label" for="targetWallet">Transfer To Wallet</label>
+                <select id="targetWallet" class="form-select">
+                  <option value="">Select destination wallet...</option>
+                  <!-- Wallets will be populated dynamically -->
+                </select>
+              </div>
+
+              <!-- Conversion rate field -->
+              <div id="conversionRateField" class="hidden">
+                <div class="card"
+                  style="background: var(--color-warning-bg); border-color: var(--color-warning); margin-bottom: var(--space-md);">
+                  <div class="form-label" style="color: var(--color-warning); margin-bottom: var(--space-sm);">
+                    💱 Currency Conversion Required
+                  </div>
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" id="conversionRateLabel">Conversion Rate</label>
+                    <input type="text" inputmode="decimal" id="conversionRate" class="form-input" placeholder="0.00">
+                  </div>
+                </div>
+              </div>
+
+              <div id="conversionPreview" class="hidden"
+                style="margin-top: var(--space-sm); color: var(--color-text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-lg);">
+              </div>
+
+              <div class="form-group" id="field-amount">
+                <label class="form-label" for="transactionAmount">Amount</label>
+                <input type="text" inputmode="decimal" id="transactionAmount" class="form-input" placeholder="0.00"
+                  required>
+              </div>
+
+              <div class="form-group hidden" id="field-fee">
+                <label class="form-label" for="transferFee">Transfer Fee (Optional)</label>
+                <input type="text" inputmode="decimal" id="transferFee" class="form-input" placeholder="0.00" value="0">
+              </div>
+
+              <div class="form-group" id="field-note">
+                <label class="form-label" for="transactionNote">Note (Optional)</label>
+                <input type="text" id="transactionNote" class="form-input"
+                  placeholder="e.g., Lunch at cafe, Monthly salary...">
+              </div>
+
+              <div class="form-group" id="field-date">
+                <label class="form-label" for="transactionDate">Date & Time</label>
+                <input type="datetime-local" id="transactionDate" class="form-input" required>
+              </div>
+
+              <input type="hidden" id="editingTransactionId">
+
+              <div id="form-actions">
+                <button type="submit" class="btn btn-primary btn-block">
+                  Add Transaction
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- RECENT TRANSACTIONS -->
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">📝 Transaction History</h2>
+            <button class="btn btn-sm btn-secondary" id="filterTransactionsBtn">
+              Filter
+            </button>
+          </div>
+          <div id="transactionsContainer">
+            <!-- Transactions will be dynamically inserted here -->
+            <div class="card text-center">
+              <p class="color-text-tertiary">No transactions yet. Add your first transaction above!</p>
+            </div>
+          </div>
+          <!-- Pagination Controls -->
+          <div id="historyPagination" class="pagination-footer mt-md flex-center gap-md hidden">
+            <button class="btn btn-sm btn-secondary" id="prevPageBtn">← Prev</button>
+            <span id="pageIndicator" class="text-sm font-600">Page 1</span>
+            <button class="btn btn-sm btn-secondary" id="nextPageBtn">Next →</button>
+          </div>
+        </section>
+      </div>
+
+      <!-- VIEW: ANALYTICS -->
+      <div id="view-analytics" class="view-section">
+        <!-- CASH FLOW ANALYTICS -->
+        <section class="section">
+          <div class="section-header" style="flex-direction: column; align-items: stretch; gap: var(--space-md);">
+            <div class="text-center">
+              <h2 class="section-title m-0">📊 Cash Flow Analytics</h2>
+            </div>
+
+            <!-- Standard Navigation -->
+            <div id="analyticsStandardNav" class="flex-between analytics-nav-bar bg-tertiary p-xs radius-md">
+              <button class="btn btn-icon-sm" id="prevTimeframeBtn">◀</button>
+              <h3 id="analyticsDisplayDate" class="text-base font-700 m-0">October 2023</h3>
+              <button class="btn btn-icon-sm" id="nextTimeframeBtn">▶</button>
+            </div>
+
+            <!-- Custom Range Navigation -->
+            <div id="analyticsCustomNav" class="flex-center analytics-nav-bar bg-tertiary p-xs radius-md hidden">
+              <div class="flex-center gap-xs" style="width: 100%; max-width: 340px;">
+                <div class="flex-1">
+                  <input type="date" id="analyticsStartDate" class="form-input text-center"
+                    style="padding: 4px 8px; font-size: 0.75rem; height: 32px;">
+                </div>
+                <div class="flex-center" style="color: var(--color-text-tertiary); font-size: 0.7rem; min-width: 20px;">
+                  to</div>
+                <div class="flex-1">
+                  <input type="date" id="analyticsEndDate" class="form-input text-center"
+                    style="padding: 4px 8px; font-size: 0.75rem; height: 32px;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Timeframe Selector -->
+            <div class="flex-center mb-sm">
+              <div class="timeframe-selector flex gap-xs">
+                <button class="btn btn-xs btn-outline" data-timeframe="daily">Day</button>
+                <button class="btn btn-xs btn-outline active" data-timeframe="monthly">Month</button>
+                <button class="btn btn-xs btn-outline" data-timeframe="annual">Year</button>
+                <button class="btn btn-xs btn-outline" data-timeframe="custom">Custom</button>
+              </div>
+            </div>
+
+            <div class="tabs tabs-sm" id="analyticsCurrencyTabs">
+              <!-- Dynamically populated by JS -->
+            </div>
+          </div>
+
+          <div id="analyticsContainer" class="grid gap-lg">
+            <!-- Dynamically populated by currency -->
+            <div class="card text-center">
+              <p class="color-text-tertiary">No transaction data for this month.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- DATA MANAGEMENT -->
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">💾 Data Management</h2>
+          </div>
+          <div class="grid grid-2 gap-md" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <button class="btn btn-success btn-block" id="exportDataBtn">
+              📤 Export JSON
+            </button>
+            <button class="btn btn-primary btn-block" id="exportExcelBtn"
+              style="background: #1D6F42; border-color: #1D6F42;">
+              📊 Export to Excel
+            </button>
+            <button class="btn btn-secondary btn-block" id="importDataBtn">
+              📥 Import JSON
+            </button>
+          </div>
+          <input type="file" id="importFileInput" accept=".json" style="display: none;">
+        </section>
+      </div>
+
+      <!-- VIEW: SETTINGS -->
+      <div id="view-settings" class="view-section">
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">⚙️ Settings</h2>
+          </div>
+
+          <!-- Appearance Section -->
+          <div class="card mb-lg">
+            <div class="card-header">
+              <h3 class="card-title">🌓 Appearance</h3>
+            </div>
+            <div class="card-body">
+              <div class="settings-group">
+                <label class="form-label">Theme Mode</label>
+                <div class="grid grid-2 gap-sm">
+                  <button class="btn btn-outline" id="theme-dark-btn">Dark Mode</button>
+                  <button class="btn btn-outline" id="theme-light-btn">Light Mode</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Management -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🏷️ Category Management</h3>
+            </div>
+            <div class="card-body">
+              <div class="settings-group">
+                <div class="form-group">
+                  <label class="form-label">Manage Categories For:</label>
+                  <div class="tabs tabs-sm" id="categoryTypeTabs">
+                    <button class="tab active" data-type="expense">Expenses</button>
+                    <button class="tab" data-type="income">Income</button>
+                  </div>
+                </div>
+                <div class="form-group mt-md">
+                  <label class="form-label">Add New Category</label>
+                  <div class="input-with-button">
+                    <input type="text" id="newCategoryName" class="form-input" placeholder="New category name...">
+                    <button class="btn btn-primary" id="addCategoryBtn">Add</button>
+                  </div>
+                </div>
+                <div class="mt-md">
+                  <label class="form-label">Existing Categories</label>
+                  <div id="settingsCategoryList" class="category-list mt-sm">
+                    <!-- Categories will be listed here -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- BOTTOM NAVIGATION (Mobile) -->
+    <nav class="bottom-nav">
+      <button class="bottom-nav-item active" data-view="wallets">
+        <span class="bottom-nav-icon">👛</span>
+        <span>Wallets</span>
+      </button>
+      <button class="bottom-nav-item" data-view="transactions">
+        <span class="bottom-nav-icon">📝</span>
+        <span>Transactions</span>
+      </button>
+      <button class="bottom-nav-item" data-view="analytics">
+        <span class="bottom-nav-icon">📊</span>
+        <span>Analytics</span>
+      </button>
+      <button class="bottom-nav-item" data-view="settings">
+        <span class="bottom-nav-icon">⚙️</span>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- ADD/EDIT WALLET MODAL -->
+  <div class="modal-overlay" id="walletModal">
+    <div class="bottom-sheet">
+      <div class="bottom-sheet-handle"></div>
+      <h2 class="section-title mb-lg" id="walletModalTitle">Add Wallet</h2>
+      <form id="walletForm">
+        <div class="form-group">
+          <label class="form-label" for="walletName">Wallet Name</label>
+          <input type="text" id="walletName" class="form-input" placeholder="e.g., Chase Checking, BCA Savings..."
+            required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="walletCurrency">Currency</label>
+          <select id="walletCurrency" class="form-select" required>
+            <option value="NTD">NT$ (NTD)</option>
+            <option value="USD">US$ (USD)</option>
+            <option value="IDR">Rp (IDR)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="walletPlatform">Platform/Bank</label>
+          <input type="text" id="walletPlatform" class="form-input" placeholder="e.g., Chase Bank, BCA, E*TRADE..."
+            required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="walletBalance">Initial Balance</label>
+          <input type="text" inputmode="decimal" id="walletBalance" class="form-input" placeholder="0.00" required>
+        </div>
+
+        <div class="modal-footer-actions">
+          <button type="button" class="btn-delete-link" id="deleteWalletBtn">
+            <span>🗑️ Delete Wallet</span>
+          </button>
+          <div class="grid grid-2 gap-sm" style="flex: 1;">
+            <button type="button" class="btn btn-secondary btn-block" id="cancelWalletBtn">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary btn-block" id="saveWalletBtn">
+              Save
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT TRANSACTION MODAL -->
+  <div class="modal-overlay center" id="transactionEditModal">
+    <div class="center-modal">
+      <h2 class="section-title mb-lg">Edit Transaction</h2>
+      <form id="editTransactionForm">
+
+        <input type="hidden" id="edit_transactionId">
+
+        <div class="form-group" id="edit_field-type">
+          <label class="form-label">Type</label>
+          <select id="edit_transactionType" class="form-select">
+            <option value="expense">Expense</option>
+            <option value="income">Income</option>
+            <option value="transfer">Transfer</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="edit_field-category">
+          <label class="form-label">Category</label>
+          <select id="edit_transactionCategory" class="form-select">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <div class="form-group" id="edit_field-wallet">
+          <label class="form-label" for="edit_transactionWallet">Wallet/Account</label>
+          <select id="edit_transactionWallet" class="form-select">
+            <option value="">Select wallet...</option>
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <!-- Transfer fields -->
+        <div class="form-group hidden" id="edit_field-target">
+          <label class="form-label">Transfer To Wallet</label>
+          <select id="edit_targetWallet" class="form-select">
+            <option value="">Select destination wallet...</option>
+          </select>
+        </div>
+
+        <!-- Conversion rate field -->
+        <div id="edit_conversionRateField" class="hidden">
+          <div class="card"
+            style="background: var(--color-warning-bg); border-color: var(--color-warning); margin-bottom: var(--space-md);">
+            <div class="form-label" style="color: var(--color-warning); margin-bottom: var(--space-sm);">
+              💱 Currency Conversion Required
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Conversion Rate</label>
+              <input type="text" inputmode="decimal" id="edit_conversionRate" class="form-input" placeholder="0.00">
+            </div>
+          </div>
+        </div>
+
+        <div id="edit_conversionPreview" class="hidden"
+          style="margin-top: var(--space-sm); color: var(--color-text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-lg);">
+        </div>
+
+        <div class="form-group" id="edit_field-amount">
+          <label class="form-label">Amount</label>
+          <input type="text" inputmode="decimal" id="edit_transactionAmount" class="form-input" placeholder="0.00"
+            required>
+        </div>
+
+        <div class="form-group hidden" id="edit_field-fee">
+          <label class="form-label">Transfer Fee (Optional)</label>
+          <input type="text" inputmode="decimal" id="edit_transferFee" class="form-input" placeholder="0.00" value="0">
+        </div>
+
+        <div class="form-group" id="edit_field-note">
+          <label class="form-label">Note (Optional)</label>
+          <input type="text" id="edit_transactionNote" class="form-input" placeholder="e.g., Lunch at cafe...">
+        </div>
+
+        <div class="form-group" id="edit_field-date">
+          <label class="form-label">Date & Time</label>
+          <input type="datetime-local" id="edit_transactionDate" class="form-input" required>
+        </div>
+
+        <div class="modal-footer-actions">
+          <button type="button" class="btn-delete-link" id="deleteTransactionBtn">
+            <span>🗑️ Delete</span>
+          </button>
+          <div class="grid grid-2 gap-sm" style="flex: 1;">
+            <button type="button" class="btn btn-secondary btn-block" id="cancelEditTransactionBtn">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-warning btn-block">
+              Update
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="utils.js?v=3"></script>
+  <script src="data-manager.js?v=3"></script>
+  <script src="currency-manager.js?v=3"></script>
+  <script src="wallet-manager.js?v=3"></script>
+  <script src="transaction-manager.js?v=3"></script>
+  <script src="app.js?v=3"></script>
+
+  <!-- FILTER MODAL -->
+  <div class="modal-overlay center" id="filterModal">
+    <div class="center-modal">
+      <h2 class="section-title mb-lg">Filter Transactions</h2>
+
+      <div class="form-group">
+        <label class="form-label">Time Period</label>
+        <div class="grid grid-2 gap-sm" id="filterPresets">
+          <button class="btn btn-outline active" data-range="all">All Time</button>
+          <button class="btn btn-outline" data-range="7">Last 7 Days</button>
+          <button class="btn btn-outline" data-range="30">Last 30 Days</button>
+          <button class="btn btn-outline" data-range="90">Last 90 Days</button>
+          <button class="btn btn-outline" data-range="custom">Custom Range</button>
+        </div>
+      </div>
+
+      <div id="customDateRange" class="hidden">
+        <div class="grid grid-2 gap-md">
+          <div class="form-group">
+            <label class="form-label">Start Date</label>
+            <input type="date" id="filterStartDate" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Date</label>
+            <input type="date" id="filterEndDate" class="form-input">
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-2 gap-md mt-lg">
+        <button class="btn btn-secondary btn-block" id="closeFilterBtn">Cancel</button>
+        <button class="btn btn-primary btn-block" id="applyFilterBtn">Apply Filter</button>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
