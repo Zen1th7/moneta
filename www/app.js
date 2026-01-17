@@ -9,6 +9,7 @@ class MoneyManagerApp {
     }
 
     async init() {
+        this.lastPauseTime = 0; // Track when app enters background
         // Wait for DOM to be ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.setup());
@@ -27,10 +28,15 @@ class MoneyManagerApp {
             // 2. Initialize managers - assign to global variables
             window.walletManager = new WalletManager(dataManager, currencyManager);
             window.transactionManager = new TransactionManager(dataManager, currencyManager);
+            window.securityManager = new SecurityManager(dataManager, window.i18n);
 
             // Re-assign to the variables declared in other files
             walletManager = window.walletManager;
             transactionManager = window.transactionManager;
+            securityManager = window.securityManager;
+
+            // 2.5 Start Security Check (Lock Screen)
+            securityManager.checkSecurity();
 
             // Make app globally accessible
             window.app = this;
@@ -88,6 +94,56 @@ class MoneyManagerApp {
 
         // Language Selector (Settings)
         this.setupLanguageSelector();
+
+        // Biometric Toggle (Settings)
+        this.setupBiometricSettings();
+    }
+
+    setupBiometricSettings() {
+        const toggle = document.getElementById('biometricToggle');
+        if (!toggle) return;
+
+        // Set initial state
+        toggle.checked = dataManager.isBiometricEnabled();
+
+        toggle.addEventListener('change', async (e) => {
+            const enabled = e.target.checked;
+
+            if (enabled) {
+                // Verify biometrics are actually available before enabling
+                const plugin = window.Capacitor?.Plugins?.NativeBiometric;
+                if (plugin) {
+                    try {
+                        const result = await plugin.isAvailable();
+                        if (result.isAvailable) {
+                            dataManager.setBiometricEnabled(true);
+                            this.showToast('🔐 Biometric lock enabled');
+                        } else {
+                            alert('❌ Biometrics not available on this device.');
+                            toggle.checked = false;
+                        }
+                    } catch (err) {
+                        console.error('Biometric check error:', err);
+                        toggle.checked = false;
+                    }
+                } else {
+                    // Simulation mode or web
+                    dataManager.setBiometricEnabled(true);
+                    this.showToast('🔐 Biometric lock enabled (Simulation)');
+                }
+            } else {
+                dataManager.setBiometricEnabled(false);
+                this.showToast('🔓 Biometric lock disabled');
+            }
+        });
+
+        // Unlock button handler for overlay
+        const unlockBtn = document.getElementById('unlock-btn');
+        if (unlockBtn) {
+            unlockBtn.addEventListener('click', () => {
+                if (window.securityManager) window.securityManager.authenticate();
+            });
+        }
     }
 
     setupLanguageSelector() {
@@ -140,6 +196,42 @@ class MoneyManagerApp {
         if (window.i18n) {
             window.i18n.applyTranslations();
         }
+
+        // 3. App State Listener (Re-auth on Resume)
+        const checkAuth = () => {
+            const now = Date.now();
+            const timeInBackground = now - this.lastPauseTime;
+
+            console.log(`🔄 App status check: Time in background = ${timeInBackground}ms`);
+
+            // Only trigger if we've been gone for more than 2 seconds
+            // This ignores focus flips from biometric dialogs or notifications
+            if (timeInBackground > 2000) {
+                console.log('🛡️ Threshold met, checking security...');
+                if (window.securityManager) {
+                    window.securityManager.checkSecurity();
+                }
+            } else {
+                console.log('🛡️ Threshold NOT met, skipping lock.');
+            }
+        };
+
+        if (window.Capacitor && window.Capacitor.Plugins.App) {
+            window.Capacitor.Plugins.App.addListener('appStateChange', ({ isActive }) => {
+                if (isActive) {
+                    checkAuth();
+                } else {
+                    this.lastPauseTime = Date.now();
+                    console.log('⏸️ App went to background at:', this.lastPauseTime);
+                }
+            });
+        }
+
+        // Fallback for some platforms/versions
+        document.addEventListener('resume', checkAuth);
+        document.addEventListener('pause', () => {
+            this.lastPauseTime = Date.now();
+        });
     }
 
     initTheme() {

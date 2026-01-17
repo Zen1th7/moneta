@@ -66,6 +66,14 @@ const translations = {
         // Settings View
         language: "Language",
         appearance: "Appearance",
+        biometricLock: "Biometric Lock",
+        biometricDesc: "Protect your data with fingerprint or face recognition",
+
+        // Security/Lock Screen
+        authenticate: "Authenticate",
+        authFailed: "Authentication Failed",
+        unlockToProceed: "Unlock to proceed to dashboard",
+        retry: "Retry",
         themeMode: "Theme Mode",
         darkMode: "Dark Mode",
         lightMode: "Light Mode",
@@ -200,6 +208,14 @@ const translations = {
         // Settings View
         language: "Bahasa",
         appearance: "Tampilan",
+        biometricLock: "Kunci Biometrik",
+        biometricDesc: "Lindungi data dengan sidik jari atau pengenalan wajah",
+
+        // Security/Lock Screen
+        authenticate: "Autentikasi",
+        authFailed: "Autentikasi Gagal",
+        unlockToProceed: "Buka kunci untuk masuk ke dasbor",
+        retry: "Coba Lagi",
         themeMode: "Mode Tema",
         darkMode: "Mode Gelap",
         lightMode: "Mode Terang",
@@ -334,6 +350,14 @@ const translations = {
         // Settings View
         language: "語言",
         appearance: "外觀",
+        biometricLock: "生物識別鎖",
+        biometricDesc: "使用指紋或面部識別保護您的數據",
+
+        // Security/Lock Screen
+        authenticate: "驗證身份",
+        authFailed: "驗證失敗",
+        unlockToProceed: "解鎖以進入控制面板",
+        retry: "重試",
         themeMode: "主題模式",
         darkMode: "深色模式",
         lightMode: "淺色模式",

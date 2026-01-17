@@ -11,7 +11,8 @@ class DataManager {
       TRANSACTIONS: 'moneyManager_transactions',
       RATES: 'moneyManager_conversionRates',
       SETTINGS: 'moneyManager_settings',
-      CATEGORIES: 'transactionCategories'
+      CATEGORIES: 'transactionCategories',
+      BIOMETRIC_ENABLED: 'moneyManager_biometricEnabled'
     };
 
     this.init();
@@ -435,6 +436,14 @@ class DataManager {
    */
   generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  }
+
+  isBiometricEnabled() {
+    return localStorage.getItem(this.STORAGE_KEYS.BIOMETRIC_ENABLED) === 'true';
+  }
+
+  setBiometricEnabled(enabled) {
+    localStorage.setItem(this.STORAGE_KEYS.BIOMETRIC_ENABLED, enabled.toString());
   }
 }
 
