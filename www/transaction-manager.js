@@ -97,6 +97,7 @@ class TransactionManager {
         try {
             this.setupEventListeners();
             this.setupSettingsEventListeners(); // New Settings listeners
+            this.reloadCategories();
             this.updateCategoryDropdown();
             this.updateWalletDropdown();
             this.toggleTransferFields();
@@ -1105,7 +1106,7 @@ class TransactionManager {
             if (!startStr || !endStr) {
                 container.innerHTML = `
                     <div class="card text-center animate-fade-in">
-                        <p class="color-text-tertiary">Please select a valid date range.</p>
+                        <p class="color-text-tertiary">${window.i18n?.t('selectDateRange') || 'Please select a valid date range.'}</p>
                     </div>
                 `;
                 return;
@@ -1161,10 +1162,10 @@ class TransactionManager {
                 <!-- 1. TOP OVERVIEW (Bar + Stats) -->
                 <div class="grid gap-md" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-bottom: var(--space-md);">
                     <!-- Health Check Bar Chart -->
-                    <div class="card">
-                        <div class="card-header pb-xs">
-                            <h3 class="card-title" style="font-size: 0.85rem;">⚖️ <span data-i18n="financialHealth">Financial Health</span></h3>
-                        </div>
+                <div class="card">
+                    <div class="card-header pb-xs">
+                        <h3 class="card-title" style="font-size: 0.85rem;">⚖️ <span data-i18n="financialHealth">${window.i18n?.t('financialHealth') || 'Financial Health'}</span></h3>
+                    </div>
                         <div class="chart-container" style="position: relative; height: 180px; width: 100%;">
                             <canvas id="barChart"></canvas>
                         </div>
@@ -1190,7 +1191,7 @@ class TransactionManager {
                             </div>
                         </div>
                         <div class="mt-md pt-sm" style="border-top: 1px solid var(--glass-border);">
-                            <div class="form-label" style="font-size: 0.75rem; color: var(--color-text-tertiary);">Net Savings</div>
+                            <div class="form-label" style="font-size: 0.75rem; color: var(--color-text-tertiary);" data-i18n="netSavings">${window.i18n?.t('netSavings') || 'Net Savings'}</div>
                             <div class="wallet-balance" style="color: ${stats.income >= stats.expense ? 'var(--color-success)' : 'var(--color-danger)'}; font-size: 1.5rem; text-align: left;">
                                 ${this.currencyManager.format(stats.income - stats.expense, currency)}
                             </div>
@@ -1203,7 +1204,7 @@ class TransactionManager {
                     <!-- Line Trend -->
                     <div class="card">
                         <div class="card-header pb-xs">
-                            <h3 class="card-title" style="font-size: 0.85rem;">📉 <span data-i18n="cashFlowTrend">Cash Flow Trend</span></h3>
+                            <h3 class="card-title" style="font-size: 0.85rem;">📉 <span data-i18n="cashFlowTrend">${window.i18n?.t('cashFlowTrend') || 'Cash Flow Trend'}</span></h3>
                         </div>
                         <div class="chart-container" style="position: relative; height: 220px; width: 100%;">
                             <canvas id="lineChart"></canvas>
@@ -1213,7 +1214,7 @@ class TransactionManager {
                     <!-- Spending Donut -->
                     <div class="card">
                         <div class="card-header pb-xs">
-                            <h3 class="card-title" style="font-size: 0.85rem;">🍩 <span data-i18n="spendingAnalysis">Spending Analysis</span></h3>
+                            <h3 class="card-title" style="font-size: 0.85rem;">🍩 <span data-i18n="spendingAnalysis">${window.i18n?.t('spendingAnalysis') || 'Spending Analysis'}</span></h3>
                         </div>
                         <div class="chart-container" style="position: relative; height: 220px; width: 100%;">
                             <canvas id="donutChart"></canvas>
@@ -1246,12 +1247,21 @@ class TransactionManager {
             </div>
         `;
 
+        console.log(`Updating charts for ${currency} (${timeframeKey})`);
+
+        // Debug: Check if charts are blank due to library or data
+        if (typeof Chart === 'undefined') {
+            console.error('CRITICAL: Chart.js is NOT loaded!');
+            container.insertAdjacentHTML('afterbegin', `<div style="background:#ff7675; color:white; padding:15px; margin-bottom:15px;">⚠️ Chart library failing to load from www/lib/chart.min.js</div>`);
+        }
+
         // Update Charts after DOM is ready
         setTimeout(() => {
+            console.log('DOM ready, initializing charts...');
             this.updateDonutChart(expenseBreakdown, currency);
             this.updateLineChart(timeframeKey, currency);
             this.updateBarChart(stats, currency);
-        }, 0);
+        }, 100);
     }
 
     getChartThemeColors() {
@@ -1269,8 +1279,13 @@ class TransactionManager {
 
     updateDonutChart(breakdown, currency) {
         const canvas = document.getElementById('donutChart');
-        if (!canvas || typeof Chart === 'undefined') return;
+        if (!canvas) {
+            console.error('donutChart canvas not found');
+            return;
+        }
+        if (typeof Chart === 'undefined') return;
 
+        console.log('Updating Donut Chart with data:', breakdown);
         const colors = this.getChartThemeColors();
         const entries = Object.entries(breakdown);
         const labels = entries.map(([cat]) => this.getCategoryTranslation(cat));
@@ -1320,8 +1335,12 @@ class TransactionManager {
             const daysInMonth = this.analyticsTimeframe === 'monthly' ?
                 new Date(this.analyticsDate.getFullYear(), this.analyticsDate.getMonth() + 1, 0).getDate() : 30;
 
+            const prefix = window.i18n.t('dayPrefix');
+            const suffix = window.i18n.t('daySuffix');
+
             for (let i = 1; i <= daysInMonth; i++) {
-                labels.push(i);
+                const label = prefix ? `${prefix} ${i}` : `${i}${suffix}`;
+                labels.push(label);
                 chartData.push(0);
             }
 
@@ -1337,7 +1356,11 @@ class TransactionManager {
             });
         } else if (this.analyticsTimeframe === 'annual') {
             // Trend by Month
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const months = [
+                window.i18n.t('jan'), window.i18n.t('feb'), window.i18n.t('mar'), window.i18n.t('apr'),
+                window.i18n.t('may'), window.i18n.t('jun'), window.i18n.t('jul'), window.i18n.t('aug'),
+                window.i18n.t('sep'), window.i18n.t('oct'), window.i18n.t('nov'), window.i18n.t('dec')
+            ];
             labels = months;
             chartData = Array(12).fill(0);
 
@@ -1378,7 +1401,7 @@ class TransactionManager {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Balance Trend',
+                    label: window.i18n.t('balanceTrend'),
                     data: chartData,
                     borderColor: colors.primary,
                     backgroundColor: 'rgba(9, 132, 227, 0.2)',
@@ -1410,7 +1433,7 @@ class TransactionManager {
         this.charts.bar = new Chart(canvas, {
             type: 'bar',
             data: {
-                labels: ['Income', 'Expenses'],
+                labels: [window.i18n.t('income'), window.i18n.t('expense')],
                 datasets: [{
                     data: [stats.income, stats.expense],
                     backgroundColor: [colors.success, colors.danger],
@@ -1441,7 +1464,8 @@ class TransactionManager {
     renderBreakdownList(breakdown, currency, type) {
         const entries = Object.entries(breakdown);
         if (entries.length === 0) {
-            return `<p class="text-center color-text-tertiary" style="font-size: 0.75rem; padding: var(--space-md) 0;">No ${type} data</p>`;
+            const typeLabel = window.i18n?.t(type) || type;
+            return `<p class="text-center color-text-tertiary" style="font-size: 0.75rem; padding: var(--space-md) 0;">${window.i18n?.t('noData')}</p>`;
         }
 
         // Sort by amount
@@ -1565,5 +1589,13 @@ class TransactionManager {
 
     saveCategories() {
         localStorage.setItem('transactionCategories', JSON.stringify(this.categories));
+    }
+
+    reloadCategories() {
+        const savedCategories = localStorage.getItem('transactionCategories');
+        if (savedCategories) {
+            this.categories = JSON.parse(savedCategories);
+            console.log('🔄 Categories reloaded from storage');
+        }
     }
 }

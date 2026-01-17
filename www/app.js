@@ -377,13 +377,20 @@ class MoneyManagerApp {
                 const success = dataManager.importAllData(data);
 
                 if (success) {
-                    // Refresh all UI
+                    // 1. Reload data in managers
+                    if (window.transactionManager) {
+                        window.transactionManager.reloadCategories();
+                    }
+
+                    // 2. Refresh all UI
                     this.updateNetWorth();
                     this.loadConversionRates();
                     walletManager.render();
                     transactionManager.render();
                     transactionManager.renderAnalytics();
                     transactionManager.updateWalletDropdown();
+                    transactionManager.updateCategoryDropdown();
+                    transactionManager.renderSettingsCategoryList();
 
                     this.showToast('✅ Data imported successfully!');
                 } else {
