@@ -45,6 +45,10 @@ const translations = {
         startDate: "Start Date",
         endDate: "End Date",
         applyFilter: "Apply Filter",
+        financialHealth: "Financial Health",
+        cashFlowTrend: "Cash Flow Trend",
+        spendingAnalysis: "Spending Analysis",
+        netSavings: "Net Savings",
 
         // Analytics View
         cashFlowAnalytics: "Cash Flow Analytics",
@@ -168,6 +172,10 @@ const translations = {
         startDate: "Tanggal Mulai",
         endDate: "Tanggal Selesai",
         applyFilter: "Terapkan Filter",
+        financialHealth: "Kesehatan Keuangan",
+        cashFlowTrend: "Tren Arus Kas",
+        spendingAnalysis: "Analisis Pengeluaran",
+        netSavings: "Tabungan Bersih",
 
         // Analytics View
         cashFlowAnalytics: "Analitik Arus Kas",
@@ -291,6 +299,10 @@ const translations = {
         startDate: "開始日期",
         endDate: "結束日期",
         applyFilter: "應用篩選",
+        financialHealth: "財務狀況",
+        cashFlowTrend: "現金流趨勢",
+        spendingAnalysis: "支出分析",
+        netSavings: "淨儲蓄",
 
         // Analytics View
         cashFlowAnalytics: "現金流分析",

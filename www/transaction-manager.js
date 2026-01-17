@@ -61,8 +61,12 @@ class TransactionManager {
         this.analyticsTimeframe = 'monthly'; // 'daily', 'monthly', 'annual'
         this.analyticsDate = new Date(); // Current viewing date for analytics
 
-        this.analyticsTimeframe = 'monthly'; // 'daily', 'monthly', 'annual'
-        this.analyticsDate = new Date(); // Current viewing date for analytics
+        // Chart instances
+        this.charts = {
+            donut: null,
+            line: null,
+            bar: null
+        };
 
         // Category Translation Map
         this.categoryTranslationMap = {
@@ -100,6 +104,7 @@ class TransactionManager {
             this.render();
             this.renderAnalytics();
             this.renderSettingsCategoryList(); // Initial render of settings list
+            this.initThemeListener();
 
             // Set up automatic thousand separator formatting for amount inputs
             InputFormatter.formatNumberInput(document.getElementById('transactionAmount'));
@@ -1153,29 +1158,72 @@ class TransactionManager {
 
         container.innerHTML = `
             <div class="analytics-currency-section animate-fade-in">
-                <!-- 1. OVERVIEW -->
-                <div class="card mb-md" style="border-left: 4px solid var(--color-primary);">
-                    <div class="card-header" style="align-items: flex-start; text-align: left; padding-bottom: var(--space-sm);">
-                        <h3 class="card-title" style="font-size: 0.9rem;"><span data-i18n="overview">${window.i18n?.t('overview') || 'Overview'}</span> (${currency})</h3>
+                <!-- 1. TOP OVERVIEW (Bar + Stats) -->
+                <div class="grid gap-md" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-bottom: var(--space-md);">
+                    <!-- Health Check Bar Chart -->
+                    <div class="card">
+                        <div class="card-header pb-xs">
+                            <h3 class="card-title" style="font-size: 0.85rem;">⚖️ <span data-i18n="financialHealth">Financial Health</span></h3>
+                        </div>
+                        <div class="chart-container" style="position: relative; height: 180px; width: 100%;">
+                            <canvas id="barChart"></canvas>
+                        </div>
                     </div>
-                    <div class="grid grid-2 gap-md">
-                        <div>
-                            <div class="form-label" style="font-size: 0.7rem; color: var(--color-text-tertiary);" data-i18n="income">${window.i18n?.t('income') || 'Income'}</div>
-                            <div class="wallet-balance" style="color: var(--color-success); font-size: 1.25rem; text-align: left;">
-                                ${this.currencyManager.format(stats.income, currency)}
+
+                    <!-- Summary Card -->
+                    <div class="card" style="border-left: 4px solid var(--color-primary);">
+                        <div class="card-header" style="align-items: flex-start; text-align: left; padding-bottom: var(--space-sm);">
+                            <h3 class="card-title" style="font-size: 0.9rem;"><span data-i18n="overview">${window.i18n?.t('overview') || 'Overview'}</span> (${currency})</h3>
+                        </div>
+                        <div class="grid grid-2 gap-md">
+                            <div>
+                                <div class="form-label" style="font-size: 0.7rem; color: var(--color-text-tertiary);" data-i18n="income">${window.i18n?.t('income') || 'Income'}</div>
+                                <div class="wallet-balance" style="color: var(--color-success); font-size: 1.25rem; text-align: left;">
+                                    ${this.currencyManager.format(stats.income, currency)}
+                                </div>
+                            </div>
+                            <div>
+                                <div class="form-label" style="font-size: 0.7rem; color: var(--color-text-tertiary);" data-i18n="expense">${window.i18n?.t('expense') || 'Expenses'}</div>
+                                <div class="wallet-balance" style="color: var(--color-danger); font-size: 1.25rem; text-align: left;">
+                                    ${this.currencyManager.format(stats.expense, currency)}
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <div class="form-label" style="font-size: 0.7rem; color: var(--color-text-tertiary);" data-i18n="expense">${window.i18n?.t('expense') || 'Expenses'}</div>
-                            <div class="wallet-balance" style="color: var(--color-danger); font-size: 1.25rem; text-align: left;">
-                                ${this.currencyManager.format(stats.expense, currency)}
+                        <div class="mt-md pt-sm" style="border-top: 1px solid var(--glass-border);">
+                            <div class="form-label" style="font-size: 0.75rem; color: var(--color-text-tertiary);">Net Savings</div>
+                            <div class="wallet-balance" style="color: ${stats.income >= stats.expense ? 'var(--color-success)' : 'var(--color-danger)'}; font-size: 1.5rem; text-align: left;">
+                                ${this.currencyManager.format(stats.income - stats.expense, currency)}
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- 2. TREND & DONUT -->
+                <div class="grid gap-md" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-bottom: var(--space-md);">
+                    <!-- Line Trend -->
+                    <div class="card">
+                        <div class="card-header pb-xs">
+                            <h3 class="card-title" style="font-size: 0.85rem;">📉 <span data-i18n="cashFlowTrend">Cash Flow Trend</span></h3>
+                        </div>
+                        <div class="chart-container" style="position: relative; height: 220px; width: 100%;">
+                            <canvas id="lineChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Spending Donut -->
+                    <div class="card">
+                        <div class="card-header pb-xs">
+                            <h3 class="card-title" style="font-size: 0.85rem;">🍩 <span data-i18n="spendingAnalysis">Spending Analysis</span></h3>
+                        </div>
+                        <div class="chart-container" style="position: relative; height: 220px; width: 100%;">
+                            <canvas id="donutChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. LIST BREAKDOWNS -->
                 <div class="grid gap-md" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-                    <!-- 2. INCOME BREAKDOWN -->
+                    <!-- INCOME BREAKDOWN -->
                     <div class="card">
                         <div class="card-header" style="align-items: flex-start; text-align: left; padding-bottom: var(--space-sm);">
                             <h3 class="card-title" style="font-size: 0.85rem;">📈 <span data-i18n="incomeBreakdown">${window.i18n?.t('incomeBreakdown') || 'Income Breakdown'}</span></h3>
@@ -1185,7 +1233,7 @@ class TransactionManager {
                         </div>
                     </div>
 
-                    <!-- 3. EXPENSE BREAKDOWN -->
+                    <!-- EXPENSE BREAKDOWN -->
                     <div class="card">
                         <div class="card-header" style="align-items: flex-start; text-align: left; padding-bottom: var(--space-sm);">
                             <h3 class="card-title" style="font-size: 0.85rem;">📉 <span data-i18n="expenseBreakdown">${window.i18n?.t('expenseBreakdown') || 'Expense Breakdown'}</span></h3>
@@ -1197,6 +1245,165 @@ class TransactionManager {
                 </div>
             </div>
         `;
+
+        // Update Charts after DOM is ready
+        setTimeout(() => {
+            this.updateDonutChart(expenseBreakdown, currency);
+            this.updateLineChart(timeframeKey, currency);
+            this.updateBarChart(stats, currency);
+        }, 0);
+    }
+
+    getChartThemeColors() {
+        const isDark = !document.body.classList.contains('light-mode');
+        return {
+            background: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+            text: isDark ? '#e0e0e0' : '#2d3436',
+            grid: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+            primary: '#0984e3',
+            success: '#00b894',
+            danger: '#d63031',
+            palette: ['#0984e3', '#00b894', '#6c5ce7', '#fab1a0', '#fdcb6e', '#e17055', '#d63031', '#00cec9']
+        };
+    }
+
+    updateDonutChart(breakdown, currency) {
+        const canvas = document.getElementById('donutChart');
+        if (!canvas || typeof Chart === 'undefined') return;
+
+        const colors = this.getChartThemeColors();
+        const entries = Object.entries(breakdown);
+        const labels = entries.map(([cat]) => this.getCategoryTranslation(cat));
+        const data = entries.map(([_, d]) => d.total);
+
+        if (this.charts.donut) this.charts.donut.destroy();
+
+        if (data.length === 0) return;
+
+        this.charts.donut = new Chart(canvas, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: colors.palette,
+                    borderColor: 'transparent',
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: colors.text, font: { size: 10 }, boxWidth: 10 }
+                    }
+                }
+            }
+        });
+    }
+
+    updateLineChart(timeframeKey, currency) {
+        const canvas = document.getElementById('lineChart');
+        if (!canvas || typeof Chart === 'undefined') return;
+
+        const colors = this.getChartThemeColors();
+        const transactions = this.dataManager.getTransactions();
+
+        // Filter and group by date for trend
+        let chartData = [];
+        let labels = [];
+
+        if (this.analyticsTimeframe === 'monthly' || this.analyticsTimeframe === 'custom') {
+            // Trend by Day
+            const daysInMonth = this.analyticsTimeframe === 'monthly' ?
+                new Date(this.analyticsDate.getFullYear(), this.analyticsDate.getMonth() + 1, 0).getDate() : 30; // Approximation for custom
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                labels.push(i);
+                chartData.push(0);
+            }
+
+            const startDate = this.analyticsTimeframe === 'monthly' ?
+                new Date(this.analyticsDate.getFullYear(), this.analyticsDate.getMonth(), 1) : null;
+
+            transactions.filter(t => t.currency === currency).forEach(t => {
+                const tDate = new Date(t.date);
+                if (this.analyticsTimeframe === 'monthly' && tDate.getMonth() === this.analyticsDate.getMonth() && tDate.getFullYear() === this.analyticsDate.getFullYear()) {
+                    const day = tDate.getDate();
+                    const amount = t.type === 'income' ? t.amount : (t.type === 'expense' ? -t.amount : 0);
+                    chartData[day - 1] += amount;
+                }
+            });
+
+            // Accumulate
+            for (let i = 1; i < chartData.length; i++) {
+                chartData[i] += chartData[i - 1];
+            }
+        } else {
+            // Simplified for Daily/Annual (just show single points or grouped by month)
+            labels = ['P1'];
+            chartData = [0];
+        }
+
+        if (this.charts.line) this.charts.line.destroy();
+
+        this.charts.line = new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Balance Trend',
+                    data: chartData,
+                    borderColor: colors.primary,
+                    backgroundColor: 'rgba(9, 132, 227, 0.2)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { ticks: { color: colors.text, size: 9 }, grid: { display: false } },
+                    y: { ticks: { color: colors.text, size: 9 }, grid: { color: colors.grid } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    updateBarChart(stats, currency) {
+        const canvas = document.getElementById('barChart');
+        if (!canvas || typeof Chart === 'undefined') return;
+
+        const colors = this.getChartThemeColors();
+
+        if (this.charts.bar) this.charts.bar.destroy();
+
+        this.charts.bar = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: ['Income', 'Expenses'],
+                datasets: [{
+                    data: [stats.income, stats.expense],
+                    backgroundColor: [colors.success, colors.danger],
+                    borderRadius: 8,
+                    barThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, ticks: { color: colors.text, size: 9 }, grid: { color: colors.grid } },
+                    x: { ticks: { color: colors.text, size: 10 }, grid: { display: false } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
     }
 
     renderBreakdownList(breakdown, currency, type) {
