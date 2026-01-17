@@ -17,8 +17,8 @@ class InputFormatter {
             // Remove all commas to get raw number
             let rawValue = this.value.replace(/,/g, '');
 
-            // If empty or just a decimal point, leave it
-            if (rawValue === '' || rawValue === '.') {
+            // If empty, just decimal point, or just minus sign, leave it
+            if (rawValue === '' || rawValue === '.' || rawValue === '-') {
                 return;
             }
 
@@ -27,8 +27,8 @@ class InputFormatter {
             let integerPart = parts[0];
             const decimalPart = parts[1];
 
-            // Only format if we have valid digits
-            if (!/^\d+$/.test(integerPart)) {
+            // Only format if we have valid digits (allow negative)
+            if (!/^-?\d*$/.test(integerPart)) {
                 return;
             }
 

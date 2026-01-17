@@ -1,6 +1,6 @@
 {
-    "appId": "com.moneymanagement.app",
-    "appName": "Money Manager",
+    "appId": "com.andrianwu.smartmoneytracker",
+    "appName": "Smart Money Tracker",
     "webDir": "www",
     "bundledWebRuntime": false,
     "android": {

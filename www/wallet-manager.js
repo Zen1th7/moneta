@@ -171,6 +171,8 @@ class WalletManager {
             if (window.transactionManager) {
                 window.transactionManager.updateWalletDropdown();
             }
+
+            this.closeWalletModal();
         }
     }
 
@@ -190,10 +192,21 @@ class WalletManager {
         const wallets = this.dataManager.getWalletsByCurrency(this.currentCurrency);
 
         if (wallets.length === 0) {
+            let noWalletsMsg;
+            if (this.currentCurrency === 'ALL') {
+                noWalletsMsg = window.i18n?.t('noWallets') || 'No wallets yet. Add your first wallet to get started!';
+            } else {
+                // Use specific key: noWalletsUSD, noWalletsNTD, etc.
+                const key = `noWallets${this.currentCurrency}`;
+                noWalletsMsg = window.i18n?.t(key) || `No ${this.currentCurrency} wallets yet.`;
+            }
+
+            const dataI18n = this.currentCurrency === 'ALL' ? 'noWallets' : `noWallets${this.currentCurrency}`;
+
             container.innerHTML = `
         <div class="card text-center">
-          <p style="color: var(--color-text-tertiary);">
-            ${this.currentCurrency === 'ALL' ? 'No wallets yet. Add your first wallet to get started!' : `No ${this.currentCurrency} wallets yet.`}
+          <p style="color: var(--color-text-tertiary);" data-i18n="${dataI18n}">
+            ${noWalletsMsg}
           </p>
         </div>
       `;

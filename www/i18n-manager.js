@@ -2,7 +2,7 @@ const translations = {
     en: {
         // Bottom Nav
         wallets: "Wallets",
-        history: "History",
+        history: "Transactions",
         analytics: "Analytics",
         settings: "Settings",
 
@@ -36,6 +36,15 @@ const translations = {
         of: "of",
         prev: "Prev",
         next: "Next",
+        timePeriod: "Time Period",
+        allTime: "All Time",
+        last7Days: "Last 7 Days",
+        last30Days: "Last 30 Days",
+        last90Days: "Last 90 Days",
+        customRange: "Custom Range",
+        startDate: "Start Date",
+        endDate: "End Date",
+        applyFilter: "Apply Filter",
 
         // Analytics View
         cashFlowAnalytics: "Cash Flow Analytics",
@@ -71,6 +80,12 @@ const translations = {
         walletIcon: "Wallet Icon",
         cancel: "Cancel",
         delete: "Delete",
+        platform: "Platform/Bank",
+        selectWallet: "Select wallet...",
+        selectDestinationWallet: "Select destination wallet...",
+        walletNamePlaceholder: "e.g., Chase Checking, BCA Savings...",
+        platformPlaceholder: "e.g., Chase Bank, BCA, E*TRADE...",
+        notePlaceholder: "e.g., Lunch at cafe, Monthly salary...",
 
         // Toasts & Alerts
         transactionAdded: "✅ Transaction registered!",
@@ -80,12 +95,37 @@ const translations = {
         walletUpdated: "👛 Wallet updated",
         walletDeleted: "👛 Wallet deleted",
         importSuccess: "✅ Data imported successfully!",
-        importError: "❌ Failed to import data"
+        importError: "❌ Failed to import data",
+
+        // Currency Specific Wallets (Dynamic Empty States)
+        noWalletsNTD: "No NTD wallets yet.",
+        noWalletsUSD: "No USD wallets yet.",
+        noWalletsIDR: "No IDR wallets yet.",
+
+        // Categories
+        catFoodDining: "Food & Dining",
+        catFuel: "Fuel",
+        catTransportation: "Transportation",
+        catHousing: "Housing",
+        catUtilities: "Utilities",
+        catEntertainment: "Entertainment",
+        catShopping: "Shopping",
+        catHealthcare: "Healthcare",
+        catEducation: "Education",
+        catPersonalCare: "Personal Care",
+        catSubscriptions: "Subscriptions",
+        catOther: "Other",
+        catSalary: "Salary",
+        catInvestmentReturn: "Investment Return",
+        catDividend: "Dividend",
+        catFreelance: "Freelance",
+        catGift: "Gift",
+        catBetweenWallets: "Between Wallets",
     },
     id: {
         // Bottom Nav
         wallets: "Dompet",
-        history: "Riwayat",
+        history: "Transaksi",
         analytics: "Analitik",
         settings: "Pengaturan",
 
@@ -119,6 +159,15 @@ const translations = {
         of: "dari",
         prev: "Seb",
         next: "Sel",
+        timePeriod: "Periode Waktu",
+        allTime: "Semua Waktu",
+        last7Days: "7 Hari Terakhir",
+        last30Days: "30 Hari Terakhir",
+        last90Days: "90 Hari Terakhir",
+        customRange: "Rentang Khusus",
+        startDate: "Tanggal Mulai",
+        endDate: "Tanggal Selesai",
+        applyFilter: "Terapkan Filter",
 
         // Analytics View
         cashFlowAnalytics: "Analitik Arus Kas",
@@ -154,6 +203,12 @@ const translations = {
         walletIcon: "Ikon Dompet",
         cancel: "Batal",
         delete: "Hapus",
+        platform: "Platform/Bank",
+        selectWallet: "Pilih dompet...",
+        selectDestinationWallet: "Pilih dompet tujuan...",
+        walletNamePlaceholder: "contoh: Tabungan BCA, Mandiri...",
+        platformPlaceholder: "contoh: BCA, Mandiri, Jenius...",
+        notePlaceholder: "contoh: Makan siang, Gaji bulanan...",
 
         // Toasts & Alerts
         transactionAdded: "✅ Transaksi dicatat!",
@@ -163,12 +218,37 @@ const translations = {
         walletUpdated: "👛 Dompet diperbarui",
         walletDeleted: "👛 Dompet dihapus",
         importSuccess: "✅ Data berhasil diimpor!",
-        importError: "❌ Gagal mengimpor data"
+        importError: "❌ Gagal mengimpor data",
+
+        // Currency Specific Wallets (Dynamic Empty States)
+        noWalletsNTD: "Belum ada dompet NTD.",
+        noWalletsUSD: "Belum ada dompet USD.",
+        noWalletsIDR: "Belum ada dompet IDR.",
+
+        // Categories
+        catFoodDining: "Makan & Minum",
+        catFuel: "Bensin",
+        catTransportation: "Transportasi",
+        catHousing: "Tempat Tinggal",
+        catUtilities: "Tagihan",
+        catEntertainment: "Hiburan",
+        catShopping: "Belanja",
+        catHealthcare: "Kesehatan",
+        catEducation: "Pendidikan",
+        catPersonalCare: "Perawatan Diri",
+        catSubscriptions: "Langganan",
+        catOther: "Lainnya",
+        catSalary: "Gaji",
+        catInvestmentReturn: "Hasil Investasi",
+        catDividend: "Dividen",
+        catFreelance: "Freelance",
+        catGift: "Hadiah",
+        catBetweenWallets: "Antar Dompet",
     },
     zh: {
         // Bottom Nav
         wallets: "錢包",
-        history: "歷史",
+        history: "交易",
         analytics: "分析",
         settings: "設置",
 
@@ -202,6 +282,15 @@ const translations = {
         of: "頁，共",
         prev: "上一頁",
         next: "下一頁",
+        timePeriod: "時間段",
+        allTime: "所有時間",
+        last7Days: "最近7天",
+        last30Days: "最近30天",
+        last90Days: "最近90天",
+        customRange: "自定義範圍",
+        startDate: "開始日期",
+        endDate: "結束日期",
+        applyFilter: "應用篩選",
 
         // Analytics View
         cashFlowAnalytics: "現金流分析",
@@ -237,6 +326,12 @@ const translations = {
         walletIcon: "錢包圖標",
         cancel: "取消",
         delete: "刪除",
+        platform: "平台/銀行",
+        selectWallet: "選擇錢包...",
+        selectDestinationWallet: "選擇目標錢包...",
+        walletNamePlaceholder: "例如：玉山銀行, 中國信託...",
+        platformPlaceholder: "例如：玉山, 中信, 國泰...",
+        notePlaceholder: "例如：午餐, 月薪...",
 
         // Toasts & Alerts
         transactionAdded: "✅ 交易已登記！",
@@ -246,7 +341,32 @@ const translations = {
         walletUpdated: "👛 錢包已更新",
         walletDeleted: "👛 錢包已刪除",
         importSuccess: "✅ 數據導入成功！",
-        importError: "❌ 數據導入失敗"
+        importError: "❌ 數據導入失敗",
+
+        // Currency Specific Wallets (Dynamic Empty States)
+        noWalletsNTD: "暫無新台幣錢包。",
+        noWalletsUSD: "暫無美元錢包。",
+        noWalletsIDR: "暫無印尼盾錢包。",
+
+        // Categories
+        catFoodDining: "餐飲",
+        catFuel: "燃料",
+        catTransportation: "交通",
+        catHousing: "住房",
+        catUtilities: "水電費",
+        catEntertainment: "娛樂",
+        catShopping: "購物",
+        catHealthcare: "醫療",
+        catEducation: "教育",
+        catPersonalCare: "個人護理",
+        catSubscriptions: "訂閱",
+        catOther: "其他",
+        catSalary: "薪水",
+        catInvestmentReturn: "投資回報",
+        catDividend: "股息",
+        catFreelance: "自由職業",
+        catGift: "禮物",
+        catBetweenWallets: "錢包轉帳",
     }
 };
 

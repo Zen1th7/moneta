@@ -85,6 +85,61 @@ class MoneyManagerApp {
 
         // Initialize theme from localStorage
         this.initTheme();
+
+        // Language Selector (Settings)
+        this.setupLanguageSelector();
+    }
+
+    setupLanguageSelector() {
+        const selector = document.getElementById('languageSelector');
+        if (!selector) return;
+
+        const buttons = selector.querySelectorAll('[data-lang]');
+
+        // Set initial active state
+        const currentLang = window.i18n ? window.i18n.currentLanguage : 'en';
+        buttons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.lang === currentLang);
+        });
+
+        // Add click handlers
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const lang = btn.dataset.lang;
+                if (window.i18n) {
+                    window.i18n.setLanguage(lang);
+                    // Update active button state
+                    buttons.forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+                    console.log('🌐 Language set to:', lang);
+
+                    // Re-render dynamic components to ensure Full Translation
+                    if (window.transactionManager) {
+                        // Wallets
+                        window.transactionManager.updateWalletDropdown();
+                        window.transactionManager.updateWalletDropdown(null, 'edit_');
+
+                        // Categories (Dropdowns & Settings List)
+                        window.transactionManager.updateCategoryDropdown();
+                        window.transactionManager.updateCategoryDropdown('edit_');
+                        window.transactionManager.renderSettingsCategoryList();
+
+                        // Transaction History (to update category names in list)
+                        window.transactionManager.render();
+
+                        // Analytics (already handles data-i18n, but safe to re-render if needed)
+                        window.transactionManager.renderAnalytics();
+                    }
+                    if (window.walletManager) {
+                        window.walletManager.render(); // Re-render wallets (for empty states dynamic text)
+                    }
+                }
+            });
+        });
+
+        // Apply initial translations
+        if (window.i18n) {
+            window.i18n.applyTranslations();
+        }
     }
 
     initTheme() {
@@ -135,29 +190,87 @@ class MoneyManagerApp {
         // This function is kept for backward compatibility
     }
 
-    exportData() {
+    async exportData() {
         try {
             const data = dataManager.exportAllData();
             const json = JSON.stringify(data, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
+            const filename = `smart-money-backup-${new Date().toISOString().split('T')[0]}.json`;
 
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `money-manager-backup-${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            this.showToast('✅ Data exported successfully!');
+            if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+                // JSON is plain text, so we use isBase64 = false
+                await this.handleNativeExport(filename, json, false);
+            } else {
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                this.showToast('✅ Data exported successfully!');
+            }
         } catch (error) {
             console.error('Export failed:', error);
             alert('❌ Failed to export data. Please try again.');
         }
     }
 
-    exportToExcel() {
+    async handleNativeExport(filename, data, isBase64) {
+        try {
+            const { Filesystem, Share } = window.Capacitor.Plugins;
+
+            if (!Filesystem || !Share) {
+                throw new Error("Native plugins not available. Please ensure Cap Sync was run.");
+            }
+
+            // Write file
+            let result;
+            try {
+                // Try writing to CACHE with the requested encoding
+                result = await Filesystem.writeFile({
+                    path: filename,
+                    data: data,
+                    directory: 'CACHE',
+                    encoding: isBase64 ? 'base64' : 'utf8'
+                });
+            } catch (writeErr) {
+                // Fallback: If 'base64' encoding fails (unsupported encoding error), 
+                // try omitting it. Some Android systems handle binary defaults automatically if formatted as base64 string.
+                if (isBase64 && writeErr.message && writeErr.message.toLowerCase().includes('encoding')) {
+                    result = await Filesystem.writeFile({
+                        path: filename,
+                        data: data,
+                        directory: 'CACHE'
+                    });
+                } else {
+                    throw writeErr;
+                }
+            }
+
+            try {
+                await Share.share({
+                    title: filename,
+                    url: result.uri,
+                    dialogTitle: 'Save your file'
+                });
+                this.showToast('✅ Export processed!');
+            } catch (shareErr) {
+                // Ignore cancellation - user likely just closed the share sheet
+                if (shareErr.message && shareErr.message.toLowerCase().includes('canceled')) {
+                    this.showToast('✅ Export finished');
+                } else {
+                    throw shareErr;
+                }
+            }
+        } catch (e) {
+            console.error('Native export error:', e);
+            alert('❌ Native export failed: ' + e.message);
+        }
+    }
+
+    async exportToExcel() {
         try {
             const transactions = dataManager.getTransactions();
             const wallets = dataManager.getWallets();
@@ -214,15 +327,22 @@ class MoneyManagerApp {
             const wsSummary = XLSX.utils.aoa_to_sheet([summaryHeaders, ...summaryRows]);
             this._autoSizeExcelColumns(wsSummary);
 
-            // Create Workbook and save
+            // Create Workbook
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
             XLSX.utils.book_append_sheet(wb, wsTransactions, 'Transactions');
 
-            const filename = `money-manager-export-${new Date().toISOString().split('T')[0]}.xlsx`;
-            XLSX.writeFile(wb, filename);
+            const filename = `smart-money-export-${new Date().toISOString().split('T')[0]}.xlsx`;
 
-            this.showToast('✅ Excel file exported successfully!');
+            if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+                // Generate base64 for native sharing
+                const base64 = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+                // Pass true for isBase64
+                await this.handleNativeExport(filename, base64, true);
+            } else {
+                XLSX.writeFile(wb, filename);
+                this.showToast('✅ Excel file exported successfully!');
+            }
         } catch (error) {
             console.error('Excel Export failed:', error);
             alert('❌ Failed to export Excel. Error: ' + error.message);
@@ -297,6 +417,11 @@ class MoneyManagerApp {
             targetView.classList.add('active');
             // Reset scroll position to top for a clean transition
             window.scrollTo({ top: 0, behavior: 'auto' });
+
+            // Refresh Analytics date if switching to analytics
+            if (view === 'analytics' && window.transactionManager) {
+                window.transactionManager.refreshAnalyticsDate();
+            }
         }
     }
 

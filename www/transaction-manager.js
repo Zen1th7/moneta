@@ -61,6 +61,31 @@ class TransactionManager {
         this.analyticsTimeframe = 'monthly'; // 'daily', 'monthly', 'annual'
         this.analyticsDate = new Date(); // Current viewing date for analytics
 
+        this.analyticsTimeframe = 'monthly'; // 'daily', 'monthly', 'annual'
+        this.analyticsDate = new Date(); // Current viewing date for analytics
+
+        // Category Translation Map
+        this.categoryTranslationMap = {
+            'Food & Dining': 'catFoodDining',
+            'Fuel': 'catFuel',
+            'Transportation': 'catTransportation',
+            'Housing': 'catHousing',
+            'Utilities': 'catUtilities',
+            'Entertainment': 'catEntertainment',
+            'Shopping': 'catShopping',
+            'Healthcare': 'catHealthcare',
+            'Education': 'catEducation',
+            'Personal Care': 'catPersonalCare',
+            'Subscriptions': 'catSubscriptions',
+            'Other': 'catOther',
+            'Salary': 'catSalary',
+            'Investment Return': 'catInvestmentReturn',
+            'Dividend': 'catDividend',
+            'Freelance': 'catFreelance',
+            'Gift': 'catGift',
+            'Between Wallets': 'catBetweenWallets'
+        };
+
         this.init();
     }
 
@@ -352,9 +377,16 @@ class TransactionManager {
         const categorySelect = document.getElementById(`${prefix}transactionCategory`);
 
         const categories = this.categories[type] || [];
-        categorySelect.innerHTML = categories.map(cat =>
-            `<option value="${cat}">${cat}</option>`
-        ).join('');
+        categorySelect.innerHTML = categories.map(cat => {
+            const translatedCat = this.getCategoryTranslation(cat); // Translate for display
+            return `<option value="${cat}">${translatedCat}</option>`; // Value stays English/ID
+        }).join('');
+    }
+
+    getCategoryTranslation(categoryName) {
+        if (!window.i18n) return categoryName;
+        const key = this.categoryTranslationMap[categoryName];
+        return key ? window.i18n.t(key) : categoryName;
     }
 
     updateWalletDropdown(wallets = null, prefix = '') {
@@ -362,7 +394,8 @@ class TransactionManager {
         const currentValue = walletSelect.value;
         const walletData = wallets || this.dataManager.getWallets();
 
-        const optionsHtml = '<option value="">Select wallet...</option>' +
+        const defaultText = window.i18n?.t('selectWallet') || 'Select wallet...';
+        const optionsHtml = `<option value="" data-i18n="selectWallet">${defaultText}</option>` +
             walletData.map(wallet => {
                 const balance = this.currencyManager.format(wallet.balance, wallet.currency);
                 return `<option value="${wallet.id}" data-currency="${wallet.currency}">${wallet.name} (${balance})</option>`;
@@ -496,7 +529,8 @@ class TransactionManager {
             return;
         }
 
-        targetSelect.innerHTML = '<option value="">Select destination wallet...</option>' +
+        const defaultDestText = window.i18n?.t('selectDestinationWallet') || 'Select destination wallet...';
+        targetSelect.innerHTML = `<option value="" data-i18n="selectDestinationWallet">${defaultDestText}</option>` +
             availableWallets.map(w => {
                 const balance = this.currencyManager.format(w.balance, w.currency);
                 return `<option value="${w.id}">${w.name} (${balance})</option>`;
@@ -842,9 +876,10 @@ class TransactionManager {
         transactions = this.filterTransactionsByDate(transactions);
 
         if (transactions.length === 0) {
+            const noTxMsg = window.i18n?.t('noTransactions') || 'No transactions found for the selected period.';
             container.innerHTML = `
         <div class="card text-center">
-          <p style="color: var(--color-text-tertiary);">No transactions found for the selected period.</p>
+          <p style="color: var(--color-text-tertiary);" data-i18n="noTransactions">${noTxMsg}</p>
         </div>
       `;
             pagination?.classList.add('hidden');
@@ -869,7 +904,7 @@ class TransactionManager {
         if (pagination) {
             if (totalPages > 1) {
                 pagination.classList.remove('hidden');
-                document.getElementById('pageIndicator').textContent = `Page ${this.currentPage} of ${totalPages}`;
+                document.getElementById('pageIndicator').textContent = `${window.i18n?.t('page') || 'Page'} ${this.currentPage} ${window.i18n?.t('of') || 'of'} ${totalPages}`;
                 document.getElementById('prevPageBtn').disabled = this.currentPage === 1;
                 document.getElementById('nextPageBtn').disabled = this.currentPage === totalPages;
             } else {
@@ -1013,7 +1048,7 @@ class TransactionManager {
         </div>
         <div class="transaction-details" style="flex: 1; min-width: 0;">
           <div class="transaction-category" style="font-size: 0.95rem; font-weight: 600; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-            ${transaction.category || 'Transfer'}
+            ${this.getCategoryTranslation(transaction.category || 'Transfer')}
           </div>
           <div class="transaction-note" style="font-size: 0.75rem; color: var(--color-text-tertiary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
             ${transaction.note || walletName} • ${dateStr}
@@ -1024,6 +1059,11 @@ class TransactionManager {
         </div>
       </div>
     `;
+    }
+
+    refreshAnalyticsDate() {
+        this.analyticsDate = new Date(); // Reset to current time
+        this.renderAnalytics();
     }
 
     renderAnalytics() {
@@ -1045,7 +1085,11 @@ class TransactionManager {
 
         let timeframeKey;
         if (this.analyticsTimeframe === 'daily') {
-            timeframeKey = this.analyticsDate.toISOString().split('T')[0];
+            // Fix: Use LOCAL time for key, not UTC (toISOString)
+            const year = this.analyticsDate.getFullYear();
+            const month = String(this.analyticsDate.getMonth() + 1).padStart(2, '0');
+            const day = String(this.analyticsDate.getDate()).padStart(2, '0');
+            timeframeKey = `${year}-${month}-${day}`;
         } else if (this.analyticsTimeframe === 'monthly') {
             timeframeKey = `${this.analyticsDate.getFullYear()}-${this.analyticsDate.getMonth() + 1}`;
         } else if (this.analyticsTimeframe === 'annual') {
@@ -1072,9 +1116,10 @@ class TransactionManager {
 
         if (currencies.length === 0) {
             tabsContainer.innerHTML = '';
+            const noDataMsg = window.i18n?.t('noData') || 'No transaction data for this period.';
             container.innerHTML = `
                 <div class="card text-center animate-fade-in">
-                    <p class="color-text-tertiary">No transaction data for this period.</p>
+                    <p class="color-text-tertiary" data-i18n="noData">${noDataMsg}</p>
                 </div>
             `;
             return;
@@ -1111,17 +1156,17 @@ class TransactionManager {
                 <!-- 1. OVERVIEW -->
                 <div class="card mb-md" style="border-left: 4px solid var(--color-primary);">
                     <div class="card-header" style="align-items: flex-start; text-align: left; padding-bottom: var(--space-sm);">
-                        <h3 class="card-title" style="font-size: 0.9rem;">Overview (${currency})</h3>
+                        <h3 class="card-title" style="font-size: 0.9rem;"><span data-i18n="overview">${window.i18n?.t('overview') || 'Overview'}</span> (${currency})</h3>
                     </div>
                     <div class="grid grid-2 gap-md">
                         <div>
-                            <div class="form-label" style="font-size: 0.7rem; color: var(--color-text-tertiary);">Income</div>
+                            <div class="form-label" style="font-size: 0.7rem; color: var(--color-text-tertiary);" data-i18n="income">${window.i18n?.t('income') || 'Income'}</div>
                             <div class="wallet-balance" style="color: var(--color-success); font-size: 1.25rem; text-align: left;">
                                 ${this.currencyManager.format(stats.income, currency)}
                             </div>
                         </div>
                         <div>
-                            <div class="form-label" style="font-size: 0.7rem; color: var(--color-text-tertiary);">Expenses</div>
+                            <div class="form-label" style="font-size: 0.7rem; color: var(--color-text-tertiary);" data-i18n="expense">${window.i18n?.t('expense') || 'Expenses'}</div>
                             <div class="wallet-balance" style="color: var(--color-danger); font-size: 1.25rem; text-align: left;">
                                 ${this.currencyManager.format(stats.expense, currency)}
                             </div>
@@ -1133,7 +1178,7 @@ class TransactionManager {
                     <!-- 2. INCOME BREAKDOWN -->
                     <div class="card">
                         <div class="card-header" style="align-items: flex-start; text-align: left; padding-bottom: var(--space-sm);">
-                            <h3 class="card-title" style="font-size: 0.85rem;">📈 Income Breakdown</h3>
+                            <h3 class="card-title" style="font-size: 0.85rem;">📈 <span data-i18n="incomeBreakdown">${window.i18n?.t('incomeBreakdown') || 'Income Breakdown'}</span></h3>
                         </div>
                         <div class="card-body" style="padding: 0 var(--space-md) var(--space-md);">
                             ${this.renderBreakdownList(incomeBreakdown, currency, 'income')}
@@ -1143,7 +1188,7 @@ class TransactionManager {
                     <!-- 3. EXPENSE BREAKDOWN -->
                     <div class="card">
                         <div class="card-header" style="align-items: flex-start; text-align: left; padding-bottom: var(--space-sm);">
-                            <h3 class="card-title" style="font-size: 0.85rem;">📉 Expense Breakdown</h3>
+                            <h3 class="card-title" style="font-size: 0.85rem;">📉 <span data-i18n="expenseBreakdown">${window.i18n?.t('expenseBreakdown') || 'Expense Breakdown'}</span></h3>
                         </div>
                         <div class="card-body" style="padding: 0 var(--space-md) var(--space-md);">
                             ${this.renderBreakdownList(expenseBreakdown, currency, 'expense')}
@@ -1185,7 +1230,7 @@ class TransactionManager {
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                         <span style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem;">
                             <span>${icon}</span>
-                            <span>${category}</span>
+                            <span>${this.getCategoryTranslation(category)}</span>
                         </span>
                         <span style="font-weight: 600; font-size: 0.85rem;">${this.currencyManager.format(data.total, currency)}</span>
                     </div>
@@ -1237,7 +1282,7 @@ class TransactionManager {
 
         container.innerHTML = categoriesToShow.map(catName => `
             <div class="category-item">
-                <span>${this.categoryIcons[catName] || '📝'} ${catName}</span>
+                <span>${this.categoryIcons[catName] || '📝'} ${this.getCategoryTranslation(catName)}</span>
                 <button class="btn-icon-delete" onclick="transactionManager.deleteCategory('${catName}', '${this.settingsCategoryType}')">
                     🗑️
                 </button>
