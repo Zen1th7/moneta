@@ -10,9 +10,87 @@
   <link rel="stylesheet" href="styles.css">
   <script src="lib/chart.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    #lock-screen-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 14, 39, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    #lock-screen-overlay.hidden {
+      display: none;
+    }
+
+    #lock-screen-overlay.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .lock-content {
+      text-align: center;
+      padding: var(--space-xl);
+      max-width: 300px;
+    }
+
+    .lock-icon {
+      font-size: 4rem;
+      margin-bottom: var(--space-lg);
+      display: block;
+      animation: pulse 2s infinite;
+    }
+
+    .lock-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: var(--space-sm);
+      color: white;
+    }
+
+    .lock-desc {
+      font-size: 0.9rem;
+      color: var(--color-text-tertiary);
+      margin-bottom: var(--space-xl);
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.1);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <!-- BIOMETRIC LOCK SCREEN -->
+  <div id="lock-screen-overlay" class="hidden">
+    <div class="lock-content">
+      <span class="lock-icon">🔐</span>
+      <h2 class="lock-title" data-i18n="authenticate">Authenticate</h2>
+      <p class="lock-desc" data-i18n="unlockToProceed">Unlock to proceed to dashboard</p>
+      <button class="btn btn-primary btn-block" id="unlock-btn" data-i18n="authenticate">Authenticate</button>
+    </div>
+  </div>
+
   <!-- SPLASH SCREEN -->
   <div id="splash-screen">
     <div class="splash-content">
@@ -307,6 +385,22 @@
                   <button class="btn btn-outline" id="theme-light-btn" data-i18n="lightMode">Light Mode</button>
                 </div>
               </div>
+
+              <div class="settings-group mt-lg pt-lg" style="border-top: 1px solid var(--glass-border);">
+                <div class="flex-between align-center">
+                  <div class="flex-1 pr-md">
+                    <label class="form-label mb-0" data-i18n="biometricLock">Biometric Lock</label>
+                    <p class="text-xs color-text-tertiary" data-i18n="biometricDesc">Protect your data with fingerprint
+                      or face recognition</p>
+                  </div>
+                  <div class="flex-shrink-0">
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="biometricToggle">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -542,6 +636,7 @@
   <script src="currency-manager.js?v=5"></script>
   <script src="wallet-manager.js?v=5"></script>
   <script src="transaction-manager.js?v=5"></script>
+  <script src="security-manager.js?v=5"></script>
   <script src="app.js?v=5"></script>
 
   <!-- FILTER MODAL -->

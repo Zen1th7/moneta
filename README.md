@@ -57,9 +57,5 @@ Smart Money Tracker helps you manage your finances across different currencies w
 4. **Run on Device**:
    Open the `android` folder in Android Studio and click **Run**.
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ---
-*Created with ❤️ by Andrian Wu*
+*Created by Zen1th7*
