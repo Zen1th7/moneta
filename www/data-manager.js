@@ -10,7 +10,8 @@ class DataManager {
       WALLETS: 'moneyManager_wallets',
       TRANSACTIONS: 'moneyManager_transactions',
       RATES: 'moneyManager_conversionRates',
-      SETTINGS: 'moneyManager_settings'
+      SETTINGS: 'moneyManager_settings',
+      CATEGORIES: 'transactionCategories'
     };
 
     this.init();
@@ -256,27 +257,37 @@ class DataManager {
    * EXPORT/IMPORT
    */
   exportAllData() {
+    const categoriesData = localStorage.getItem(this.STORAGE_KEYS.CATEGORIES);
     const data = {
       wallets: this.getWallets(),
       transactions: this.getTransactions(),
       conversionRates: this.getConversionRates(),
+      categories: categoriesData ? JSON.parse(categoriesData) : null,
       exportedAt: new Date().toISOString(),
-      version: '1.0.0'
+      version: '1.1.0'
     };
     return data;
   }
 
   importAllData(data) {
     try {
-      // Validate data structure
-      if (!data.wallets || !data.transactions || !data.conversionRates) {
-        throw new Error('Invalid data structure');
+      // Validate data structure (minimum requirements)
+      if (!data.wallets || !data.transactions) {
+        throw new Error('Invalid data structure: Missing wallets or transactions');
       }
 
-      // Import data
+      // Import core data
       this.saveWallets(data.wallets);
       this.saveTransactions(data.transactions);
-      this.saveConversionRates(data.conversionRates);
+
+      if (data.conversionRates) {
+        this.saveConversionRates(data.conversionRates);
+      }
+
+      // Import categories if present
+      if (data.categories) {
+        localStorage.setItem(this.STORAGE_KEYS.CATEGORIES, JSON.stringify(data.categories));
+      }
 
       return true;
     } catch (error) {

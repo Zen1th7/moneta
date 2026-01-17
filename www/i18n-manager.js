@@ -61,6 +61,7 @@ const translations = {
         year: "Year",
         custom: "Custom",
         to: "to",
+        selectDateRange: "Please select a valid date range.",
 
         // Settings View
         language: "Language",
@@ -125,6 +126,12 @@ const translations = {
         catFreelance: "Freelance",
         catGift: "Gift",
         catBetweenWallets: "Between Wallets",
+
+        // Chart Labels
+        balanceTrend: "Balance Trend",
+        jan: "Jan", feb: "Feb", mar: "Mar", apr: "Apr", may: "May", jun: "Jun",
+        jul: "Jul", aug: "Aug", sep: "Sep", oct: "Oct", nov: "Nov", dec: "Dec",
+        dayPrefix: "Day", daySuffix: ""
     },
     id: {
         // Bottom Nav
@@ -188,6 +195,7 @@ const translations = {
         year: "Tahun",
         custom: "Kustom",
         to: "sampai",
+        selectDateRange: "Pilih rentang tanggal yang valid.",
 
         // Settings View
         language: "Bahasa",
@@ -252,6 +260,12 @@ const translations = {
         catFreelance: "Freelance",
         catGift: "Hadiah",
         catBetweenWallets: "Antar Dompet",
+
+        // Chart Labels
+        balanceTrend: "Tren Saldo",
+        jan: "Jan", feb: "Feb", mar: "Mar", apr: "Apr", mei: "Mei", jun: "Jun",
+        jul: "Jul", agt: "Agt", sep: "Sep", okt: "Okt", nov: "Nov", des: "Des",
+        dayPrefix: "Tgl", daySuffix: ""
     },
     zh: {
         // Bottom Nav
@@ -315,6 +329,7 @@ const translations = {
         year: "年",
         custom: "自定義",
         to: "至",
+        selectDateRange: "請選擇有效的日期範圍。",
 
         // Settings View
         language: "語言",
@@ -379,6 +394,12 @@ const translations = {
         catFreelance: "自由職業",
         catGift: "禮物",
         catBetweenWallets: "錢包轉帳",
+
+        // Chart Labels
+        balanceTrend: "餘額趨勢",
+        jan: "1月", feb: "2月", mar: "3月", apr: "4月", may: "5月", jun: "6月",
+        jul: "7月", aug: "8月", sep: "9月", oct: "10月", nov: "11月", dec: "12月",
+        dayPrefix: "", daySuffix: "日"
     }
 };
 
@@ -397,7 +418,8 @@ class I18nManager {
     }
 
     t(key) {
-        return this.translations[this.currentLanguage][key] || key;
+        const val = this.translations[this.currentLanguage][key];
+        return val !== undefined ? val : key;
     }
 
     applyTranslations() {
