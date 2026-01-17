@@ -1318,15 +1318,12 @@ class TransactionManager {
         if (this.analyticsTimeframe === 'monthly' || this.analyticsTimeframe === 'custom') {
             // Trend by Day
             const daysInMonth = this.analyticsTimeframe === 'monthly' ?
-                new Date(this.analyticsDate.getFullYear(), this.analyticsDate.getMonth() + 1, 0).getDate() : 30; // Approximation for custom
+                new Date(this.analyticsDate.getFullYear(), this.analyticsDate.getMonth() + 1, 0).getDate() : 30;
 
             for (let i = 1; i <= daysInMonth; i++) {
                 labels.push(i);
                 chartData.push(0);
             }
-
-            const startDate = this.analyticsTimeframe === 'monthly' ?
-                new Date(this.analyticsDate.getFullYear(), this.analyticsDate.getMonth(), 1) : null;
 
             transactions.filter(t => t.currency === currency).forEach(t => {
                 const tDate = new Date(t.date);
@@ -1334,17 +1331,44 @@ class TransactionManager {
                     const day = tDate.getDate();
                     const amount = t.type === 'income' ? t.amount : (t.type === 'expense' ? -t.amount : 0);
                     chartData[day - 1] += amount;
+                } else if (this.analyticsTimeframe === 'custom') {
+                    // Custom logic could be more complex, but simplified for now
                 }
             });
+        } else if (this.analyticsTimeframe === 'annual') {
+            // Trend by Month
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            labels = months;
+            chartData = Array(12).fill(0);
 
-            // Accumulate
-            for (let i = 1; i < chartData.length; i++) {
-                chartData[i] += chartData[i - 1];
+            transactions.filter(t => t.currency === currency).forEach(t => {
+                const tDate = new Date(t.date);
+                if (tDate.getFullYear() === this.analyticsDate.getFullYear()) {
+                    const month = tDate.getMonth();
+                    const amount = t.type === 'income' ? t.amount : (t.type === 'expense' ? -t.amount : 0);
+                    chartData[month] += amount;
+                }
+            });
+        } else if (this.analyticsTimeframe === 'daily') {
+            // Trend by Hour (last 24h)
+            for (let i = 0; i < 24; i++) {
+                labels.push(`${i}:00`);
+                chartData.push(0);
             }
-        } else {
-            // Simplified for Daily/Annual (just show single points or grouped by month)
-            labels = ['P1'];
-            chartData = [0];
+
+            transactions.filter(t => t.currency === currency).forEach(t => {
+                const tDate = new Date(t.date);
+                if (tDate.toDateString() === this.analyticsDate.toDateString()) {
+                    const hour = tDate.getHours();
+                    const amount = t.type === 'income' ? t.amount : (t.type === 'expense' ? -t.amount : 0);
+                    chartData[hour] += amount;
+                }
+            });
+        }
+
+        // Accumulate for all trend types
+        for (let i = 1; i < chartData.length; i++) {
+            chartData[i] += chartData[i - 1];
         }
 
         if (this.charts.line) this.charts.line.destroy();
@@ -1404,6 +1428,14 @@ class TransactionManager {
                 plugins: { legend: { display: false } }
             }
         });
+    }
+
+    initThemeListener() {
+        // Listen for theme changes to update chart colors
+        const darkBtn = document.getElementById('theme-dark-btn');
+        const lightBtn = document.getElementById('theme-light-btn');
+        if (darkBtn) darkBtn.addEventListener('click', () => setTimeout(() => this.renderAnalytics(), 200));
+        if (lightBtn) lightBtn.addEventListener('click', () => setTimeout(() => this.renderAnalytics(), 200));
     }
 
     renderBreakdownList(breakdown, currency, type) {
