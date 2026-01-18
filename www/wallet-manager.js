@@ -9,6 +9,7 @@ class WalletManager {
         this.currencyManager = currencyManager;
         this.currentCurrency = 'ALL';
         this.editingWalletId = null;
+        this.distributionChart = null;
 
         this.init();
     }
@@ -187,9 +188,116 @@ class WalletManager {
         this.render();
     }
 
+    updateChart() {
+        const ctx = document.getElementById('walletDistributionChart');
+        const legendContainer = document.getElementById('walletChartLegend');
+        const section = document.getElementById('walletDistributionSection');
+
+        if (!ctx || !legendContainer || !section) return;
+
+        const wallets = this.dataManager.getWalletsByCurrency(this.currentCurrency);
+
+        // Hide section if no wallets
+        if (wallets.length === 0) {
+            section.classList.add('hidden');
+            return;
+        }
+
+        // Calculate data
+        let chartData = [];
+        let labels = [];
+        let total = 0;
+
+        wallets.forEach(wallet => {
+            let value;
+            if (this.currentCurrency === 'ALL') {
+                value = this.currencyManager.convertToNTD(wallet.balance, wallet.currency);
+            } else {
+                value = parseFloat(wallet.balance);
+            }
+
+            if (value > 0) { // Only show positive wallets in distribution
+                chartData.push(value);
+                labels.push(wallet.name);
+                total += value;
+            }
+        });
+
+        if (chartData.length === 0) {
+            section.classList.add('hidden');
+            return;
+        }
+        section.classList.remove('hidden');
+
+        const colors = [
+            '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+            '#3b82f6', '#ec4899', '#06b6d4', '#f97316', '#84cc16'
+        ];
+
+        // Destroy existing chart instance
+        if (this.distributionChart) {
+            this.distributionChart.destroy();
+        }
+
+        // Create new chart
+        this.distributionChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: chartData,
+                    backgroundColor: colors.map(c => c),
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(17, 22, 51, 0.95)',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#cbd5e1',
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: true,
+                        callbacks: {
+                            label: (context) => {
+                                const value = context.raw;
+                                const percent = ((value / total) * 100).toFixed(1);
+                                return ` ${context.label}: ${percent}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Update Legend
+        legendContainer.innerHTML = labels.map((label, index) => {
+            const percent = ((chartData[index] / total) * 100).toFixed(1);
+            return `
+                <div class="flex align-center gap-xs animate-fade-in" style="margin-bottom: 4px;">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: ${colors[index % colors.length]}; flex-shrink: 0;"></div>
+                    <span class="color-text-secondary" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">${label}</span>
+                    <span class="font-600" style="color: var(--color-text-primary); margin-left: auto;">${percent}%</span>
+                </div>
+            `;
+        }).join('');
+    }
+
     render() {
         const container = document.getElementById('walletsContainer');
         const wallets = this.dataManager.getWalletsByCurrency(this.currentCurrency);
+
+        // Update chart
+        this.updateChart();
 
         if (wallets.length === 0) {
             let noWalletsMsg;

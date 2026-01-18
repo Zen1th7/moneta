@@ -1176,6 +1176,12 @@ a:hover {
   margin: var(--space-xs) 0;
 }
 
+.chart-wrapper {
+  position: relative;
+  height: 180px;
+  width: 100%;
+}
+
 .btn-icon-sm {
   width: 32px;
   height: 32px;

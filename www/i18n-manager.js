@@ -9,6 +9,7 @@ const translations = {
         // Wallets View
         netWorth: "Total Net Worth",
         addWallet: "Add Wallet",
+        walletAllocation: "Wallet Allocation",
         noWallets: "No wallets found. Create your first one to get started!",
 
         // Transaction Form
@@ -167,6 +168,7 @@ const translations = {
         // Wallets View
         netWorth: "Total Kekayaan Bersih",
         addWallet: "Tambah Dompet",
+        walletAllocation: "Alokasi Dompet",
         noWallets: "Belum ada dompet. Buat yang pertama untuk memulai!",
 
         // Transaction Form
@@ -325,6 +327,7 @@ const translations = {
         // Wallets View
         netWorth: "總資產",
         addWallet: "添加錢包",
+        walletAllocation: "錢包分配",
         noWallets: "未發現錢包。請創建您的第一個錢包！",
 
         // Transaction Form
