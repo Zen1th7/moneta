@@ -22,21 +22,31 @@ class MoneyManagerApp {
         try {
             console.log('🚀 App setup starting...');
 
-            // 1. Setup global event listeners FIRST (so sidebar works even if data fails)
-            this.setupEventListeners();
-
-            // 2. Initialize managers - assign to global variables
+            // 1. Initialize managers - assign to global variables
             window.walletManager = new WalletManager(dataManager, currencyManager);
             window.transactionManager = new TransactionManager(dataManager, currencyManager);
             window.securityManager = new SecurityManager(dataManager, window.i18n);
+            window.recurringManager = new RecurringManager(dataManager);
 
             // Re-assign to the variables declared in other files
             walletManager = window.walletManager;
             transactionManager = window.transactionManager;
             securityManager = window.securityManager;
+            const recurringManager = window.recurringManager;
+
+            // 2. Setup global event listeners
+            this.setupEventListeners();
+
+            // Link security manager to app to reset grace period on unlock
+            securityManager.onUnlock = () => {
+                this.resetGracePeriod();
+            };
 
             // 2.5 Start Security Check (Lock Screen)
             securityManager.checkSecurity();
+
+            // 2.6 Check Recurring Transactions
+            recurringManager.checkAndExecute();
 
             // Make app globally accessible
             window.app = this;
@@ -97,6 +107,11 @@ class MoneyManagerApp {
 
         // Biometric Toggle (Settings)
         this.setupBiometricSettings();
+
+        // Manage Recurring Transactions Button
+        if (window.recurringManager) {
+            window.recurringManager.initUI();
+        }
     }
 
     setupBiometricSettings() {
@@ -185,6 +200,15 @@ class MoneyManagerApp {
                         // Analytics (already handles data-i18n, but safe to re-render if needed)
                         window.transactionManager.renderAnalytics();
                     }
+
+                    if (window.recurringManager) {
+                        // Recurring List
+                        window.recurringManager.renderList();
+                        // Recurring Dropdowns in Modals
+                        window.recurringManager.updateCategoryDropdown('edit_recurring');
+                        window.recurringManager.updateWalletDropdown('edit_recurring');
+                    }
+
                     if (window.walletManager) {
                         window.walletManager.render(); // Re-render wallets (for empty states dynamic text)
                     }
@@ -222,16 +246,16 @@ class MoneyManagerApp {
                     checkAuth();
                 } else {
                     this.lastPauseTime = Date.now();
-                    console.log('⏸️ App went to background at:', this.lastPauseTime);
                 }
             });
         }
+    }
 
-        // Fallback for some platforms/versions
-        document.addEventListener('resume', checkAuth);
-        document.addEventListener('pause', () => {
-            this.lastPauseTime = Date.now();
-        });
+    resetGracePeriod() {
+        // Sets lastPauseTime to now, giving the user 2 seconds of "grace"
+        // right after they unlock or perform an action that returns focus
+        this.lastPauseTime = Date.now();
+        console.log('🛡️ Grace period reset. Last pause set to now.');
     }
 
     initTheme() {

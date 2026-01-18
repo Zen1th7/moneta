@@ -12,7 +12,8 @@ class DataManager {
       RATES: 'moneyManager_conversionRates',
       SETTINGS: 'moneyManager_settings',
       CATEGORIES: 'transactionCategories',
-      BIOMETRIC_ENABLED: 'moneyManager_biometricEnabled'
+      BIOMETRIC_ENABLED: 'moneyManager_biometricEnabled',
+      RECURRING: 'moneyManager_recurringTransactions'
     };
 
     this.init();
@@ -34,6 +35,9 @@ class DataManager {
         usdToNtd: 31.50,
         idrToNtd: 2.00  // per 1000 IDR
       });
+    }
+    if (!this.getRecurringTransactions()) {
+      this.saveRecurringTransactions([]);
     }
   }
 
@@ -165,6 +169,45 @@ class DataManager {
   }
 
   /**
+   * RECURRING TRANSACTIONS
+   */
+  getRecurringTransactions() {
+    const data = localStorage.getItem(this.STORAGE_KEYS.RECURRING);
+    return data ? JSON.parse(data) : [];
+  }
+
+  saveRecurringTransactions(recurring) {
+    localStorage.setItem(this.STORAGE_KEYS.RECURRING, JSON.stringify(recurring));
+  }
+
+  addRecurringTransaction(recurring) {
+    const all = this.getRecurringTransactions();
+    recurring.id = this.generateId();
+    recurring.createdAt = new Date().toISOString();
+    all.push(recurring);
+    this.saveRecurringTransactions(all);
+    return recurring;
+  }
+
+  updateRecurringTransaction(id, updated) {
+    const all = this.getRecurringTransactions();
+    const index = all.findIndex(r => r.id === id);
+    if (index !== -1) {
+      all[index] = { ...all[index], ...updated, updatedAt: new Date().toISOString() };
+      this.saveRecurringTransactions(all);
+      return all[index];
+    }
+    return null;
+  }
+
+  deleteRecurringTransaction(id) {
+    const all = this.getRecurringTransactions();
+    const filtered = all.filter(r => r.id !== id);
+    this.saveRecurringTransactions(filtered);
+    return true;
+  }
+
+  /**
    * Update wallet balance based on transaction
    */
   updateWalletBalance(transaction) {
@@ -264,8 +307,9 @@ class DataManager {
       transactions: this.getTransactions(),
       conversionRates: this.getConversionRates(),
       categories: categoriesData ? JSON.parse(categoriesData) : null,
+      recurring: this.getRecurringTransactions(),
       exportedAt: new Date().toISOString(),
-      version: '1.1.0'
+      version: '1.2.0'
     };
     return data;
   }
@@ -288,6 +332,11 @@ class DataManager {
       // Import categories if present
       if (data.categories) {
         localStorage.setItem(this.STORAGE_KEYS.CATEGORIES, JSON.stringify(data.categories));
+      }
+
+      // Import recurring transactions if present
+      if (data.recurring) {
+        this.saveRecurringTransactions(data.recurring);
       }
 
       return true;

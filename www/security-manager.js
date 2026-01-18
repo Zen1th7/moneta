@@ -9,6 +9,7 @@ class SecurityManager {
         this.i18n = i18n;
         this.isLocked = false;
         this.isAuthenticating = false;
+        this.onUnlock = null; // Callback for when app is unlocked
         this.plugin = window.Capacitor?.Plugins?.NativeBiometric;
     }
 
@@ -58,6 +59,11 @@ class SecurityManager {
         if (overlay) {
             overlay.classList.remove('active');
             setTimeout(() => overlay.classList.add('hidden'), 300);
+        }
+
+        // Notify app that unlock occurred to reset grace period
+        if (this.onUnlock) {
+            this.onUnlock();
         }
     }
 

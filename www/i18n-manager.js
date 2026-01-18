@@ -66,8 +66,24 @@ const translations = {
         // Settings View
         language: "Language",
         appearance: "Appearance",
+        security: "Security",
         biometricLock: "Biometric Lock",
-        biometricDesc: "Protect your data with fingerprint or face recognition",
+        biometricDesc: "Protect your data with fingerprint authentication",
+
+        // Recurring Transactions
+        occurrence: "Occurrence",
+        once: "Once",
+        recurringTransactions: "Recurring Transactions",
+        manageRecurring: "Manage automated income and expenses",
+        addRecurring: "Add Recurring",
+        setupRecurring: "Setup Recurring Transaction",
+        noRecurring: "No recurring transactions found.",
+        frequency: "Frequency",
+        daily: "Daily",
+        monthly: "Monthly",
+        yearly: "Yearly",
+        nextRun: "Next Run",
+        editRecurring: "Edit Recurring Schedule",
 
         // Security/Lock Screen
         authenticate: "Authenticate",
@@ -208,8 +224,24 @@ const translations = {
         // Settings View
         language: "Bahasa",
         appearance: "Tampilan",
+        security: "Keamanan",
         biometricLock: "Kunci Biometrik",
-        biometricDesc: "Lindungi data dengan sidik jari atau pengenalan wajah",
+        biometricDesc: "Lindungi data dengan autentikasi sidik jari",
+
+        // Recurring Transactions
+        occurrence: "Frekuensi",
+        once: "Sekali",
+        recurringTransactions: "Transaksi Berulang",
+        manageRecurring: "Kelola pemasukan dan pengeluaran otomatis",
+        addRecurring: "Tambah Berulang",
+        setupRecurring: "Atur Transaksi Berulang",
+        noRecurring: "Tidak ada transaksi berulang.",
+        frequency: "Frekuensi",
+        daily: "Harian",
+        monthly: "Bulanan",
+        yearly: "Tahunan",
+        nextRun: "Jadwal Berikutnya",
+        editRecurring: "Edit Jadwal Berulang",
 
         // Security/Lock Screen
         authenticate: "Autentikasi",
@@ -350,8 +382,24 @@ const translations = {
         // Settings View
         language: "語言",
         appearance: "外觀",
+        security: "安全",
         biometricLock: "生物識別鎖",
-        biometricDesc: "使用指紋或面部識別保護您的數據",
+        biometricDesc: "使用指紋身份驗證保護您的數據",
+
+        // Recurring Transactions
+        occurrence: "執行頻率",
+        once: "僅此一次",
+        recurringTransactions: "週期性交易",
+        manageRecurring: "管理自动收入和支出",
+        addRecurring: "添加週期性",
+        setupRecurring: "設置週期性交易",
+        noRecurring: "暫無週期性交易。",
+        frequency: "頻率",
+        daily: "每日",
+        monthly: "每月",
+        yearly: "每年",
+        nextRun: "下次執行",
+        editRecurring: "编辑定期交易",
 
         // Security/Lock Screen
         authenticate: "驗證身份",

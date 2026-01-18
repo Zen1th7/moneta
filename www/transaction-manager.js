@@ -281,6 +281,7 @@ class TransactionManager {
             this.openFilterModal();
         });
 
+
         document.getElementById('closeFilterBtn').addEventListener('click', () => {
             this.closeFilterModal();
         });
@@ -647,6 +648,7 @@ class TransactionManager {
 
     addTransaction() {
         try {
+            const occurrence = document.getElementById('transactionOccurrence').value;
             const type = document.getElementById('transactionType').value;
             const category = document.getElementById('transactionCategory').value;
 
@@ -729,6 +731,39 @@ class TransactionManager {
                 };
 
                 this.dataManager.addTransaction(transaction);
+            }
+
+            // Handle Recurring if not "once"
+            if (occurrence !== 'once') {
+                // Calculate NEXT run date (since we already added the first one today)
+                const firstRun = new Date(date);
+                const nextRun = window.recurringManager ?
+                    window.recurringManager.calculateNextDate(firstRun, occurrence) :
+                    firstRun;
+
+                const recurring = {
+                    type: type,
+                    category: type === 'transfer' ? 'Transfer' : category,
+                    amount: amount,
+                    currency: sourceWallet.currency,
+                    walletId: walletId,
+                    frequency: occurrence,
+                    nextRunDate: nextRun.toISOString(),
+                    lastRunDate: new Date().toISOString(), // Mark it as run today
+                    note: note
+                };
+
+                if (type === 'transfer') {
+                    // Recurring transfers are a bit more complex, but we'll support basic info for now
+                    recurring.targetWalletId = document.getElementById('targetWallet').value;
+                    recurring.transferFee = InputFormatter.getNumericValue(document.getElementById('transferFee'));
+                    recurring.conversionRate = sourceWallet.currency !== this.dataManager.getWalletById(recurring.targetWalletId).currency ?
+                        InputFormatter.getNumericValue(document.getElementById('conversionRate')) : 1;
+                }
+
+                this.dataManager.addRecurringTransaction(recurring);
+                if (window.recurringManager) window.recurringManager.renderList();
+                if (window.app) window.app.showToast('✅ Recurring transaction scheduled!');
             }
 
             // Reset form and State

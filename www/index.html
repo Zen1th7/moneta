@@ -176,94 +176,114 @@
       <!-- VIEW: TRANSACTIONS -->
       <div id="view-transactions" class="view-section">
         <!-- TRANSACTION FORM -->
-        <section class="section" id="transactions-form">
-          <div class="section-header">
-            <h2 class="section-title"><span>⚡</span> <span data-i18n="addTransaction">Transaction</span></h2>
-          </div>
-          <div class="card">
-            <form id="transactionForm">
-              <!-- ... form contents ... -->
-              <div class="form-group" id="field-type">
-                <label class="form-label" for="transactionType" data-i18n="type">Type</label>
-                <select id="transactionType" class="form-select">
-                  <option value="expense" data-i18n="expense">Expense</option>
-                  <option value="income" data-i18n="income">Income</option>
-                  <option value="transfer" data-i18n="transfer">Transfer</option>
-                </select>
-              </div>
+        <h2 class="section-title" style="margin-bottom: var(--space-lg);"><span>⚡</span> <span
+            data-i18n="addTransaction">Transaction</span></h2>
+        <div class="card">
+          <form id="transactionForm">
+            <div class="form-group" id="field-occurrence">
+              <label class="form-label" for="transactionOccurrence" data-i18n="occurrence">Occurrence</label>
+              <select id="transactionOccurrence" class="form-select">
+                <option value="once" data-i18n="once">Once</option>
+                <option value="daily" data-i18n="daily">Daily</option>
+                <option value="monthly" data-i18n="monthly">Monthly</option>
+                <option value="yearly" data-i18n="yearly">Yearly</option>
+              </select>
+            </div>
+            <div class="form-group" id="field-type">
+              <label class="form-label" for="transactionType" data-i18n="type">Type</label>
+              <select id="transactionType" class="form-select">
+                <option value="expense" data-i18n="expense">Expense</option>
+                <option value="income" data-i18n="income">Income</option>
+                <option value="transfer" data-i18n="transfer">Transfer</option>
+              </select>
+            </div>
 
-              <div class="form-group" id="field-category">
-                <label class="form-label" for="transactionCategory" data-i18n="category">Category</label>
-                <select id="transactionCategory" class="form-select">
-                  <!-- Categories will be populated by JavaScript based on type -->
-                </select>
-              </div>
+            <div class="form-group" id="field-category">
+              <label class="form-label" for="transactionCategory" data-i18n="category">Category</label>
+              <select id="transactionCategory" class="form-select">
+                <!-- Categories will be populated by JavaScript based on type -->
+              </select>
+            </div>
 
-              <div class="form-group" id="field-wallet">
-                <label class="form-label" for="transactionWallet" data-i18n="wallet">Wallet/Account</label>
-                <select id="transactionWallet" class="form-select">
-                  <option value="" data-i18n="selectWallet">Select wallet...</option>
-                  <!-- Wallets will be populated dynamically -->
-                </select>
-              </div>
+            <div class="form-group" id="field-wallet">
+              <label class="form-label" for="transactionWallet" data-i18n="wallet">Wallet/Account</label>
+              <select id="transactionWallet" class="form-select">
+                <option value="" data-i18n="selectWallet">Select wallet...</option>
+                <!-- Wallets will be populated dynamically -->
+              </select>
+            </div>
 
-              <div class="form-group hidden" id="field-target">
-                <label class="form-label" for="targetWallet" data-i18n="targetWallet">Transfer To Wallet</label>
-                <select id="targetWallet" class="form-select">
-                  <option value="" data-i18n="selectDestinationWallet">Select destination wallet...</option>
-                  <!-- Wallets will be populated dynamically -->
-                </select>
-              </div>
+            <div class="form-group hidden" id="field-target">
+              <label class="form-label" for="targetWallet" data-i18n="targetWallet">Transfer To Wallet</label>
+              <select id="targetWallet" class="form-select">
+                <option value="" data-i18n="selectDestinationWallet">Select destination wallet...</option>
+                <!-- Wallets will be populated dynamically -->
+              </select>
+            </div>
 
-              <!-- Conversion rate field -->
-              <div id="conversionRateField" class="hidden">
-                <div class="card"
-                  style="background: var(--color-warning-bg); border-color: var(--color-warning); margin-bottom: var(--space-md);">
-                  <div class="form-label" style="color: var(--color-warning); margin-bottom: var(--space-sm);">
-                    💱 Currency Conversion Required
-                  </div>
-                  <div class="form-group" style="margin-bottom: 0;">
-                    <label class="form-label" id="conversionRateLabel" data-i18n="conversionRate">Conversion
-                      Rate</label>
-                    <input type="text" inputmode="decimal" id="conversionRate" class="form-input" placeholder="0.00">
-                  </div>
+            <!-- Conversion rate field -->
+            <div id="conversionRateField" class="hidden">
+              <div class="card"
+                style="background: var(--color-warning-bg); border-color: var(--color-warning); margin-bottom: var(--space-md);">
+                <div class="form-label" style="color: var(--color-warning); margin-bottom: var(--space-sm);">
+                  💱 Currency Conversion Required
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label class="form-label" id="conversionRateLabel" data-i18n="conversionRate">Conversion
+                    Rate</label>
+                  <input type="text" inputmode="decimal" id="conversionRate" class="form-input" placeholder="0.00">
                 </div>
               </div>
+            </div>
 
-              <div id="conversionPreview" class="hidden"
-                style="margin-top: var(--space-sm); color: var(--color-text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-lg);">
-              </div>
+            <div id="conversionPreview" class="hidden"
+              style="margin-top: var(--space-sm); color: var(--color-text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-lg);">
+            </div>
 
-              <div class="form-group" id="field-amount">
-                <label class="form-label" for="transactionAmount" data-i18n="amount">Amount</label>
-                <input type="text" inputmode="decimal" id="transactionAmount" class="form-input" placeholder="0.00"
-                  required>
-              </div>
+            <div class="form-group" id="field-amount">
+              <label class="form-label" for="transactionAmount" data-i18n="amount">Amount</label>
+              <input type="text" inputmode="decimal" id="transactionAmount" class="form-input" placeholder="0.00"
+                required>
+            </div>
 
-              <div class="form-group hidden" id="field-fee">
-                <label class="form-label" for="transferFee" data-i18n="transferFee">Transfer Fee (Optional)</label>
-                <input type="text" inputmode="decimal" id="transferFee" class="form-input" placeholder="0.00" value="0">
-              </div>
+            <div class="form-group hidden" id="field-fee">
+              <label class="form-label" for="transferFee" data-i18n="transferFee">Transfer Fee (Optional)</label>
+              <input type="text" inputmode="decimal" id="transferFee" class="form-input" placeholder="0.00" value="0">
+            </div>
 
-              <div class="form-group" id="field-note">
-                <label class="form-label" for="transactionNote" data-i18n="note">Note (Optional)</label>
-                <input type="text" id="transactionNote" class="form-input"
-                  placeholder="e.g., Lunch at cafe, Monthly salary..." data-i18n-placeholder="notePlaceholder">
-              </div>
+            <div class="form-group" id="field-note">
+              <label class="form-label" for="transactionNote" data-i18n="note">Note (Optional)</label>
+              <input type="text" id="transactionNote" class="form-input"
+                placeholder="e.g., Lunch at cafe, Monthly salary..." data-i18n-placeholder="notePlaceholder">
+            </div>
 
-              <div class="form-group" id="field-date">
-                <label class="form-label" for="transactionDate" data-i18n="date">Date & Time</label>
-                <input type="datetime-local" id="transactionDate" class="form-input" required>
-              </div>
+            <div class="form-group" id="field-date">
+              <label class="form-label" for="transactionDate" data-i18n="date">Date & Time</label>
+              <input type="datetime-local" id="transactionDate" class="form-input" required>
+            </div>
 
-              <input type="hidden" id="editingTransactionId">
+            <input type="hidden" id="editingTransactionId">
 
-              <div id="form-actions">
-                <button type="submit" class="btn btn-primary btn-block" data-i18n="submit">
-                  Add Transaction
-                </button>
-              </div>
-            </form>
+            <div id="form-actions">
+              <button type="submit" class="btn btn-primary btn-block" data-i18n="submit">
+                Add Transaction
+              </button>
+            </div>
+          </form>
+        </div>
+        </section>
+
+        <!-- RECURRING SCHEDULES SECTION -->
+        <section class="section" id="recurring-schedules-section" style="margin-top: var(--space-xl);">
+          <div class="section-header">
+            <h2 class="section-title"><span>🔁</span> <span data-i18n="recurringTransactions">Recurring
+                Transactions</span></h2>
+          </div>
+          <div id="recurringListContainer" class="grid gap-sm">
+            <!-- Recurring items will be dynamically inserted here -->
+            <div class="card text-center py-xl">
+              <p class="color-text-tertiary m-0" data-i18n="noRecurring">No recurring transactions found.</p>
+            </div>
           </div>
         </section>
 
@@ -272,9 +292,11 @@
           <div class="section-header">
             <h2 class="section-title"><span>📝</span> <span data-i18n="transactionHistory">Transaction History</span>
             </h2>
-            <button class="btn btn-sm btn-secondary" id="filterTransactionsBtn" data-i18n="filter">
-              Filter
-            </button>
+            <div class="flex gap-xs">
+              <button class="btn btn-sm btn-secondary" id="filterTransactionsBtn" data-i18n="filter">
+                Filter
+              </button>
+            </div>
           </div>
           <div id="transactionsContainer">
             <!-- Transactions will be dynamically inserted here -->
@@ -385,8 +407,16 @@
                   <button class="btn btn-outline" id="theme-light-btn" data-i18n="lightMode">Light Mode</button>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div class="settings-group mt-lg pt-lg" style="border-top: 1px solid var(--glass-border);">
+          <!-- Security Section -->
+          <div class="card mb-lg">
+            <div class="card-header">
+              <h3 class="card-title" data-i18n="security">🔐 Security</h3>
+            </div>
+            <div class="card-body">
+              <div class="settings-group">
                 <div class="flex-between align-center">
                   <div class="flex-1 pr-md">
                     <label class="form-label mb-0" data-i18n="biometricLock">Biometric Lock</label>
@@ -637,7 +667,86 @@
   <script src="wallet-manager.js?v=5"></script>
   <script src="transaction-manager.js?v=5"></script>
   <script src="security-manager.js?v=5"></script>
-  <script src="app.js?v=5"></script>
+  <!-- RECURRING EDIT MODAL -->
+  <div class="modal-overlay center" id="recurringEditModal">
+    <div class="center-modal">
+      <div class="flex-between align-center mb-lg">
+        <h2 class="section-title m-0" data-i18n="editRecurring">Edit Recurring Schedule</h2>
+      </div>
+
+      <form id="editRecurringForm">
+        <input type="hidden" id="edit_recurringId">
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="occurrence">Occurrence</label>
+          <select id="edit_recurringOccurrence" class="form-select">
+            <option value="daily" data-i18n="daily">Daily</option>
+            <option value="monthly" data-i18n="monthly">Monthly</option>
+            <option value="yearly" data-i18n="yearly">Yearly</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="type">Type</label>
+          <select id="edit_recurringType" class="form-select">
+            <option value="expense" data-i18n="expense">Expense</option>
+            <option value="income" data-i18n="income">Income</option>
+            <option value="transfer" data-i18n="transfer">Transfer</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="category">Category</label>
+          <select id="edit_recurringCategory" class="form-select">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="wallet">Wallet/Account</label>
+          <select id="edit_recurringWallet" class="form-select">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <div class="form-group hidden" id="edit_recurringFieldTarget">
+          <label class="form-label" data-i18n="targetWallet">Transfer To Wallet</label>
+          <select id="edit_recurringTargetWallet" class="form-select">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="amount">Amount</label>
+          <input type="text" inputmode="decimal" id="edit_recurringAmount" class="form-input" placeholder="0.00"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="note">Note (Optional)</label>
+          <input type="text" id="edit_recurringNote" class="form-input" placeholder="e.g., Monthly salary...">
+        </div>
+
+        <div class="modal-footer-actions">
+          <button type="button" class="btn-delete-link" id="deleteRecurringBtn">
+            <span>🗑️ <span data-i18n="delete">Delete</span></span>
+          </button>
+          <div class="grid grid-2 gap-sm" style="flex: 1;">
+            <button type="button" class="btn btn-secondary btn-block" id="closeRecurringEditBtn" data-i18n="cancel">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-warning btn-block" data-i18n="saveChanges">
+              Update
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="recurring-manager.js?v=6"></script>
+  <script src="app.js?v=6"></script>
+
 
   <!-- FILTER MODAL -->
   <div class="modal-overlay center" id="filterModal">
