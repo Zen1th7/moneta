@@ -4,6 +4,16 @@ All notable changes to the **Smart Money Tracker** app will be documented in thi
 
 ---
 
+## [1.4.0] - 2026-01-18
+### 💱 Manual Currency Management & Precision Scheduling
+- **Manual Currency Ratios**: Introduced a new "Currency Rates" section in Settings. Users can now manually define exact ratios for `USD/NTD`, `USD/IDR`, and `NTD/IDR`.
+- **Smart Transfer Logic**: Transaction forms now dynamically suggest the correct conversion rate based on the source/target wallet's currency hierarchy (Strong-to-Weak logic).
+- **Precision Recurring Schedules**: Added "Next Occurrence" date-time selector to recurring templates. Users can now specify the exact hour, date, or month for their automated transactions.
+- **Improved UI Formatting**: Implemented automatic thousands separators (e.g., 16,900) for all currency rate inputs, maintaining a premium feel throughout the settings and forms.
+- **Real-time Localization**: Conversion prompts and recurrence labels now update instantly when the app language is switched.
+
+---
+
 ## [1.3.0] - 2026-01-18
 ### 🔁 Recurring Management & UI Refinement
 - **Full Recurring Management**: Added full edit functionality allowed users to update categories, amounts, notes, and frequency of active templates.

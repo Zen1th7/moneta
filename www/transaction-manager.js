@@ -91,6 +91,18 @@ class TransactionManager {
         };
 
         this.init();
+
+        // Listen for language changes to update dynamic prompts
+        document.addEventListener('languageChanged', () => {
+            const transType = document.getElementById('transactionType');
+            if (transType && transType.value === 'transfer') {
+                this.checkConversionNeeded();
+            }
+            const editType = document.getElementById('edit_transactionType');
+            if (editType && editType.value === 'transfer') {
+                this.checkConversionNeeded('edit_');
+            }
+        });
     }
 
     init() {
@@ -127,6 +139,14 @@ class TransactionManager {
     }
 
     setupEventListeners() {
+        // Live formatting for numeric inputs
+        InputFormatter.formatNumberInput(document.getElementById('transactionAmount'));
+        InputFormatter.formatNumberInput(document.getElementById('transferFee'));
+        InputFormatter.formatNumberInput(document.getElementById('conversionRate'));
+        InputFormatter.formatNumberInput(document.getElementById('edit_transactionAmount'));
+        InputFormatter.formatNumberInput(document.getElementById('edit_transferFee'));
+        InputFormatter.formatNumberInput(document.getElementById('edit_conversionRate'));
+
         // Transaction type change
         document.getElementById('transactionType').addEventListener('change', (e) => {
             this.updateCategoryDropdown();
@@ -552,6 +572,7 @@ class TransactionManager {
         const sourceWalletId = document.getElementById(`${prefix}transactionWallet`).value;
         const targetWalletId = document.getElementById(`${prefix}targetWallet`).value;
         const conversionField = document.getElementById(`${prefix}conversionRateField`);
+        const rateInput = document.getElementById(`${prefix}conversionRate`);
 
         if (!sourceWalletId || !targetWalletId) {
             conversionField.classList.add('hidden');
@@ -570,11 +591,31 @@ class TransactionManager {
             // Show conversion rate field
             conversionField.classList.remove('hidden');
 
-            // Update label - tricky if label doesn't have unique ID with prefix in my HTML structure
-            // In main form: conversionRateLabel
-            // In modal: labels don't have IDs? I didn't add IDs to modal labels.
-            // Let's assume user knows. Or I can query selector inside the div.
-            // For now, functionality first.
+            const strength = { 'USD': 3, 'NTD': 2, 'IDR': 1 };
+            const s1 = strength[sourceWallet.currency] || 0;
+            const s2 = strength[targetWallet.currency] || 0;
+
+            const strong = s1 > s2 ? sourceWallet.currency : targetWallet.currency;
+            const weak = s1 > s2 ? targetWallet.currency : sourceWallet.currency;
+
+            // Update Label/Placeholder to guide user
+            const label = conversionField.querySelector('label');
+            if (label) {
+                let prompt = window.i18n ? window.i18n.t('rateForPrompt') : `Rate for 1 {strong} to {weak}`;
+                prompt = prompt.replace('{strong}', strong).replace('{weak}', weak);
+                label.textContent = prompt;
+            }
+
+            // Suggest stored rate
+            const rates = this.dataManager.getConversionRates();
+            let suggestedRate = 1;
+            if (strong === 'USD' && weak === 'NTD') suggestedRate = rates.usdToNtd;
+            else if (strong === 'USD' && weak === 'IDR') suggestedRate = rates.usdToIdr;
+            else if (strong === 'NTD' && weak === 'IDR') suggestedRate = rates.ntdToIdr;
+
+            if (rateInput) {
+                InputFormatter.setFormattedValue(rateInput, suggestedRate);
+            }
 
             // Update preview
             this.updateConversionPreview(prefix);
@@ -610,7 +651,22 @@ class TransactionManager {
 
         if (amount === 0) return;
 
-        const convertedAmount = amount * rate;
+        // Math based on hierarchy: 
+        // If Source is Stronger (e.g. USD to NTD), math is: Target = Amount * Rate
+        // If Target is Stronger (e.g. NTD to USD), math is: Target = Amount / Rate
+        const strength = { 'USD': 3, 'NTD': 2, 'IDR': 1 };
+        const s1 = strength[sourceWallet.currency] || 0;
+        const s2 = strength[targetWallet.currency] || 0;
+
+        let convertedAmount = amount;
+        if (sourceWallet.currency !== targetWallet.currency) {
+            if (s1 > s2) {
+                convertedAmount = amount * rate;
+            } else {
+                convertedAmount = amount / rate;
+            }
+        }
+
         const afterFee = convertedAmount - fee;
 
         const sourceFormatted = this.currencyManager.format(amount, sourceWallet.currency);
@@ -695,7 +751,19 @@ class TransactionManager {
                 }
 
                 // UNIFIED TRANSFER TRANSACTION
-                const targetAmount = (amount * conversionRate) - transferFee;
+                const strength = { 'USD': 3, 'NTD': 2, 'IDR': 1 };
+                const s1 = strength[sourceWallet.currency] || 0;
+                const s2 = strength[targetWallet.currency] || 0;
+
+                let targetAmount = amount;
+                if (sourceWallet.currency !== targetWallet.currency) {
+                    if (s1 > s2) {
+                        targetAmount = amount * conversionRate;
+                    } else {
+                        targetAmount = amount / conversionRate;
+                    }
+                }
+                targetAmount = targetAmount - transferFee;
 
                 const transaction = {
                     type: 'transfer',
@@ -832,15 +900,24 @@ class TransactionManager {
                 let conversionRate = 1;
                 let transferFee = InputFormatter.getNumericValue(document.getElementById(`${prefix}transferFee`));
 
+                const strength = { 'USD': 3, 'NTD': 2, 'IDR': 1 };
+                const s1 = strength[sourceWallet.currency] || 0;
+                const s2 = strength[targetWallet.currency] || 0;
+
+                let targetAmount = amount;
                 if (sourceWallet.currency !== targetWallet.currency) {
                     conversionRate = InputFormatter.getNumericValue(document.getElementById(`${prefix}conversionRate`));
                     if (!conversionRate || conversionRate <= 0) {
                         alert('Please enter a valid conversion rate');
                         return;
                     }
+                    if (s1 > s2) {
+                        targetAmount = amount * conversionRate;
+                    } else {
+                        targetAmount = amount / conversionRate;
+                    }
                 }
-
-                const targetAmount = (amount * conversionRate) - transferFee;
+                targetAmount = targetAmount - transferFee;
 
                 transaction = {
                     type: 'transfer',
@@ -876,7 +953,7 @@ class TransactionManager {
             InputFormatter.dismissKeyboard();
             document.getElementById('transactionEditModal').classList.remove('active');
 
-            // Reload to ensure safety and fresh state (consistent with previous behavior)
+            // Reload to ensure safety and fresh state
             console.log('Update complete, reloading...');
             window.location.reload();
 

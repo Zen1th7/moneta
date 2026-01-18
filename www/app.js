@@ -102,8 +102,11 @@ class MoneyManagerApp {
         // Initialize theme from localStorage
         this.initTheme();
 
-        // Language Selector (Settings)
+        // Language Selector
         this.setupLanguageSelector();
+
+        // Currency Settings
+        this.setupCurrencySettings();
 
         // Biometric Toggle (Settings)
         this.setupBiometricSettings();
@@ -249,6 +252,56 @@ class MoneyManagerApp {
                 }
             });
         }
+    }
+
+    setupCurrencySettings() {
+        const rates = dataManager.getConversionRates();
+        const usdNtdInput = document.getElementById('rate-usd-ntd');
+        const usdIdrInput = document.getElementById('rate-usd-idr');
+        const ntdIdrInput = document.getElementById('rate-ntd-idr');
+        const saveBtn = document.getElementById('saveRatesBtn');
+
+        if (!usdNtdInput || !usdIdrInput || !ntdIdrInput || !saveBtn) return;
+
+        // Load current rates and add live formatting
+        if (window.InputFormatter) {
+            window.InputFormatter.setFormattedValue(usdNtdInput, rates.usdToNtd);
+            window.InputFormatter.setFormattedValue(usdIdrInput, rates.usdToIdr);
+            window.InputFormatter.setFormattedValue(ntdIdrInput, rates.ntdToIdr);
+
+            window.InputFormatter.formatNumberInput(usdNtdInput);
+            window.InputFormatter.formatNumberInput(usdIdrInput);
+            window.InputFormatter.formatNumberInput(ntdIdrInput);
+        } else {
+            usdNtdInput.value = rates.usdToNtd;
+            usdIdrInput.value = rates.usdToIdr;
+            ntdIdrInput.value = rates.ntdToIdr;
+        }
+
+        saveBtn.addEventListener('click', () => {
+            const newRates = {
+                usdToNtd: InputFormatter.getNumericValue(usdNtdInput),
+                usdToIdr: InputFormatter.getNumericValue(usdIdrInput),
+                ntdToIdr: InputFormatter.getNumericValue(ntdIdrInput)
+            };
+
+            if (isNaN(newRates.usdToNtd) || isNaN(newRates.usdToIdr) || isNaN(newRates.ntdToIdr) ||
+                newRates.usdToNtd <= 0 || newRates.usdToIdr <= 0 || newRates.ntdToIdr <= 0) {
+                this.showToast('❌ Invalid rate values');
+                return;
+            }
+
+            dataManager.saveConversionRates(newRates);
+
+            // Re-render components that depend on rates
+            if (window.walletManager) window.walletManager.render();
+            if (window.transactionManager) {
+                window.transactionManager.renderAnalytics();
+            }
+            this.updateNetWorth();
+
+            this.showToast('✅ ' + (window.i18n ? window.i18n.t('ratesUpdated') : 'Rates updated!'));
+        });
     }
 
     resetGracePeriod() {

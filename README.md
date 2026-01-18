@@ -2,7 +2,7 @@
 
 A lightweight, powerful, and private multi-currency money management application built for Android.
 
-![Version](https://img.shields.io/badge/version-1.3.0-green.svg)
+![Version](https://img.shields.io/badge/version-1.4.0-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Android-brightgreen.svg)
 
 ## 🚀 Overview
@@ -11,9 +11,9 @@ Smart Money Tracker helps you manage your finances across different currencies w
 
 ## ✨ Key Features
 
-- 🔁 **Recurring Transactions**: Automate your daily, monthly, or yearly finances with powerful scheduling and a dedicated inline management dashboard.
+- 🔁 **Recurring Transactions**: Automate your daily, monthly, or yearly finances with powerful scheduling and a dedicated inline management dashboard. Now with **precise time/date scheduling**.
 - 🔐 **Biometric Security**: Protect your financial privacy with **Fingerprint/Face ID** native authentication.
-- 🌍 **Multi-Currency Support**: Manage wallets and transactions in **USD**, **NTD**, and **IDR**.
+- 🌍 **Multi-Currency Support**: Manage wallets and transactions in **USD**, **NTD**, and **IDR**. Now with **manual exchange rate management**.
 - 🌐 **Multi-Language**: Fully localized in English, Indonesian (Bahasa), and Traditional Chinese.
 - 📊 **Detailed Analytics**: Track your spending patterns with daily, monthly, and yearly breakdowns.
 - 📂 **Data Management**:
@@ -58,10 +58,11 @@ Smart Money Tracker helps you manage your finances across different currencies w
 4. **Run on Device**:
    Open the `android` folder in Android Studio and click **Run**.
 
-## 🚀 What's New in v1.3.0
-- **Full Recurring Management**: Edit active schedules, change frequencies, and update amounts directly from a new inline dashboard.
-- **Improved Visual Rhythm**: Refined section spacing and professional UI flow.
-- **Dynamic Translation Sync**: All transaction templates now correctly update language instantly upon setting change.
+## 🚀 What's New in v1.4.0
+- **Manual Currency Ratios**: Define exact exchange rates for USD, NTD, and IDR in Settings.
+- **Strong-to-Weak Hierarchy**: "Smart Suggestions" now use a hierarchy logic (USD > NTD > IDR) for more intuitive transfers.
+- **Precision Scheduling**: Set exact hours for daily runs, or specific dates/times for monthly and yearly cycles.
+- **Aesthetic Number Formatting**: Thousands separators (10,000) are now active across all currency rate and transaction fields.
 
 ---
 *Created by Zen1th7*

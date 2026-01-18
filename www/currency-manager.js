@@ -44,8 +44,8 @@ class CurrencyManager {
         } else if (fromCurrency === 'USD') {
             return amount * rates.usdToNtd;
         } else if (fromCurrency === 'IDR') {
-            // IDR rate is per 1000, so divide by 1000 first
-            return (amount / 1000) * rates.idrToNtd;
+            // New logic: 1 NTD = X IDR, so IDR -> NTD is divide
+            return amount / rates.ntdToIdr;
         }
         return amount;
     }
@@ -62,8 +62,8 @@ class CurrencyManager {
         } else if (toCurrency === 'USD') {
             return amount / rates.usdToNtd;
         } else if (toCurrency === 'IDR') {
-            // IDR rate is per 1000, so multiply by 1000 after conversion
-            return (amount / rates.idrToNtd) * 1000;
+            // New logic: 1 NTD = X IDR, so NTD -> IDR is multiply
+            return amount * rates.ntdToIdr;
         }
         return amount;
     }

@@ -70,6 +70,14 @@ const translations = {
         security: "Security",
         biometricLock: "Biometric Lock",
         biometricDesc: "Protect your data with fingerprint authentication",
+        currencyRates: "Currency Rates",
+        usdToNtdLabel: "1 USD to NTD",
+        usdToIdrLabel: "1 USD to IDR",
+        ntdToIdrLabel: "1 NTD to IDR",
+        saveRates: "Save Rates",
+        ratesUpdated: "Currency rates updated!",
+        rateForPrompt: "Rate for 1 {strong} to {weak}",
+        currencyConversionRequired: "Currency Conversion Required",
 
         // Recurring Transactions
         occurrence: "Occurrence",
@@ -229,6 +237,14 @@ const translations = {
         security: "Keamanan",
         biometricLock: "Kunci Biometrik",
         biometricDesc: "Lindungi data dengan autentikasi sidik jari",
+        currencyRates: "Nilai Tukar",
+        usdToNtdLabel: "1 USD ke NTD",
+        usdToIdrLabel: "1 USD ke IDR",
+        ntdToIdrLabel: "1 NTD ke IDR",
+        saveRates: "Simpan Nilai Tukar",
+        ratesUpdated: "Nilai tukar berhasil diperbarui!",
+        rateForPrompt: "Kurs 1 {strong} ke {weak}",
+        currencyConversionRequired: "Konversi Mata Uang Diperlukan",
 
         // Recurring Transactions
         occurrence: "Frekuensi",
@@ -388,6 +404,14 @@ const translations = {
         security: "安全",
         biometricLock: "生物識別鎖",
         biometricDesc: "使用指紋身份驗證保護您的數據",
+        currencyRates: "匯率設置",
+        usdToNtdLabel: "1 USD 兌 NTD",
+        usdToIdrLabel: "1 USD 兌 IDR",
+        ntdToIdrLabel: "1 NTD 兌 IDR",
+        saveRates: "保存匯率",
+        ratesUpdated: "匯率已成功更新！",
+        rateForPrompt: "1 {strong} 兌 {weak} 匯率",
+        currencyConversionRequired: "需要進行幣別轉換",
 
         // Recurring Transactions
         occurrence: "執行頻率",
@@ -489,6 +513,9 @@ class I18nManager {
             this.currentLanguage = lang;
             localStorage.setItem('appLanguage', lang);
             this.applyTranslations();
+
+            // Dispatch event for other listeners
+            document.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: lang } }));
         }
     }
 

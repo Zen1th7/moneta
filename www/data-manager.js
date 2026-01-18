@@ -32,8 +32,9 @@ class DataManager {
     }
     if (!this.getConversionRates()) {
       this.saveConversionRates({
-        usdToNtd: 31.50,
-        idrToNtd: 2.00  // per 1000 IDR
+        usdToNtd: 31.60,
+        usdToIdr: 16900,
+        ntdToIdr: 535
       });
     }
     if (!this.getRecurringTransactions()) {
@@ -290,7 +291,27 @@ class DataManager {
    */
   getConversionRates() {
     const data = localStorage.getItem(this.STORAGE_KEYS.RATES);
-    return data ? JSON.parse(data) : null;
+    let rates = data ? JSON.parse(data) : null;
+
+    // Migration: If we have old rates, convert to new hierarchy
+    if (rates && (!rates.ntdToIdr || !rates.usdToIdr)) {
+      if (!rates.usdToNtd) rates.usdToNtd = 32.5;
+
+      // Old idrToNtd was "per 1000 IDR"
+      if (!rates.ntdToIdr) {
+        rates.ntdToIdr = rates.idrToNtd ? (1000 / rates.idrToNtd) : 480;
+      }
+      if (!rates.usdToIdr) {
+        rates.usdToIdr = rates.usdToNtd * rates.ntdToIdr;
+      }
+
+      // Cleanup old key
+      delete rates.idrToNtd;
+
+      this.saveConversionRates(rates);
+    }
+
+    return rates;
   }
 
   saveConversionRates(rates) {

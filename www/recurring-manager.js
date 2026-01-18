@@ -175,6 +175,14 @@ class RecurringManager {
             // Category Icon
             const icon = (window.transactionManager && window.transactionManager.categoryIcons[r.category]) || '🔁';
 
+            // Format Next Run Date with Title
+            const nextRunTitle = window.i18n ? window.i18n.t('nextRun') : 'Next Run';
+            let nextRunStr = '';
+            if (r.nextRunDate) {
+                const nrDate = new Date(r.nextRunDate);
+                nextRunStr = nrDate.toLocaleDateString() + ' ' + nrDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
             // MATCH TRANSACTION-ITEM STRUCTURE PERFECTLY
             return `
                 <div class="transaction-item animate-slide-up" data-id="${r.id}" onclick="recurringManager.editRecurring('${r.id}')" style="cursor: pointer;">
@@ -187,6 +195,9 @@ class RecurringManager {
                         </div>
                         <div class="transaction-note" style="font-size: 0.75rem; color: var(--color-text-tertiary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                             ${r.note || (wallet ? wallet.name : 'Unknown')} • 🔁 ${frequencyLabel}
+                        </div>
+                        <div class="next-run" style="font-size: 0.65rem; color: var(--color-warning); margin-top: 1px; font-weight: 500;">
+                            ${nextRunTitle}: ${nextRunStr}
                         </div>
                     </div>
                     <div class="transaction-amount ${amountClass}" style="font-size: 0.95rem; font-weight: 700; text-align: right; flex-shrink: 0; margin-left: var(--space-sm);">
@@ -209,6 +220,16 @@ class RecurringManager {
             document.getElementById('edit_recurringId').value = id;
             document.getElementById('edit_recurringOccurrence').value = recurring.frequency;
             document.getElementById('edit_recurringType').value = recurring.type;
+
+            // Populate Next Run Date
+            if (recurring.nextRunDate) {
+                const date = new Date(recurring.nextRunDate);
+                // Format for datetime-local: YYYY-MM-DDTHH:MM
+                // Localize to system time for the input
+                const offset = date.getTimezoneOffset() * 60000;
+                const localISOTime = (new Date(date - offset)).toISOString().slice(0, 16);
+                document.getElementById('edit_recurringNextRun').value = localISOTime;
+            }
 
             // Populate dropdowns before setting values
             this.updateWalletDropdown('edit_recurring');
@@ -243,7 +264,8 @@ class RecurringManager {
             walletId: walletId,
             currency: wallet ? wallet.currency : 'USD',
             amount: parseFloat(document.getElementById('edit_recurringAmount').value),
-            note: document.getElementById('edit_recurringNote').value
+            note: document.getElementById('edit_recurringNote').value,
+            nextRunDate: new Date(document.getElementById('edit_recurringNextRun').value).toISOString()
         };
 
         if (updates.type === 'transfer') {
