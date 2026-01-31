@@ -5,39 +5,44 @@ All notable changes to the **Smart Money Tracker** app will be documented in thi
 ---
 
 ## [1.5.0] - 2026-01-31
-### 📱 Major Update: Smart Notifications, UI Refinements, Bug Fixes, and Stability
+### 🎉 Major Release: Smart Notifications, Analytics Overhaul, Base Currency, and Complete UI Refinement
 
 #### 🆕 New Features
 - **Smart Notifications System**:
-  - Daily Reminder Notifications: Optional evening reminders to log transactions  
-  - Quick Actions Notification: Persistent notification with shortcuts for instant Income/Expense entry
+  - Daily Reminder Notifications: Evening reminders to log transactions  
+  - Quick Actions: Persistent notification with Income/Expense shortcuts
+  - Fully localized (EN, ID, ZH)
   
-#### 🎨 User Interface Improvements
-- **Settings UI Overhaul**:
-  - Refactored to separate emoji icons from text labels  
-  - Scoped translation updates prevent UI glitches
-  
-- **Analytics Enhancements**:
-  - Compact view showing only categories and totals
-  - Detail modal for individual transactions per category  
-  - Pagination (7 items/page) for smooth performance
+- **Base Currency for Analytics**: Choose your preferred pivot currency (USD, NTD, IDR) for global Analytics summaries
+- **Delete All Data**: Nuclear option in Settings to wipe all transactions and start fresh
 
-- **Recurring UI Cleanup**:
-  - Fixed category field visibility in Edit Recurring modal
+#### 📊 Analytics & Data Improvements
+- **Compact Analytics View**: Shows only categories and totals (decluttered)
+- **Category Detail Modal**: Click any category to see individual transactions
+- **Modal Pagination**: 7 items per page for smooth performance
+- **Transaction History Sorting**: Now displays newest transactions first (latest at top)
+- **Cash Flow Trend**: Fixed chart rendering and data accuracy
+- **Full Date Localization**: Month and day names adapt to selected language
 
-- **Form Improvements**:
-  - Better visual feedback when interacting with inputs
-  - Calculator when inputting amount
+#### 🎨 User Interface Refinements
+- **Soft Light Mode**: Warm cream/parchment palette to reduce eye strain (vs harsh white)
+- **Settings UI Overhaul**: Icons persist correctly during language changes
+- **Recurring UI Cleanup**: Fixed category field visibility in Edit modal
+- **Form Improvements**: Better visual feedback, calculator for amount inputs
+- **Global Padding**: Added spacing to prevent FAB (Floating Action Button) overlap
 
 #### 🐛 Bug Fixes & Stability
-- Fixed cascading wallet deletion - transactions properly removed  
+- Fixed cascading wallet deletion (transactions properly removed)
 - Fixed wallet dropdown sync after deletions
 - Improved focus behavior when scrolling
+- Fixed notification scheduling reliability
 
 #### 🌐 Localization & Translation
-- All system alerts now properly localized
-- Full date localization in Analytics and lists
-- Everything dynamically translated
+- **Full Translation Standard**: Removed ALL hardcoded labels
+- **Localized System Alerts**: All confirm/alert dialogs in EN/ID/ZH
+- Enhanced translation engine with scoped DOM updates
+- Everything dynamically translated based on selected language
+
 
 ## [1.4.4] - 2026-01-28
 ### 📊 Advanced Analytics: Compact Lists & Detail Modals
