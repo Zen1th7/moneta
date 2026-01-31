@@ -56,10 +56,12 @@ class TransactionManager {
         };
 
         this.selectedAnalyticsCurrency = null;
+        this.selectedHistoryCurrency = 'all'; // Default to ALL
         this.currentPage = 1;
         this.itemsPerPage = 7;
         this.analyticsTimeframe = 'monthly'; // 'daily', 'monthly', 'annual'
         this.analyticsDate = new Date(); // Current viewing date for analytics
+        this.lastBreakdowns = { expense: {}, income: {}, currency: '' };
 
         // Chart instances
         this.charts = {
@@ -87,7 +89,8 @@ class TransactionManager {
             'Dividend': 'catDividend',
             'Freelance': 'catFreelance',
             'Gift': 'catGift',
-            'Between Wallets': 'catBetweenWallets'
+            'Between Wallets': 'catBetweenWallets',
+            'Transfer': 'transfer'
         };
 
         this.init();
@@ -112,6 +115,7 @@ class TransactionManager {
             this.reloadCategories();
             this.updateCategoryDropdown();
             this.updateWalletDropdown();
+            this.initHistoryTabs(); // Add this
             this.toggleTransferFields();
             this.setDefaultDateTime();
             this.render();
@@ -120,25 +124,121 @@ class TransactionManager {
             this.initThemeListener();
 
             // Set up automatic thousand separator formatting for amount inputs
-            InputFormatter.formatNumberInput(document.getElementById('transactionAmount'));
-            InputFormatter.formatNumberInput(document.getElementById('conversionRate'));
-            InputFormatter.formatNumberInput(document.getElementById('transferFee'));
+            if (document.getElementById('transactionAmount')) InputFormatter.formatNumberInput(document.getElementById('transactionAmount'));
+            if (document.getElementById('conversionRate')) InputFormatter.formatNumberInput(document.getElementById('conversionRate'));
+            if (document.getElementById('transferFee')) InputFormatter.formatNumberInput(document.getElementById('transferFee'));
 
             // Edit Modal Inputs
-            InputFormatter.formatNumberInput(document.getElementById('edit_transactionAmount'));
-            InputFormatter.formatNumberInput(document.getElementById('edit_transferFee'));
-            InputFormatter.formatNumberInput(document.getElementById('edit_conversionRate'));
+            if (document.getElementById('edit_transactionAmount')) InputFormatter.formatNumberInput(document.getElementById('edit_transactionAmount'));
+            if (document.getElementById('edit_transferFee')) InputFormatter.formatNumberInput(document.getElementById('edit_transferFee'));
+            if (document.getElementById('edit_conversionRate')) InputFormatter.formatNumberInput(document.getElementById('edit_conversionRate'));
 
-            console.log('TransactionManager initialized - VERSION 3 (Reload Fix)');
-            // alert('App Updated to Version 3! Please try deleting now.'); 
-            // Commenting out alert to be less annoying, but the log is key.
+            console.log('TransactionManager initialized');
         } catch (error) {
             console.error('TransactionManager init error:', error);
-            alert('Error initializing Transaction Manager: ' + error.message);
+        }
+    }
+
+    initHistoryTabs() {
+        const tabsContainer = document.getElementById('historyCurrencyTabs');
+        if (!tabsContainer) return;
+
+        const currencies = ['all', 'NTD', 'USD', 'IDR'];
+
+        tabsContainer.innerHTML = currencies.map(curr => `
+            <div class="tab ${curr === this.selectedHistoryCurrency ? 'active' : ''}" data-currency="${curr}">
+                ${curr === 'all' ? (window.i18n ? window.i18n.t('all') : 'All') : curr}
+            </div>
+        `).join('');
+
+        tabsContainer.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                this.selectedHistoryCurrency = tab.dataset.currency;
+                this.currentPage = 1; // Reset to first page
+                this.initHistoryTabs(); // Re-render tabs to update active state
+                this.render();
+            });
+        });
+    }
+
+    initAnalyticsDatePickers() {
+        const displayDate = document.getElementById('analyticsDisplayDate');
+        const dailyInput = document.getElementById('analyticsDatePicker_daily');
+        const monthlyInput = document.getElementById('analyticsDatePicker_monthly');
+
+        if (!displayDate || !dailyInput || !monthlyInput) return;
+
+        // 1. Click on Date Display
+        displayDate.addEventListener('click', () => {
+            if (this.analyticsTimeframe === 'daily') {
+                // Set current date value (YYYY-MM-DD) - use local time construction
+                const year = this.analyticsDate.getFullYear();
+                const month = String(this.analyticsDate.getMonth() + 1).padStart(2, '0');
+                const day = String(this.analyticsDate.getDate()).padStart(2, '0');
+                dailyInput.value = `${year}-${month}-${day}`;
+
+                try {
+                    dailyInput.showPicker();
+                } catch (e) {
+                    dailyInput.click();
+                }
+            } else if (this.analyticsTimeframe === 'monthly') {
+                // Set current month value (YYYY-MM)
+                const year = this.analyticsDate.getFullYear();
+                const month = String(this.analyticsDate.getMonth() + 1).padStart(2, '0');
+                monthlyInput.value = `${year}-${month}`;
+
+                try {
+                    monthlyInput.showPicker();
+                } catch (e) {
+                    monthlyInput.click();
+                }
+            } else if (this.analyticsTimeframe === 'annual') {
+                // Simple prompt for Year
+                const currentYear = this.analyticsDate.getFullYear();
+                const input = prompt(window.i18n.t('enterYear'), currentYear);
+
+                if (input !== null) {
+                    const year = parseInt(input);
+                    if (!isNaN(year) && year > 1900 && year < 2100) {
+                        this.analyticsDate.setFullYear(year);
+                        this.renderAnalytics();
+                    } else {
+                        window.app.showToast(window.i18n.t('invalidYear'));
+                    }
+                }
+            }
+        });
+
+        // 2. Change Listeners
+        dailyInput.addEventListener('change', (e) => {
+            if (e.target.value) {
+                // Parse local date
+                const parts = e.target.value.split('-');
+                this.analyticsDate = new Date(parts[0], parts[1] - 1, parts[2]);
+                this.renderAnalytics();
+            }
+        });
+
+        monthlyInput.addEventListener('change', (e) => {
+            if (e.target.value) {
+                const parts = e.target.value.split('-');
+                this.analyticsDate = new Date(parts[0], parts[1] - 1, 1);
+                this.renderAnalytics();
+            }
+        });
+    }
+
+    resetPagination() {
+        if (this.currentPage !== 1) {
+            this.currentPage = 1;
+            this.render();
         }
     }
 
     setupEventListeners() {
+        this.initAnalyticsDatePickers(); // Initialize date pickers
+
         // Live formatting for numeric inputs
         InputFormatter.formatNumberInput(document.getElementById('transactionAmount'));
         InputFormatter.formatNumberInput(document.getElementById('transferFee'));
@@ -377,23 +477,28 @@ class TransactionManager {
     }
 
     deleteTransaction(id) {
-        if (confirm('Are you sure you want to delete this transaction? The wallet balance will be reversed.')) {
-            console.log('Calling dataManager.deleteTransaction(' + id + ')...');
+        if (confirm(window.i18n.t('confirmDeleteTransaction'))) {
             const success = this.dataManager.deleteTransaction(id);
-            console.log('Delete result:', success);
-
             if (success) {
-                // 1. Manually update dropdowns JUST IN CASE reload fails
-                console.log('Manually updating dropdowns before reload...');
+                // Refresh all UI components without page reload for smoothness
+                this.render();
+                this.renderAnalytics();
+
+                if (window.walletManager) {
+                    window.walletManager.render();
+                }
+                if (window.app) {
+                    window.app.updateNetWorth();
+                }
+
+                // IMPORTANT: Refresh the transaction form's wallet dropdowns
                 this.updateWalletDropdown();
                 this.updateTargetWalletDropdown();
 
-                // 2. Force Reload
-                console.log('Attempting Page Reload...');
-                window.location.reload();
-                window.location.href = window.location.href;
+                if (window.app) {
+                    window.app.showToast(window.i18n.t('transactionDeleted'));
+                }
             } else {
-                console.error('Delete failed according to DataManager');
                 alert('Failed to delete transaction.');
             }
         }
@@ -404,10 +509,13 @@ class TransactionManager {
         const categorySelect = document.getElementById(`${prefix}transactionCategory`);
 
         const categories = this.categories[type] || [];
-        categorySelect.innerHTML = categories.map(cat => {
-            const translatedCat = this.getCategoryTranslation(cat); // Translate for display
-            return `<option value="${cat}">${translatedCat}</option>`; // Value stays English/ID
-        }).join('');
+        const placeholderText = window.i18n?.t('selectCategory') || 'Select category...';
+
+        categorySelect.innerHTML = `<option value="" data-i18n="selectCategory">${placeholderText}</option>` +
+            categories.map(cat => {
+                const translatedCat = this.getCategoryTranslation(cat); // Translate for display
+                return `<option value="${cat}">${translatedCat}</option>`; // Value stays English/ID
+            }).join('');
     }
 
     getCategoryTranslation(categoryName) {
@@ -442,14 +550,19 @@ class TransactionManager {
         const feeField = document.getElementById(`${prefix}field-fee`);
         const conversionField = document.getElementById(`${prefix}conversionRateField`);
         const conversionPreview = document.getElementById(`${prefix}conversionPreview`);
+        const amountLabel = document.querySelector(`label[for="${prefix}transactionAmount"]`);
 
-        // Only run reorder logic for main form (no prefix)
-        // The modal has a fixed layout so we don't shuffle fields around
-        if (prefix === '') {
-            const amountLabel = document.querySelector('label[for="transactionAmount"]');
-
+        // Update Label text based on type & localization
+        if (amountLabel) {
             if (type === 'transfer') {
-                amountLabel.textContent = 'Transfer Amount';
+                amountLabel.textContent = window.i18n?.t('transferAmount') || 'Transfer Amount';
+            } else {
+                amountLabel.textContent = window.i18n?.t('amount') || 'Amount';
+            }
+        }
+
+        if (prefix === '') {
+            if (type === 'transfer') {
                 document.getElementById('field-category').classList.add('hidden');
 
                 targetField.classList.remove('hidden');
@@ -459,7 +572,6 @@ class TransactionManager {
                 this.updateTargetWalletDropdown();
                 this.reorderFormFields('transfer');
             } else {
-                amountLabel.textContent = 'Amount';
                 document.getElementById('field-category').classList.remove('hidden');
 
                 targetField.classList.add('hidden');
@@ -552,7 +664,8 @@ class TransactionManager {
         const availableWallets = walletData.filter(w => w.id !== sourceWalletId);
 
         if (availableWallets.length === 0) {
-            targetSelect.innerHTML = '<option value="">No other wallets available</option>';
+            const noOtherText = window.i18n?.t('noOtherWallets') || 'No other wallets available';
+            targetSelect.innerHTML = `<option value="">${noOtherText}</option>`;
             return;
         }
 
@@ -713,16 +826,32 @@ class TransactionManager {
             const note = document.getElementById('transactionNote').value;
             const date = document.getElementById('transactionDate').value;
 
+            if (!occurrence) {
+                alert(window.i18n?.t('pleaseSelectOccurrence') || 'Please select an occurrence');
+                return;
+            }
+
+            if (!type) {
+                alert(window.i18n?.t('pleaseSelectType') || 'Please select a type');
+                return;
+            }
+
+            // Only check category if NOT transfer
+            if (type !== 'transfer' && !category) {
+                alert(window.i18n?.t('pleaseSelectCategory') || 'Please select a category');
+                return;
+            }
+
             if (!walletId) {
-                alert('Please select a wallet');
+                alert(window.i18n?.t('pleaseSelectWallet') || 'Please select a wallet');
                 return;
             }
 
             // Get source wallet to determine currency
             const sourceWallet = this.dataManager.getWalletById(walletId);
 
-            if (amount <= 0) {
-                alert('Please enter a valid amount');
+            if (isNaN(amount) || amount <= 0) {
+                alert(window.i18n?.t('pleaseEnterValidAmount') || 'Please enter a valid amount');
                 return;
             }
 
@@ -731,7 +860,7 @@ class TransactionManager {
                 const targetWalletId = document.getElementById('targetWallet').value;
 
                 if (!targetWalletId) {
-                    alert('Please select a destination wallet for transfer');
+                    alert(window.i18n?.t('pleaseSelectDestination') || 'Please select a destination wallet');
                     return;
                 }
 
@@ -786,6 +915,9 @@ class TransactionManager {
 
                 this.dataManager.addTransaction(transaction);
 
+                // Reset pagination to first page
+                this.resetPagination();
+
             } else {
                 // Regular transaction
                 const transaction = {
@@ -799,6 +931,35 @@ class TransactionManager {
                 };
 
                 this.dataManager.addTransaction(transaction);
+                this.resetPagination();
+            }
+
+            // Reset Filter to "All Time"
+            this.currentFilter = {
+                range: 'all',
+                startDate: '',
+                endDate: ''
+            };
+
+            // Reset Filter UI
+            document.querySelectorAll('#filterPresets .btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.range === 'all');
+            });
+            document.getElementById('filterStartDate').value = '';
+            document.getElementById('filterEndDate').value = '';
+
+            // Switch to Transactions View
+            if (window.app) {
+                window.app.showToast(window.i18n.t('transactionAdded'));
+                window.app.switchView('transactions');
+
+                // Scroll to History Section so user sees the new item
+                setTimeout(() => {
+                    const historySection = document.getElementById('historySection');
+                    if (historySection) {
+                        historySection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }, 300);
             }
 
             // Handle Recurring if not "once"
@@ -953,9 +1114,19 @@ class TransactionManager {
             InputFormatter.dismissKeyboard();
             document.getElementById('transactionEditModal').classList.remove('active');
 
-            // Reload to ensure safety and fresh state
-            console.log('Update complete, reloading...');
-            window.location.reload();
+            // Refresh UI components instead of reloading
+            console.log('Update complete, refreshing UI...');
+            this.render();
+            this.renderAnalytics();
+            if (window.walletManager) window.walletManager.render();
+            if (window.app) {
+                window.app.updateNetWorth();
+                window.app.showToast(window.i18n.t('transactionUpdated'));
+            }
+
+            // Refresh toggles and dropdowns
+            this.updateWalletDropdown();
+            this.updateTargetWalletDropdown();
 
         } catch (error) {
             console.error('Update transaction error:', error);
@@ -990,7 +1161,15 @@ class TransactionManager {
 
         let transactions = this.dataManager.getTransactions();
 
-        // Apply filtering
+        // Sort transactions by date (newest first)
+        transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        // Filter by currency if not "all"
+        if (this.selectedHistoryCurrency !== 'all') {
+            transactions = transactions.filter(t => t.currency === this.selectedHistoryCurrency);
+        }
+
+        // Apply filtering by date range
         transactions = this.filterTransactionsByDate(transactions);
 
         if (transactions.length === 0) {
@@ -1077,6 +1256,8 @@ class TransactionManager {
     }
 
     applyFilter() {
+        this.resetPagination();
+
         const activeBtn = document.querySelector('#filterPresets .btn.active');
         const range = activeBtn ? activeBtn.dataset.range : 'all';
 
@@ -1094,28 +1275,18 @@ class TransactionManager {
 
         // Show success toast
         if (window.app) {
-            const rangeText = range === 'all' ? 'All Time' :
-                range === 'custom' ? 'Custom Range' :
-                    `Last ${range} Days`;
-            window.app.showToast(`📊 Filter Applied: ${rangeText}`);
-        }
-    }
-
-    deleteTransaction(id) {
-        if (confirm('Are you sure you want to delete this transaction? The wallet balance will be reversed.')) {
-            const success = this.dataManager.deleteTransaction(id);
-            if (success) {
-                this.render();
-                this.renderAnalytics();
-
-                // Update global UI
-                if (window.walletManager) window.walletManager.render();
-                if (window.app) window.app.updateNetWorth();
+            let rangeText = '';
+            if (range === 'all') {
+                rangeText = window.i18n.t('rangeAllTime');
+            } else if (range === 'custom') {
+                rangeText = window.i18n.t('rangeCustom');
             } else {
-                alert('Failed to delete transaction.');
+                rangeText = window.i18n.t('rangeLastDays').replace('{days}', range);
             }
+            window.app.showToast(window.i18n.t('filterAppliedToast').replace('{range}', rangeText));
         }
     }
+
 
     createTransactionItem(transaction) {
         const wallet = this.dataManager.getWalletById(transaction.walletId);
@@ -1124,7 +1295,8 @@ class TransactionManager {
         const formattedAmount = this.currencyManager.format(transaction.amount, transaction.currency);
 
         const date = new Date(transaction.date);
-        const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const lang = window.i18n?.currentLanguage || undefined;
+        const dateStr = date.toLocaleDateString(lang) + ' ' + date.toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' });
 
         // Icon
         let icon = this.categoryIcons[transaction.category] || '📝';
@@ -1184,6 +1356,21 @@ class TransactionManager {
         this.renderAnalytics();
     }
 
+    navigateTimeframe(direction) {
+        if (this.analyticsTimeframe === 'daily') {
+            this.analyticsDate.setDate(this.analyticsDate.getDate() + direction);
+        } else if (this.analyticsTimeframe === 'monthly') {
+            // Fix: Set to 1st of month to avoid overflow (e.g. Jan 31 -> Feb 28/29)
+            // If we are at Jan 31 and +1 month, it becomes Feb 31 -> March 3.
+            // By setting to 1st, we ensure we land in the correct month.
+            this.analyticsDate.setDate(1);
+            this.analyticsDate.setMonth(this.analyticsDate.getMonth() + direction);
+        } else if (this.analyticsTimeframe === 'annual') {
+            this.analyticsDate.setFullYear(this.analyticsDate.getFullYear() + direction);
+        }
+        this.renderAnalytics();
+    }
+
     renderAnalytics() {
         const container = document.getElementById('analyticsContainer');
         const tabsContainer = document.getElementById('analyticsCurrencyTabs');
@@ -1193,9 +1380,9 @@ class TransactionManager {
         // Update Display Date
         if (displayDate) {
             if (this.analyticsTimeframe === 'daily') {
-                displayDate.textContent = this.analyticsDate.toLocaleDateString(undefined, { dateStyle: 'long' });
+                displayDate.textContent = this.analyticsDate.toLocaleDateString(window.i18n?.currentLanguage || undefined, { dateStyle: 'long' });
             } else if (this.analyticsTimeframe === 'monthly') {
-                displayDate.textContent = this.analyticsDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+                displayDate.textContent = this.analyticsDate.toLocaleDateString(window.i18n?.currentLanguage || undefined, { month: 'long', year: 'numeric' });
             } else if (this.analyticsTimeframe === 'annual') {
                 displayDate.textContent = this.analyticsDate.getFullYear();
             }
@@ -1226,11 +1413,45 @@ class TransactionManager {
             timeframeKey = `${startStr}|${endStr}`;
         }
 
-        const statsByCurrency = this.dataManager.getStatsByTimeframe(this.analyticsTimeframe, timeframeKey);
-        const expenseBreakdownByCurrency = this.dataManager.getCategoryBreakdownByTimeframe(this.analyticsTimeframe, timeframeKey, 'expense');
-        const incomeBreakdownByCurrency = this.dataManager.getCategoryBreakdownByTimeframe(this.analyticsTimeframe, timeframeKey, 'income');
+        // Get Projected Transactions for the timeframe
+        let startDate, endDate;
+        if (this.analyticsTimeframe === 'daily') {
+            startDate = new Date(this.analyticsDate);
+            startDate.setHours(0, 0, 0, 0);
+            endDate = new Date(this.analyticsDate);
+            endDate.setHours(23, 59, 59, 999);
+        } else if (this.analyticsTimeframe === 'monthly') {
+            startDate = new Date(this.analyticsDate.getFullYear(), this.analyticsDate.getMonth(), 1);
+            endDate = new Date(this.analyticsDate.getFullYear(), this.analyticsDate.getMonth() + 1, 0);
+        } else if (this.analyticsTimeframe === 'annual') {
+            startDate = new Date(this.analyticsDate.getFullYear(), 0, 1);
+            endDate = new Date(this.analyticsDate.getFullYear(), 11, 31);
+        } else if (this.analyticsTimeframe === 'custom') {
+            const startStr = document.getElementById('analyticsStartDate')?.value;
+            const endStr = document.getElementById('analyticsEndDate')?.value;
+            if (startStr && endStr) {
+                startDate = new Date(startStr);
+                endDate = new Date(endStr);
+            }
+        }
 
-        const currencies = Object.keys(statsByCurrency);
+        let projectedTransactions = [];
+        if (startDate && endDate && window.recurringManager) {
+            projectedTransactions = window.recurringManager.getProjectedTransactions(startDate, endDate);
+        }
+
+        const statsByCurrency = this.dataManager.getStatsByTimeframe(this.analyticsTimeframe, timeframeKey, projectedTransactions);
+        const expenseBreakdownByCurrency = this.dataManager.getCategoryBreakdownByTimeframe(this.analyticsTimeframe, timeframeKey, 'expense', projectedTransactions);
+        const incomeBreakdownByCurrency = this.dataManager.getCategoryBreakdownByTimeframe(this.analyticsTimeframe, timeframeKey, 'income', projectedTransactions);
+
+        // Add "ALL" to currency options if there is data
+        const activeCurrencies = Object.keys(statsByCurrency);
+        let currencies = [];
+        if (activeCurrencies.length > 0) {
+            // Apply fixed order per user request: ALL, NTD, USD, IDR
+            const fixedOrder = ['all', 'NTD', 'USD', 'IDR'];
+            currencies = fixedOrder.filter(c => c === 'all' || activeCurrencies.includes(c));
+        }
 
         if (currencies.length === 0) {
             tabsContainer.innerHTML = '';
@@ -1251,7 +1472,7 @@ class TransactionManager {
         // Render Tabs
         tabsContainer.innerHTML = currencies.map(curr => `
             <div class="tab ${curr === this.selectedAnalyticsCurrency ? 'active' : ''}" data-currency="${curr}">
-                ${curr}
+                ${curr === 'all' ? (window.i18n ? window.i18n.t('all') : 'All') : curr}
             </div>
         `).join('');
 
@@ -1264,10 +1485,64 @@ class TransactionManager {
         });
 
         // Render Content for Selected Currency
-        const currency = this.selectedAnalyticsCurrency;
-        const stats = statsByCurrency[currency];
-        const expenseBreakdown = expenseBreakdownByCurrency[currency] || {};
-        const incomeBreakdown = incomeBreakdownByCurrency[currency] || {};
+        let currency = this.selectedAnalyticsCurrency;
+        let stats, expenseBreakdown, incomeBreakdown;
+
+        if (currency === 'all') {
+            // Aggregate all currencies into base currency
+            currency = this.dataManager.getBaseCurrency();
+            stats = { income: 0, expense: 0, transactions: [] };
+            expenseBreakdown = {};
+            incomeBreakdown = {};
+            Object.entries(statsByCurrency).forEach(([curr, s]) => {
+                stats.income += this.currencyManager.convert(s.income, curr, currency);
+                stats.expense += this.currencyManager.convert(s.expense, curr, currency);
+            });
+
+            // Aggregate Breakdowns (Expense)
+            Object.entries(expenseBreakdownByCurrency).forEach(([curr, breakdown]) => {
+                Object.entries(breakdown).forEach(([cat, data]) => {
+                    if (!expenseBreakdown[cat]) expenseBreakdown[cat] = { total: 0, items: [] };
+                    expenseBreakdown[cat].total += this.currencyManager.convert(data.total, curr, currency);
+
+                    // Convert individual items for the detailed list
+                    const convertedItems = data.items.map(item => ({
+                        ...item,
+                        amount: this.currencyManager.convert(item.amount, curr, currency),
+                        currency: currency,
+                        originalCurrency: curr
+                    }));
+                    expenseBreakdown[cat].items.push(...convertedItems);
+                });
+            });
+
+            // Aggregate Breakdowns (Income)
+            Object.entries(incomeBreakdownByCurrency).forEach(([curr, breakdown]) => {
+                Object.entries(breakdown).forEach(([cat, data]) => {
+                    if (!incomeBreakdown[cat]) incomeBreakdown[cat] = { total: 0, items: [] };
+                    incomeBreakdown[cat].total += this.currencyManager.convert(data.total, curr, currency);
+
+                    const convertedItems = data.items.map(item => ({
+                        ...item,
+                        amount: this.currencyManager.convert(item.amount, curr, currency),
+                        currency: currency,
+                        originalCurrency: curr
+                    }));
+                    incomeBreakdown[cat].items.push(...convertedItems);
+                });
+            });
+        } else {
+            stats = statsByCurrency[currency];
+            expenseBreakdown = expenseBreakdownByCurrency[currency] || {};
+            incomeBreakdown = incomeBreakdownByCurrency[currency] || {};
+        }
+
+        // Store for detail modal (v1.4.4)
+        this.lastBreakdowns = {
+            expense: expenseBreakdown,
+            income: incomeBreakdown,
+            currency: currency
+        };
 
         container.innerHTML = `
             <div class="analytics-currency-section animate-fade-in">
@@ -1436,7 +1711,12 @@ class TransactionManager {
         if (!canvas || typeof Chart === 'undefined') return;
 
         const colors = this.getChartThemeColors();
-        const transactions = this.dataManager.getTransactions();
+        const allTransactions = this.dataManager.getTransactions();
+
+        // Determine which transactions to process
+        // If 'all' selected, use all transactions. If specific currency, filter first.
+        const isAll = this.selectedAnalyticsCurrency === 'all';
+        const relevantTransactions = isAll ? allTransactions : allTransactions.filter(t => t.currency === currency);
 
         // Filter and group by date for trend
         let chartData = [];
@@ -1456,14 +1736,15 @@ class TransactionManager {
                 chartData.push(0);
             }
 
-            transactions.filter(t => t.currency === currency).forEach(t => {
+            relevantTransactions.forEach(t => {
                 const tDate = new Date(t.date);
                 if (this.analyticsTimeframe === 'monthly' && tDate.getMonth() === this.analyticsDate.getMonth() && tDate.getFullYear() === this.analyticsDate.getFullYear()) {
                     const day = tDate.getDate();
-                    const amount = t.type === 'income' ? t.amount : (t.type === 'expense' ? -t.amount : 0);
+                    let val = t.amount;
+                    if (isAll) val = this.currencyManager.convert(val, t.currency, currency);
+
+                    const amount = t.type === 'income' ? val : (t.type === 'expense' ? -val : 0);
                     chartData[day - 1] += amount;
-                } else if (this.analyticsTimeframe === 'custom') {
-                    // Custom logic could be more complex, but simplified for now
                 }
             });
         } else if (this.analyticsTimeframe === 'annual') {
@@ -1476,11 +1757,14 @@ class TransactionManager {
             labels = months;
             chartData = Array(12).fill(0);
 
-            transactions.filter(t => t.currency === currency).forEach(t => {
+            relevantTransactions.forEach(t => {
                 const tDate = new Date(t.date);
                 if (tDate.getFullYear() === this.analyticsDate.getFullYear()) {
                     const month = tDate.getMonth();
-                    const amount = t.type === 'income' ? t.amount : (t.type === 'expense' ? -t.amount : 0);
+                    let val = t.amount;
+                    if (isAll) val = this.currencyManager.convert(val, t.currency, currency);
+
+                    const amount = t.type === 'income' ? val : (t.type === 'expense' ? -val : 0);
                     chartData[month] += amount;
                 }
             });
@@ -1491,11 +1775,14 @@ class TransactionManager {
                 chartData.push(0);
             }
 
-            transactions.filter(t => t.currency === currency).forEach(t => {
+            relevantTransactions.forEach(t => {
                 const tDate = new Date(t.date);
                 if (tDate.toDateString() === this.analyticsDate.toDateString()) {
                     const hour = tDate.getHours();
-                    const amount = t.type === 'income' ? t.amount : (t.type === 'expense' ? -t.amount : 0);
+                    let val = t.amount;
+                    if (isAll) val = this.currencyManager.convert(val, t.currency, currency);
+
+                    const amount = t.type === 'income' ? val : (t.type === 'expense' ? -val : 0);
                     chartData[hour] += amount;
                 }
             });
@@ -1589,37 +1876,137 @@ class TransactionManager {
                 const icon = this.categoryIcons[category] || '📝';
                 const percentage = total > 0 ? Math.round((data.total / total) * 100) : 0;
 
-                // Detailed items with dates
-                const itemsList = data.items.map(item => {
-                    const date = new Date(item.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-                    return `
-                        <div class="flex-between" style="font-size: 0.7rem; color: var(--color-text-tertiary); padding: 2px 0;">
-                            <span>${date} ${item.note ? '• ' + item.note : ''}</span>
-                            <span>${this.currencyManager.format(item.amount, currency)}</span>
-                        </div>
-                    `;
-                }).join('');
-
                 return `
-                <li class="list-item" style="padding: var(--space-sm) 0; border-bottom: 1px solid var(--glass-border); flex-direction: column; align-items: stretch;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <span style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem;">
-                            <span>${icon}</span>
-                            <span>${this.getCategoryTranslation(category)}</span>
-                        </span>
-                        <span style="font-weight: 600; font-size: 0.85rem;">${this.currencyManager.format(data.total, currency)}</span>
-                    </div>
-                    <div class="progress-container" style="height: 4px; background: var(--color-bg-tertiary); border-radius: 2px; margin-bottom: var(--space-xs);">
-                        <div class="progress-bar" style="width: ${percentage}%; height: 100%; border-radius: 2px; background: ${type === 'expense' ? 'var(--color-danger)' : 'var(--color-success)'}"></div>
-                    </div>
-                    <div class="breakdown-items mt-xs" style="border-left: 2px solid var(--glass-border); padding-left: 8px;">
-                        ${itemsList}
-                    </div>
-                </li>
-            `;
+            <li class="list-item clickable-item animate-slide-up" 
+                style="padding: var(--space-md) var(--space-sm); border-bottom: 1px solid var(--glass-border); flex-direction: column; align-items: stretch;"
+                onclick="window.transactionManager.showCategoryDetail('${category}', '${type}')">
+                <div class="category-row-header">
+                    <span style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem;">
+                        <span>${icon}</span>
+                        <span style="font-weight: 500;">${this.getCategoryTranslation(category)}</span>
+                        <span class="chevron-icon">▶</span>
+                    </span>
+                    <span style="font-weight: 700; font-size: 0.9rem;">${this.currencyManager.format(data.total, currency)}</span>
+                </div>
+                <div class="progress-container" style="height: 6px; background: var(--color-bg-tertiary); border-radius: 3px; margin-top: var(--space-sm);">
+                    <div class="progress-bar" style="width: ${percentage}%; height: 100%; border-radius: 3px; background: ${type === 'expense' ? 'var(--color-danger)' : 'var(--color-success)'}"></div>
+                </div>
+            </li>
+        `;
             }).join('') +
             `</ul>`;
     }
+
+    // --- Detail Modal & Pagination (v1.4.4) ---
+
+    showCategoryDetail(category, type) {
+        const breakdown = this.lastBreakdowns[type];
+        if (!breakdown || !breakdown[category]) return;
+
+        const items = breakdown[category].items;
+        const currency = this.lastBreakdowns.currency;
+
+        this.detailCategory = category;
+        this.detailItems = [...items].sort((a, b) => new Date(b.date) - new Date(a.date));
+        this.detailCurrency = currency;
+        this.detailPage = 1;
+        this.detailItemsPerPage = 7;
+
+        const modal = document.getElementById('categoryDetailModal');
+        const title = document.getElementById('categoryDetailTitle');
+        const totalDisp = document.getElementById('categoryDetailTotal');
+
+        const icon = this.categoryIcons[category] || '📝';
+        title.innerHTML = `${icon} ${this.getCategoryTranslation(category)}`;
+
+        const total = items.reduce((sum, item) => sum + item.amount, 0);
+        totalDisp.textContent = this.currencyManager.format(total, currency);
+
+        this.renderModalTransactions();
+        modal.classList.add('active');
+
+        // Setup listeners if not already done
+        if (!this.detailListenersSetup) {
+            this.setupDetailModalListeners();
+            this.detailListenersSetup = true;
+        }
+    }
+
+    renderModalTransactions() {
+        const container = document.getElementById('categoryDetailList');
+        const pagination = document.getElementById('detailPagination');
+        const pageIndicator = document.getElementById('detailPageIndicator');
+        const prevBtn = document.getElementById('detailPrevBtn');
+        const nextBtn = document.getElementById('detailNextBtn');
+
+        const startIndex = (this.detailPage - 1) * this.detailItemsPerPage;
+        const endIndex = startIndex + this.detailItemsPerPage;
+        const pageItems = this.detailItems.slice(startIndex, endIndex);
+        const totalPages = Math.ceil(this.detailItems.length / this.detailItemsPerPage);
+
+        container.innerHTML = pageItems.map(item => {
+            const lang = window.i18n?.currentLanguage || undefined;
+            const date = new Date(item.date).toLocaleDateString(lang, { month: 'short', day: 'numeric' });
+            const isConverted = item.originalCurrency && item.originalCurrency !== this.detailCurrency;
+            const conversionNote = isConverted ? ` <span style="opacity: 0.7; font-size: 0.6rem;">(from ${item.originalCurrency})</span>` : '';
+
+            return `
+                <div class="flex-between" style="padding: var(--space-md) var(--space-sm); border-bottom: 1px solid var(--glass-border); background: var(--glass-bg); margin-bottom: 2px; border-radius: var(--radius-sm);">
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                        <span style="font-size: 0.7rem; color: var(--color-text-tertiary);">${date}</span>
+                        <span style="font-size: 0.85rem; font-weight: 500;">${item.note || '-'}</span>
+                    </div>
+                    <span style="font-weight: 600; font-size: 0.9rem;">${this.currencyManager.format(item.amount, this.detailCurrency)}${conversionNote}</span>
+                </div>
+            `;
+        }).join('');
+
+        if (this.detailItems.length === 0) {
+            container.innerHTML = `<p class="text-center color-text-tertiary py-lg">${window.i18n?.t('noData')}</p>`;
+        }
+
+        // Pagination UI
+        if (totalPages > 1) {
+            pagination.classList.remove('hidden');
+            pageIndicator.textContent = `${window.i18n?.t('page') || 'Page'} ${this.detailPage} / ${totalPages}`;
+            prevBtn.disabled = this.detailPage === 1;
+            nextBtn.disabled = this.detailPage === totalPages;
+        } else {
+            pagination.classList.add('hidden');
+        }
+    }
+
+    setupDetailModalListeners() {
+        const modal = document.getElementById('categoryDetailModal');
+        const closeBtn = document.getElementById('closeCategoryDetailBtn');
+        const prevBtn = document.getElementById('detailPrevBtn');
+        const nextBtn = document.getElementById('detailNextBtn');
+
+        closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+
+        prevBtn.addEventListener('click', () => {
+            if (this.detailPage > 1) {
+                this.detailPage--;
+                this.renderModalTransactions();
+                document.getElementById('categoryDetailList').scrollTop = 0;
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(this.detailItems.length / this.detailItemsPerPage);
+            if (this.detailPage < totalPages) {
+                this.detailPage++;
+                this.renderModalTransactions();
+                document.getElementById('categoryDetailList').scrollTop = 0;
+            }
+        });
+
+        // Close on overlay click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('active');
+        });
+    }
+
 
     // --- Category Management (Settings) ---
 
@@ -1684,13 +2071,15 @@ class TransactionManager {
             InputFormatter.dismissKeyboard();
             input.value = '';
             console.log(`Category added to ${type}:`, name);
+            if (window.app) window.app.showToast(window.i18n.t('categoryCreated'));
         } else {
-            alert('Category already exists in this list!');
+            alert(window.i18n.t('categoryAlreadyExists'));
         }
     }
 
     deleteCategory(name, type) {
-        if (confirm(`Delete category "${name}"? This won't affect existing transactions.`)) {
+        const confirmMsg = window.i18n.t('confirmDeleteCategory').replace('{name}', name);
+        if (confirm(confirmMsg)) {
             this.categories[type] = this.categories[type].filter(c => c !== name);
             this.saveCategories();
             this.renderSettingsCategoryList();

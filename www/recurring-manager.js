@@ -85,6 +85,50 @@ class RecurringManager {
     }
 
     /**
+     * Get projected transactions for a specific date range
+     * @param {Date} startDate 
+     * @param {Date} endDate 
+     * @returns {Array} List of projected transaction objects
+     */
+    getProjectedTransactions(startDate, endDate) {
+        const projected = [];
+        const recurringList = this.dataManager.getRecurringTransactions();
+
+        // Normalize dates to start of day for comparison
+        const rangeStart = new Date(startDate);
+        rangeStart.setHours(0, 0, 0, 0);
+
+        const rangeEnd = new Date(endDate);
+        rangeEnd.setHours(23, 59, 59, 999);
+
+        recurringList.forEach(recurring => {
+            let nextRun = new Date(recurring.nextRunDate);
+            nextRun.setHours(0, 0, 0, 0);
+
+            // Project forward until end date
+            while (nextRun <= rangeEnd) {
+                // Only include if within range
+                if (nextRun >= rangeStart) {
+                    projected.push({
+                        id: `proj_${recurring.id}_${nextRun.getTime()}`, // Virtual ID
+                        type: recurring.type,
+                        amount: recurring.amount,
+                        currency: recurring.currency,
+                        category: recurring.category,
+                        walletId: recurring.walletId,
+                        note: recurring.note + " (Projected)",
+                        date: nextRun.toISOString(),
+                        isProjected: true // Flag for UI distinction if needed
+                    });
+                }
+                nextRun = this.calculateNextDate(nextRun, recurring.frequency);
+            }
+        });
+
+        return projected;
+    }
+
+    /**
      * UI METHODS
      */
 
@@ -180,7 +224,8 @@ class RecurringManager {
             let nextRunStr = '';
             if (r.nextRunDate) {
                 const nrDate = new Date(r.nextRunDate);
-                nextRunStr = nrDate.toLocaleDateString() + ' ' + nrDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const lang = window.i18n?.currentLanguage || undefined;
+                nextRunStr = nrDate.toLocaleDateString(lang) + ' ' + nrDate.toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' });
             }
 
             // MATCH TRANSACTION-ITEM STRUCTURE PERFECTLY
@@ -278,7 +323,7 @@ class RecurringManager {
         document.getElementById('recurringEditModal').classList.remove('active');
         this.renderList();
 
-        if (window.app) window.app.showToast('✅ Recurring schedule updated!');
+        if (window.app) window.app.showToast(window.i18n.t('recurringUpdatedToast'));
     }
 
     updateWalletDropdown(prefix = 'recurring') {
@@ -316,11 +361,21 @@ class RecurringManager {
     toggleTransferFields(prefix = 'recurring') {
         const type = document.getElementById(`${prefix}Type`).value;
         const targetField = document.getElementById(`${prefix}FieldTarget`);
+        const categoryField = document.getElementById(`${prefix}CategoryField`);
+
         if (targetField) {
             if (type === 'transfer') {
                 targetField.classList.remove('hidden');
             } else {
                 targetField.classList.add('hidden');
+            }
+        }
+
+        if (categoryField) {
+            if (type === 'transfer') {
+                categoryField.classList.add('hidden');
+            } else {
+                categoryField.classList.remove('hidden');
             }
         }
     }
@@ -349,11 +404,11 @@ class RecurringManager {
         document.getElementById('recurringFormModal').classList.remove('active');
         this.renderList();
 
-        if (window.app) window.app.showToast('✅ Recurring transaction scheduled!');
+        if (window.app) window.app.showToast(window.i18n.t('recurringScheduledToast'));
     }
 
     deleteRecurring(id) {
-        if (confirm('Delete this recurring transaction?')) {
+        if (confirm(window.i18n.t('confirmDeleteRecurring'))) {
             this.dataManager.deleteRecurringTransaction(id);
             this.renderList();
         }

@@ -13,7 +13,10 @@ class DataManager {
       SETTINGS: 'moneyManager_settings',
       CATEGORIES: 'transactionCategories',
       BIOMETRIC_ENABLED: 'moneyManager_biometricEnabled',
-      RECURRING: 'moneyManager_recurringTransactions'
+      BASE_CURRENCY: 'moneyManager_baseCurrency',
+      RECURRING: 'moneyManager_recurringTransactions',
+      NOTIF_REMINDER_ENABLED: 'moneyManager_notifReminderEnabled',
+      NOTIF_QUICK_ACTIONS_ENABLED: 'moneyManager_notifQuickActionsEnabled'
     };
 
     this.init();
@@ -75,9 +78,21 @@ class DataManager {
   }
 
   deleteWallet(id) {
+    // 1. Remove the wallet
     const wallets = this.getWallets();
-    const filtered = wallets.filter(w => w.id !== id);
-    this.saveWallets(filtered);
+    const filteredWallets = wallets.filter(w => w.id !== id);
+    this.saveWallets(filteredWallets);
+
+    // 2. Cascading delete: Remove transactions associated with this wallet
+    const transactions = this.getTransactions();
+    const filteredTransactions = transactions.filter(t => t.walletId !== id && t.targetWalletId !== id);
+    this.saveTransactions(filteredTransactions);
+
+    // 3. Cascading delete: Remove recurring transactions associated with this wallet
+    const recurring = this.getRecurringTransactions();
+    const filteredRecurring = recurring.filter(r => r.walletId !== id && r.targetWalletId !== id);
+    this.saveRecurringTransactions(filteredRecurring);
+
     return true;
   }
 
@@ -368,7 +383,7 @@ class DataManager {
   }
 
   clearAllData() {
-    if (confirm('Are you sure you want to delete ALL data? This cannot be undone!')) {
+    if (confirm(window.i18n.t('confirmDeleteAllData'))) {
       localStorage.clear();
       this.init();
       return true;
@@ -380,9 +395,14 @@ class DataManager {
    * Get statistics (income/expense) by currency for a specific timeframe
    * @param {string} type 'daily', 'monthly', or 'annual'
    * @param {string} dateStr ISO date string or partial (e.g. '2023-10-27', '2023-10', '2023')
+   * @param {Array} additionalTransactions Optional array of extra transactions (e.g. projected)
    */
-  getStatsByTimeframe(type, dateStr) {
-    const transactions = this.getTransactions();
+  getStatsByTimeframe(type, dateStr, additionalTransactions = []) {
+    let transactions = this.getTransactions();
+    if (additionalTransactions.length > 0) {
+      transactions = [...transactions, ...additionalTransactions];
+    }
+
     const stats = {};
 
     transactions.forEach(t => {
@@ -439,8 +459,8 @@ class DataManager {
     return stats;
   }
 
-  getCategoryBreakdownByTimeframe(type, dateStr, transactionType) {
-    const stats = this.getStatsByTimeframe(type, dateStr);
+  getCategoryBreakdownByTimeframe(type, dateStr, transactionType, additionalTransactions = []) {
+    const stats = this.getStatsByTimeframe(type, dateStr, additionalTransactions);
     const breakdown = {};
 
     Object.entries(stats).forEach(([currency, data]) => {
@@ -514,6 +534,30 @@ class DataManager {
 
   setBiometricEnabled(enabled) {
     localStorage.setItem(this.STORAGE_KEYS.BIOMETRIC_ENABLED, enabled.toString());
+  }
+
+  getBaseCurrency() {
+    return localStorage.getItem(this.STORAGE_KEYS.BASE_CURRENCY) || 'IDR';
+  }
+
+  setBaseCurrency(currency) {
+    localStorage.setItem(this.STORAGE_KEYS.BASE_CURRENCY, currency);
+  }
+
+  isReminderEnabled() {
+    return localStorage.getItem(this.STORAGE_KEYS.NOTIF_REMINDER_ENABLED) === 'true';
+  }
+
+  setReminderEnabled(enabled) {
+    localStorage.setItem(this.STORAGE_KEYS.NOTIF_REMINDER_ENABLED, enabled.toString());
+  }
+
+  isQuickActionsEnabled() {
+    return localStorage.getItem(this.STORAGE_KEYS.NOTIF_QUICK_ACTIONS_ENABLED) === 'true';
+  }
+
+  setQuickActionsEnabled(enabled) {
+    localStorage.setItem(this.STORAGE_KEYS.NOTIF_QUICK_ACTIONS_ENABLED, enabled.toString());
   }
 }
 

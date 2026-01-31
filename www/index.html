@@ -148,7 +148,7 @@
         <!-- CURRENCY TABS -->
         <section class="section">
           <div class="tabs" id="currencyTabs">
-            <button class="tab active" data-currency="ALL">All</button>
+            <button class="tab active" data-currency="ALL" data-i18n="all">All</button>
             <button class="tab" data-currency="NTD">NT$ (NTD)</button>
             <button class="tab" data-currency="USD">US$ (USD)</button>
             <button class="tab" data-currency="IDR">Rp (IDR)</button>
@@ -200,6 +200,7 @@
             <div class="form-group" id="field-occurrence">
               <label class="form-label" for="transactionOccurrence" data-i18n="occurrence">Occurrence</label>
               <select id="transactionOccurrence" class="form-select">
+                <option value="" data-i18n="selectOccurrence">Select occurrence...</option>
                 <option value="once" data-i18n="once">Once</option>
                 <option value="daily" data-i18n="daily">Daily</option>
                 <option value="monthly" data-i18n="monthly">Monthly</option>
@@ -209,6 +210,7 @@
             <div class="form-group" id="field-type">
               <label class="form-label" for="transactionType" data-i18n="type">Type</label>
               <select id="transactionType" class="form-select">
+                <option value="" data-i18n="selectType">Select type...</option>
                 <option value="expense" data-i18n="expense">Expense</option>
                 <option value="income" data-i18n="income">Income</option>
                 <option value="transfer" data-i18n="transfer">Transfer</option>
@@ -247,9 +249,9 @@
                   💱 Currency Conversion Required
                 </div>
                 <div class="form-group" style="margin-bottom: 0;">
-                  <label class="form-label" id="conversionRateLabel" data-i18n="conversionRate">Conversion
-                    Rate</label>
-                  <input type="text" inputmode="decimal" id="conversionRate" class="form-input" placeholder="0.00">
+                  <label class="form-label" id="conversionRateLabel" data-i18n="conversionRate">Conversion Rate</label>
+                  <input type="text" inputmode="none" id="conversionRate" class="form-input" placeholder="0.00"
+                    onclick="window.calculatorManager.show(this)">
                 </div>
               </div>
             </div>
@@ -260,13 +262,14 @@
 
             <div class="form-group" id="field-amount">
               <label class="form-label" for="transactionAmount" data-i18n="amount">Amount</label>
-              <input type="text" inputmode="decimal" id="transactionAmount" class="form-input" placeholder="0.00"
-                required>
+              <input type="text" inputmode="none" id="transactionAmount" class="form-input" placeholder="0.00"
+                onclick="window.calculatorManager.show(this)" required>
             </div>
 
             <div class="form-group hidden" id="field-fee">
               <label class="form-label" for="transferFee" data-i18n="transferFee">Transfer Fee (Optional)</label>
-              <input type="text" inputmode="decimal" id="transferFee" class="form-input" placeholder="0.00" value="0">
+              <input type="text" inputmode="none" id="transferFee" class="form-input" placeholder="0.00"
+                onclick="window.calculatorManager.show(this)" value="0">
             </div>
 
             <div class="form-group" id="field-note">
@@ -306,7 +309,7 @@
         </section>
 
         <!-- RECENT TRANSACTIONS -->
-        <section class="section">
+        <section class="section" id="historySection">
           <div class="section-header">
             <h2 class="section-title"><span>📝</span> <span data-i18n="transactionHistory">Transaction History</span>
             </h2>
@@ -316,6 +319,11 @@
               </button>
             </div>
           </div>
+
+          <div class="tabs tabs-sm mb-md" id="historyCurrencyTabs">
+            <!-- Dynamically populated by JS -->
+          </div>
+
           <div id="transactionsContainer">
             <!-- Transactions will be dynamically inserted here -->
             <div class="card text-center">
@@ -343,9 +351,18 @@
             </div>
 
             <!-- Standard Navigation -->
-            <div id="analyticsStandardNav" class="flex-between analytics-nav-bar bg-tertiary p-xs radius-md">
+            <div id="analyticsStandardNav" class="flex-between analytics-nav-bar bg-tertiary p-xs radius-md"
+              style="position: relative;">
               <button class="btn btn-icon-sm" id="prevTimeframeBtn">◀</button>
-              <h3 id="analyticsDisplayDate" class="text-base font-700 m-0">October 2023</h3>
+              <h3 id="analyticsDisplayDate" class="text-base font-700 m-0"
+                style="cursor: pointer; text-decoration: underline; text-decoration-style: dotted;">October 2023</h3>
+
+              <!-- Hidden Inputs for Date Selection -->
+              <input type="date" id="analyticsDatePicker_daily"
+                style="position: absolute; opacity: 0; pointer-events: none; height: 0; width: 0; bottom: 0; left: 50%;">
+              <input type="month" id="analyticsDatePicker_monthly"
+                style="position: absolute; opacity: 0; pointer-events: none; height: 0; width: 0; bottom: 0; left: 50%;">
+
               <button class="btn btn-icon-sm" id="nextTimeframeBtn">▶</button>
             </div>
 
@@ -401,7 +418,7 @@
           <!-- Language Section -->
           <div class="card mb-lg">
             <div class="card-header">
-              <h3 class="card-title" data-i18n="language">🌐 Language</h3>
+              <h3 class="card-title"><span class="icon">🌐</span> <span data-i18n="language">Language</span></h3>
             </div>
             <div class="card-body">
               <div class="language-selector grid grid-3 gap-sm" id="languageSelector">
@@ -415,7 +432,7 @@
           <!-- Appearance Section -->
           <div class="card mb-lg">
             <div class="card-header">
-              <h3 class="card-title" data-i18n="appearance">🌓 Appearance</h3>
+              <h3 class="card-title"><span class="icon">🌓</span> <span data-i18n="appearance">Appearance</span></h3>
             </div>
             <div class="card-body">
               <div class="settings-group">
@@ -428,10 +445,30 @@
             </div>
           </div>
 
+          <!-- Base Currency Section -->
+          <div class="card mb-lg">
+            <div class="card-header">
+              <h3 class="card-title"><span class="icon">🌍</span> <span data-i18n="baseCurrency">Base Currency</span>
+              </h3>
+            </div>
+            <div class="card-body">
+              <div class="settings-group">
+                <p class="text-xs color-text-tertiary mb-sm" data-i18n="baseCurrencyDesc">Default currency for global
+                  Analytics & Net Worth summaries.</p>
+                <select id="baseCurrencySelect" class="form-select">
+                  <option value="USD">USD - US Dollar</option>
+                  <option value="NTD">NTD - New Taiwan Dollar</option>
+                  <option value="IDR" selected>IDR - Indonesian Rupiah</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
           <!-- Currency Rates Section -->
           <div class="card mb-lg">
             <div class="card-header">
-              <h3 class="card-title" data-i18n="currencyRates">💱 Currency Rates</h3>
+              <h3 class="card-title"><span class="icon">💱</span> <span data-i18n="currencyRates">Currency Rates</span>
+              </h3>
             </div>
             <div class="card-body">
               <div class="form-group">
@@ -455,7 +492,7 @@
           <!-- Security Section -->
           <div class="card mb-lg">
             <div class="card-header">
-              <h3 class="card-title" data-i18n="security">🔐 Security</h3>
+              <h3 class="card-title"><span class="icon">🔐</span> <span data-i18n="security">Security</span></h3>
             </div>
             <div class="card-body">
               <div class="settings-group">
@@ -476,10 +513,49 @@
             </div>
           </div>
 
+          <!-- Notifications Section -->
+          <div class="card mb-lg">
+            <div class="card-header">
+              <h3 class="card-title"><span class="icon">🔔</span> <span data-i18n="notifications">Notifications</span>
+              </h3>
+            </div>
+            <div class="card-body">
+              <div class="settings-group">
+                <div class="flex-between align-center mb-md">
+                  <div class="flex-1 pr-md">
+                    <label class="form-label mb-0" data-i18n="dailyReminder">Daily Reminder</label>
+                    <p class="text-xs color-text-tertiary" data-i18n="dailyReminderDesc">Get a nudge to log transactions
+                      every evening.</p>
+                  </div>
+                  <div class="flex-shrink-0">
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="reminderToggle">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="flex-between align-center">
+                  <div class="flex-1 pr-md">
+                    <label class="form-label mb-0" data-i18n="quickActions">Quick Actions</label>
+                    <p class="text-xs color-text-tertiary" data-i18n="quickActionsDesc">Persistent notification for
+                      rapid tracking.</p>
+                  </div>
+                  <div class="flex-shrink-0">
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="quickActionsToggle">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Category Management -->
           <div class="card mb-lg">
             <div class="card-header">
-              <h3 class="card-title" data-i18n="categoryManagement">🏷️ Category Management</h3>
+              <h3 class="card-title"><span class="icon">🏷️</span> <span data-i18n="categoryManagement">Category
+                  Management</span></h3>
             </div>
             <div class="card-body">
               <div class="settings-group">
@@ -495,7 +571,7 @@
                   <div class="input-with-button">
                     <input type="text" id="newCategoryName" class="form-input" placeholder="New category name..."
                       data-i18n-placeholder="addNewCategory">
-                    <button class="btn btn-primary" id="addCategoryBtn">Add</button>
+                    <button class="btn btn-primary" id="addCategoryBtn" data-i18n="add">Add</button>
                   </div>
                 </div>
                 <div class="mt-md">
@@ -511,7 +587,8 @@
           <!-- Data Management -->
           <div class="card mb-lg">
             <div class="card-header">
-              <h3 class="card-title" data-i18n="dataManagement">💾 Data Management</h3>
+              <h3 class="card-title"><span class="icon">💾</span> <span data-i18n="dataManagement">Data
+                  Management</span></h3>
             </div>
             <div class="card-body">
               <div class="grid grid-2 gap-md" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
@@ -526,7 +603,26 @@
                   📥 Import JSON
                 </button>
               </div>
+              <div class="mt-md"
+                style="background: var(--color-bg-tertiary); border: 1px dashed var(--glass-border); border-radius: var(--radius-sm); padding: var(--space-sm);">
+                <p class="text-xs color-text-tertiary" style="margin: 0; line-height: 1.4;"
+                  data-i18n="exportInstruction">
+                  💡 Tip: Save directly to 'Files' to keep .json format. Messaging apps (WA/Line) may rename it to .txt.
+                </p>
+              </div>
               <input type="file" id="importFileInput" accept=".json" style="display: none;">
+            </div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="card mb-lg" style="border: 1px solid var(--color-danger);">
+            <div class="card-header">
+              <h3 class="card-title color-danger" data-i18n="dangerZone">Danger Zone</h3>
+            </div>
+            <div class="card-body">
+              <button class="btn btn-danger btn-block" id="deleteAllDataBtn" data-i18n="deleteAllData">
+                🗑️ Delete All Data
+              </button>
             </div>
           </div>
         </section>
@@ -553,6 +649,60 @@
       </button>
     </nav>
 
+  </div>
+
+  <!-- CALCULATOR MODAL -->
+  <div class="calculator-overlay" id="calculatorModal">
+    <div class="calculator-container">
+      <div class="calculator-display">
+        <div id="calc-expression" class="calc-expression"></div>
+        <div id="calc-result" class="calc-result">0</div>
+      </div>
+      <div class="calculator-grid">
+        <button type="button" class="calc-btn" data-val="C">C</button>
+        <button type="button" class="calc-btn" data-val="DEL">⌫</button>
+        <button type="button" class="calc-btn" data-val="÷">÷</button>
+        <button type="button" class="calc-btn" data-val="*">×</button>
+
+        <button type="button" class="calc-btn" data-val="7">7</button>
+        <button type="button" class="calc-btn" data-val="8">8</button>
+        <button type="button" class="calc-btn" data-val="9">9</button>
+        <button type="button" class="calc-btn" data-val="-">-</button>
+
+        <button type="button" class="calc-btn" data-val="4">4</button>
+        <button type="button" class="calc-btn" data-val="5">5</button>
+        <button type="button" class="calc-btn" data-val="6">6</button>
+        <button type="button" class="calc-btn" data-val="+">+</button>
+
+        <button type="button" class="calc-btn" data-val="1">1</button>
+        <button type="button" class="calc-btn" data-val="2">2</button>
+        <button type="button" class="calc-btn" data-val="3">3</button>
+        <button type="button" class="calc-btn btn-primary" data-val="DONE" data-i18n="done">Done</button>
+
+        <button type="button" class="calc-btn" data-val="0" style="grid-column: span 2;">0</button>
+        <button type="button" class="calc-btn" data-val=".">.</button>
+        <button type="button" class="calc-btn" data-val="=">=</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE ALL DATA CONFIRMATION MODAL -->
+  <div class="modal-overlay center" id="deleteDataModal">
+    <div class="center-modal">
+      <h2 class="section-title mb-md color-danger" data-i18n="deleteAllDataConfirmTitle">Delete All Data?</h2>
+      <p class="mb-lg" data-i18n="deleteAllDataConfirmMessage" style="line-height: 1.5;">
+        This action cannot be undone. All your wallets and transactions will be permanently lost.
+      </p>
+      <div class="grid grid-2 gap-sm">
+        <button type="button" class="btn btn-secondary btn-block" id="cancelDeleteDataBtn" data-i18n="cancel">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-danger btn-block" id="confirmDeleteDataBtn" disabled
+          style="opacity: 0.5; cursor: not-allowed;">
+          <span id="deleteDataTimerText">Proceed</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- ADD/EDIT WALLET MODAL -->
@@ -584,7 +734,8 @@
 
         <div class="form-group">
           <label class="form-label" for="walletBalance" data-i18n="balance">Initial Balance</label>
-          <input type="text" inputmode="decimal" id="walletBalance" class="form-input" placeholder="0.00" required>
+          <input type="text" inputmode="none" id="walletBalance" class="form-input" placeholder="0.00"
+            onclick="window.calculatorManager.show(this)" required>
         </div>
 
         <div class="modal-footer-actions">
@@ -607,7 +758,7 @@
   <!-- EDIT TRANSACTION MODAL -->
   <div class="modal-overlay center" id="transactionEditModal">
     <div class="center-modal">
-      <h2 class="section-title mb-lg">Edit Transaction</h2>
+      <h2 class="section-title mb-lg" data-i18n="editTransaction">Edit Transaction</h2>
       <form id="editTransactionForm">
 
         <input type="hidden" id="edit_transactionId">
@@ -654,7 +805,8 @@
             </div>
             <div class="form-group" style="margin-bottom: 0;">
               <label class="form-label" data-i18n="conversionRate">Conversion Rate</label>
-              <input type="text" inputmode="decimal" id="edit_conversionRate" class="form-input" placeholder="0.00">
+              <input type="text" inputmode="none" id="edit_conversionRate" class="form-input" placeholder="0.00"
+                onclick="window.calculatorManager.show(this)">
             </div>
           </div>
         </div>
@@ -665,13 +817,14 @@
 
         <div class="form-group" id="edit_field-amount">
           <label class="form-label" data-i18n="amount">Amount</label>
-          <input type="text" inputmode="decimal" id="edit_transactionAmount" class="form-input" placeholder="0.00"
-            required>
+          <input type="text" inputmode="none" id="edit_transactionAmount" class="form-input" placeholder="0.00"
+            onclick="window.calculatorManager.show(this)" required>
         </div>
 
         <div class="form-group hidden" id="edit_field-fee">
           <label class="form-label" data-i18n="transferFee">Transfer Fee (Optional)</label>
-          <input type="text" inputmode="decimal" id="edit_transferFee" class="form-input" placeholder="0.00" value="0">
+          <input type="text" inputmode="none" id="edit_transferFee" class="form-input" placeholder="0.00"
+            onclick="window.calculatorManager.show(this)" value="0">
         </div>
 
         <div class="form-group" id="edit_field-note">
@@ -702,14 +855,7 @@
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="i18n-manager.js?v=5"></script>
-  <script src="utils.js?v=5"></script>
-  <script src="data-manager.js?v=5"></script>
-  <script src="currency-manager.js?v=5"></script>
-  <script src="wallet-manager.js?v=5"></script>
-  <script src="transaction-manager.js?v=5"></script>
-  <script src="security-manager.js?v=5"></script>
+
   <!-- RECURRING EDIT MODAL -->
   <div class="modal-overlay center" id="recurringEditModal">
     <div class="center-modal">
@@ -743,7 +889,7 @@
           </select>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" id="edit_recurringCategoryField">
           <label class="form-label" data-i18n="category">Category</label>
           <select id="edit_recurringCategory" class="form-select">
             <!-- Populated dynamically -->
@@ -766,8 +912,8 @@
 
         <div class="form-group">
           <label class="form-label" data-i18n="amount">Amount</label>
-          <input type="text" inputmode="decimal" id="edit_recurringAmount" class="form-input" placeholder="0.00"
-            required>
+          <input type="text" inputmode="none" id="edit_recurringAmount" class="form-input" placeholder="0.00"
+            onclick="window.calculatorManager.show(this)" required>
         </div>
 
         <div class="form-group">
@@ -792,9 +938,17 @@
     </div>
   </div>
 
+  <script src="i18n-manager.js?v=6"></script>
+  <script src="utils.js?v=6"></script>
+  <script src="data-manager.js?v=6"></script>
+  <script src="currency-manager.js?v=6"></script>
+  <script src="wallet-manager.js?v=6"></script>
+  <script src="transaction-manager.js?v=6"></script>
+  <script src="security-manager.js?v=6"></script>
+  <script src="calculator-manager.js?v=6"></script>
   <script src="recurring-manager.js?v=6"></script>
+  <script src="notification-manager.js?v=6"></script>
   <script src="app.js?v=6"></script>
-
 
   <!-- FILTER MODAL -->
   <div class="modal-overlay center" id="filterModal">
@@ -829,6 +983,30 @@
         <button class="btn btn-secondary btn-block" id="closeFilterBtn" data-i18n="cancel">Cancel</button>
         <button class="btn btn-primary btn-block" id="applyFilterBtn" data-i18n="applyFilter">Apply Filter</button>
       </div>
+    </div>
+  </div>
+
+  <!-- CATEGORY DETAIL MODAL (ANALYTICS) -->
+  <div class="modal-overlay" id="categoryDetailModal">
+    <div class="bottom-sheet">
+      <div class="bottom-sheet-handle"></div>
+      <div class="flex-between align-center mb-lg">
+        <h2 class="section-title m-0" id="categoryDetailTitle" data-i18n="categoryDetail">Category Detail</h2>
+        <span class="text-sm font-600 color-primary" id="categoryDetailTotal"></span>
+      </div>
+
+      <div id="categoryDetailList" class="list detail-list" style="max-height: 400px; overflow-y: auto;">
+        <!-- Transactions will be dynamically inserted here -->
+      </div>
+
+      <!-- Detail Modal Pagination -->
+      <div id="detailPagination" class="pagination-footer mt-md flex-center gap-md hidden">
+        <button class="btn btn-sm btn-secondary" id="detailPrevBtn">← <span data-i18n="prev">Prev</span></button>
+        <span id="detailPageIndicator" class="text-sm font-600">Page 1</span>
+        <button class="btn btn-sm btn-secondary" id="detailNextBtn"><span data-i18n="next">Next</span> →</button>
+      </div>
+
+      <button class="btn btn-secondary btn-block mt-lg" id="closeCategoryDetailBtn" data-i18n="close">Close</button>
     </div>
   </div>
 </body>

@@ -27,15 +27,22 @@ class MoneyManagerApp {
             window.transactionManager = new TransactionManager(dataManager, currencyManager);
             window.securityManager = new SecurityManager(dataManager, window.i18n);
             window.recurringManager = new RecurringManager(dataManager);
+            window.notificationManager = new NotificationManager(dataManager, window.i18n);
 
             // Re-assign to the variables declared in other files
             walletManager = window.walletManager;
             transactionManager = window.transactionManager;
             securityManager = window.securityManager;
             const recurringManager = window.recurringManager;
+            const notificationManager = window.notificationManager;
 
             // 2. Setup global event listeners
             this.setupEventListeners();
+
+            // Listen for resume event to fix UI glitches (Android WebView)
+            document.addEventListener('resume', () => {
+                setTimeout(() => this.forceRedraw(), 100);
+            });
 
             // Link security manager to app to reset grace period on unlock
             securityManager.onUnlock = () => {
@@ -60,61 +67,139 @@ class MoneyManagerApp {
             this.hideSplashScreen();
         } catch (error) {
             console.error('❌ App initialization error:', error);
-            // alert('Critical initialization error. Check console.');
+            // Ensure splash is hidden even on error so user can see something
+            setTimeout(() => this.hideSplashScreen(), 1000);
+
+            // Show a non-blocking toast if i18n is available, otherwise alert
+            if (window.i18n) {
+                console.warn('App partially loaded with errors.');
+            } else {
+                alert('App initialization error. Check console.');
+            }
         }
     }
 
     setupEventListeners() {
+        console.log('🛠️ Setting up event listeners...');
+
+        const safeAddListener = (id, event, callback) => {
+            try {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener(event, callback);
+                } else {
+                    console.warn(`⚠️ Element #${id} not found, skipping listener.`);
+                }
+            } catch (err) {
+                console.error(`❌ Error setting up listener for #${id}:`, err);
+            }
+        };
+
         // Export JSON button
-        document.getElementById('exportDataBtn').addEventListener('click', () => {
-            this.exportData();
-        });
+        safeAddListener('exportDataBtn', 'click', () => this.exportData());
 
         // Export Excel button
-        document.getElementById('exportExcelBtn').addEventListener('click', () => {
-            this.exportToExcel();
-        });
+        safeAddListener('exportExcelBtn', 'click', () => this.exportToExcel());
 
         // Import data button
-        document.getElementById('importDataBtn').addEventListener('click', () => {
-            document.getElementById('importFileInput').click();
+        safeAddListener('importDataBtn', 'click', () => {
+            const fileInput = document.getElementById('importFileInput');
+            if (fileInput) fileInput.click();
         });
 
         // Import file input change
-        document.getElementById('importFileInput').addEventListener('change', (e) => {
+        safeAddListener('importFileInput', 'change', (e) => {
             this.importData(e.target.files[0]);
         });
 
+        // Delete All Data Button (Danger Zone)
+        safeAddListener('deleteAllDataBtn', 'click', () => this.showDeleteDataModal());
+
+        // Delete Data Modal Buttons
+        safeAddListener('cancelDeleteDataBtn', 'click', () => this.cancelDeleteData());
+        safeAddListener('confirmDeleteDataBtn', 'click', () => this.confirmDeleteData());
+
         // Bottom navigation (mobile)
-        document.querySelectorAll('.bottom-nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                this.switchView(item.dataset.view);
+        try {
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    this.switchView(item.dataset.view);
+                });
             });
-        });
+        } catch (err) {
+            console.error('❌ Error setting up bottom nav listeners:', err);
+        }
 
         // Theme Buttons (Settings)
-        const darkBtn = document.getElementById('theme-dark-btn');
-        const lightBtn = document.getElementById('theme-light-btn');
-
-        if (darkBtn) darkBtn.addEventListener('click', () => this.setTheme('dark'));
-        if (lightBtn) lightBtn.addEventListener('click', () => this.setTheme('light'));
+        safeAddListener('theme-dark-btn', 'click', () => this.setTheme('dark'));
+        safeAddListener('theme-light-btn', 'click', () => this.setTheme('light'));
 
         // Initialize theme from localStorage
-        this.initTheme();
+        try {
+            this.initTheme();
+        } catch (err) {
+            console.error('❌ Error initializing theme:', err);
+        }
 
         // Language Selector
-        this.setupLanguageSelector();
+        try {
+            this.setupLanguageSelector();
+        } catch (err) {
+            console.error('❌ Error setting up language selector:', err);
+        }
 
         // Currency Settings
-        this.setupCurrencySettings();
+        try {
+            this.setupCurrencySettings();
+        } catch (err) {
+            console.error('❌ Error setting up currency settings:', err);
+        }
 
         // Biometric Toggle (Settings)
-        this.setupBiometricSettings();
+        try {
+            this.setupBiometricSettings();
+        } catch (err) {
+            console.error('❌ Error setting up biometric settings:', err);
+        }
+
+        // Base Currency (Settings)
+        try {
+            this.setupBaseCurrencySettings();
+        } catch (err) {
+            console.error('❌ Error setting up base currency settings:', err);
+        }
 
         // Manage Recurring Transactions Button
-        if (window.recurringManager) {
-            window.recurringManager.initUI();
+        try {
+            if (window.recurringManager) {
+                window.recurringManager.initUI();
+            }
+        } catch (err) {
+            console.error('❌ Error initializing recurring manager UI:', err);
         }
+
+        // Notifications (Settings)
+        try {
+            this.setupNotificationSettings();
+        } catch (err) {
+            console.error('❌ Error setting up notification settings:', err);
+        }
+
+        // 3. Initialise Notifications
+        try {
+            if (window.notificationManager) {
+                window.notificationManager.init();
+            }
+        } catch (err) {
+            console.error('❌ Error initializing notification manager:', err);
+        }
+    }
+
+    forceRedraw() {
+        // Force layout recalculation to fix rendering glitches
+        document.body.style.display = 'none';
+        document.body.offsetHeight; // Trigger reflow
+        document.body.style.display = '';
     }
 
     setupBiometricSettings() {
@@ -135,7 +220,7 @@ class MoneyManagerApp {
                         const result = await plugin.isAvailable();
                         if (result.isAvailable) {
                             dataManager.setBiometricEnabled(true);
-                            this.showToast('🔐 Biometric lock enabled');
+                            this.showToast(window.i18n.t('biometricEnabledToast'));
                         } else {
                             alert('❌ Biometrics not available on this device.');
                             toggle.checked = false;
@@ -147,11 +232,11 @@ class MoneyManagerApp {
                 } else {
                     // Simulation mode or web
                     dataManager.setBiometricEnabled(true);
-                    this.showToast('🔐 Biometric lock enabled (Simulation)');
+                    this.showToast(window.i18n.t('biometricSimulationToast'));
                 }
             } else {
                 dataManager.setBiometricEnabled(false);
-                this.showToast('🔓 Biometric lock disabled');
+                this.showToast(window.i18n.t('biometricDisabledToast'));
             }
         });
 
@@ -162,6 +247,69 @@ class MoneyManagerApp {
                 if (window.securityManager) window.securityManager.authenticate();
             });
         }
+    }
+
+    setupNotificationSettings() {
+        const reminderToggle = document.getElementById('reminderToggle');
+        const quickActionsToggle = document.getElementById('quickActionsToggle');
+
+        if (!reminderToggle || !quickActionsToggle) return;
+
+        // Set initial state
+        reminderToggle.checked = dataManager.isReminderEnabled();
+        quickActionsToggle.checked = dataManager.isQuickActionsEnabled();
+
+        // Reminder Toggle
+        reminderToggle.addEventListener('change', async (e) => {
+            const enabled = e.target.checked;
+            dataManager.setReminderEnabled(enabled);
+
+            if (window.notificationManager) {
+                if (enabled) {
+                    await window.notificationManager.scheduleDailyReminder();
+                    this.showToast('🔔 ' + window.i18n.t('dailyReminder') + ' ON');
+                } else {
+                    await window.notificationManager.cancelDailyReminder();
+                    this.showToast('🔕 ' + window.i18n.t('dailyReminder') + ' OFF');
+                }
+            }
+        });
+
+        // Quick Actions Toggle
+        quickActionsToggle.addEventListener('change', async (e) => {
+            const enabled = e.target.checked;
+            dataManager.setQuickActionsEnabled(enabled);
+
+            if (window.notificationManager) {
+                if (enabled) {
+                    await window.notificationManager.showQuickActions();
+                    this.showToast('⚡ ' + window.i18n.t('quickActions') + ' ON');
+                } else {
+                    await window.notificationManager.cancelQuickActions();
+                    this.showToast('🛑 ' + window.i18n.t('quickActions') + ' OFF');
+                }
+            }
+        });
+    }
+
+    setupBaseCurrencySettings() {
+        const select = document.getElementById('baseCurrencySelect');
+        if (!select) return;
+
+        // Set initial state
+        select.value = dataManager.getBaseCurrency();
+
+        select.addEventListener('change', (e) => {
+            const currency = e.target.value;
+            dataManager.setBaseCurrency(currency);
+            this.showToast(window.i18n.t('baseCurrencySetToast').replace('{currency}', currency));
+
+            // Refresh dashboards and analytics
+            this.updateNetWorth();
+            if (window.transactionManager) {
+                window.transactionManager.renderAnalytics();
+            }
+        });
     }
 
     setupLanguageSelector() {
@@ -287,7 +435,7 @@ class MoneyManagerApp {
 
             if (isNaN(newRates.usdToNtd) || isNaN(newRates.usdToIdr) || isNaN(newRates.ntdToIdr) ||
                 newRates.usdToNtd <= 0 || newRates.usdToIdr <= 0 || newRates.ntdToIdr <= 0) {
-                this.showToast('❌ Invalid rate values');
+                this.showToast(window.i18n.t('invalidRatesToast'));
                 return;
             }
 
@@ -378,7 +526,7 @@ class MoneyManagerApp {
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                this.showToast('✅ Data exported successfully!');
+                this.showToast(window.i18n.t('dataExportedToast'));
             }
         } catch (error) {
             console.error('Export failed:', error);
@@ -424,11 +572,11 @@ class MoneyManagerApp {
                     url: result.uri,
                     dialogTitle: 'Save your file'
                 });
-                this.showToast('✅ Export processed!');
+                this.showToast(window.i18n.t('exportProcessedToast'));
             } catch (shareErr) {
                 // Ignore cancellation - user likely just closed the share sheet
                 if (shareErr.message && shareErr.message.toLowerCase().includes('canceled')) {
-                    this.showToast('✅ Export finished');
+                    this.showToast(window.i18n.t('exportFinishedToast'));
                 } else {
                     throw shareErr;
                 }
@@ -436,6 +584,9 @@ class MoneyManagerApp {
         } catch (e) {
             console.error('Native export error:', e);
             alert('❌ Native export failed: ' + e.message);
+        } finally {
+            // Force redraw to fix UI glitches after returning from native share sheet
+            setTimeout(() => this.forceRedraw(), 300);
         }
     }
 
@@ -455,16 +606,16 @@ class MoneyManagerApp {
                 const targetWallet = t.targetWalletId ? wallets.find(w => w.id === t.targetWalletId) : null;
 
                 return {
-                    'Date': new Date(t.date).toLocaleString(),
-                    'Type': t.type.toUpperCase(),
-                    'Category': t.category,
-                    'From Wallet': sourceWallet ? `${sourceWallet.name} (${sourceWallet.currency})` : 'Deleted Wallet',
-                    'To Wallet/Account': targetWallet ? `${targetWallet.name} (${targetWallet.currency})` : (t.type === 'transfer' ? 'Unknown' : '-'),
-                    'Amount': t.amount,
-                    'Currency': t.currency,
-                    'Fee': t.transferFee || 0,
-                    'Conv Rate': t.type === 'transfer' ? (t.conversionRate || 1) : '',
-                    'Note': t.note || ''
+                    [window.i18n.t('date')]: new Date(t.date).toLocaleString(),
+                    [window.i18n.t('type')]: window.i18n.t(t.type), // income, expense, transfer
+                    [window.i18n.t('category')]: window.transactionManager ? window.transactionManager.getCategoryTranslation(t.category) : t.category,
+                    [window.i18n.t('wallet')]: sourceWallet ? `${sourceWallet.name} (${sourceWallet.currency})` : window.i18n.t('deletedWallet'),
+                    [window.i18n.t('targetWallet')]: targetWallet ? `${targetWallet.name} (${targetWallet.currency})` : (t.type === 'transfer' ? window.i18n.t('unknown') : '-'),
+                    [window.i18n.t('amount')]: t.amount,
+                    [window.i18n.t('currency')]: t.currency,
+                    [window.i18n.t('transferFee')]: t.transferFee || 0,
+                    [window.i18n.t('conversionRate')]: t.type === 'transfer' ? (t.conversionRate || 1) : '',
+                    [window.i18n.t('note')]: t.note || ''
                 };
             });
 
@@ -476,18 +627,18 @@ class MoneyManagerApp {
             const totalUSD = currencyManager.getTotalByCurrency('USD');
             const totalIDR = currencyManager.getTotalByCurrency('IDR');
 
-            const summaryHeaders = ['Report Section', 'Details', 'Value'];
+            const summaryHeaders = [window.i18n.t('reportSection'), window.i18n.t('details'), window.i18n.t('value')];
             const summaryRows = [
-                ['TOTAL NET WORTH', 'NTD Balance', totalNTD],
-                ['TOTAL NET WORTH', 'USD Balance', totalUSD],
-                ['TOTAL NET WORTH', 'IDR Balance', totalIDR],
+                [window.i18n.t('totalNetWorth'), window.i18n.t('balance') + ' (NTD)', totalNTD],
+                [window.i18n.t('totalNetWorth'), window.i18n.t('balance') + ' (USD)', totalUSD],
+                [window.i18n.t('totalNetWorth'), window.i18n.t('balance') + ' (IDR)', totalIDR],
                 ['', '', ''], // Spacer
-                ['WALLET LIST', 'Wallet Name (Platform)', 'Balance']
+                [window.i18n.t('walletList'), window.i18n.t('walletNamePlatform'), window.i18n.t('balance')]
             ];
 
             wallets.forEach(w => {
                 summaryRows.push([
-                    'WALLET',
+                    window.i18n.t('wallet'),
                     `${w.name} (${w.platform})`,
                     `${w.currency} ${w.balance.toLocaleString()}`
                 ]);
@@ -498,8 +649,8 @@ class MoneyManagerApp {
 
             // Create Workbook
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
-            XLSX.utils.book_append_sheet(wb, wsTransactions, 'Transactions');
+            XLSX.utils.book_append_sheet(wb, wsSummary, window.i18n.t('summary'));
+            XLSX.utils.book_append_sheet(wb, wsTransactions, window.i18n.t('transactions'));
 
             const filename = `smart-money-export-${new Date().toISOString().split('T')[0]}.xlsx`;
 
@@ -510,7 +661,7 @@ class MoneyManagerApp {
                 await this.handleNativeExport(filename, base64, true);
             } else {
                 XLSX.writeFile(wb, filename);
-                this.showToast('✅ Excel file exported successfully!');
+                this.showToast(window.i18n.t('excelExportedToast'));
             }
         } catch (error) {
             console.error('Excel Export failed:', error);
@@ -534,6 +685,135 @@ class MoneyManagerApp {
             cols.push({ wch: maxLen + 2 });
         }
         ws['!cols'] = cols;
+    }
+
+    showDeleteDataModal() {
+        const modal = document.getElementById('deleteDataModal');
+        const confirmBtn = document.getElementById('confirmDeleteDataBtn');
+        const timerText = document.getElementById('deleteDataTimerText');
+
+        if (!modal || !confirmBtn || !timerText) return;
+
+        // Reset state
+        confirmBtn.disabled = true;
+        confirmBtn.style.opacity = '0.5';
+        confirmBtn.style.cursor = 'not-allowed';
+        modal.classList.add('active');
+
+        // Start Timer
+        this.startDeleteTimer(confirmBtn, timerText);
+    }
+
+    startDeleteTimer(btn, textSpan) {
+        let seconds = 5;
+        const proceedText = window.i18n.t('proceed');
+        const timerTemplate = window.i18n.t('proceedTimer');
+
+        // Initial text
+        textSpan.textContent = timerTemplate.replace('{s}', seconds);
+
+        this.deleteTimer = setInterval(() => {
+            seconds--;
+            if (seconds > 0) {
+                textSpan.textContent = timerTemplate.replace('{s}', seconds);
+            } else {
+                clearInterval(this.deleteTimer);
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                textSpan.textContent = proceedText;
+            }
+        }, 1000);
+    }
+
+    cancelDeleteData() {
+        const modal = document.getElementById('deleteDataModal');
+        if (modal) modal.classList.remove('active');
+        if (this.deleteTimer) clearInterval(this.deleteTimer);
+    }
+
+    confirmDeleteData() {
+        if (confirm(window.i18n.t('confirmDeleteAllData'))) {
+            // Check again for safety (double confirm handled by browser alert usually, or just proceed)
+            // But we already have a 5s timer modal. Just double check via simple alert or just do it?
+            // User requirement: "when user press it, please show a warning notification... then the proceed button can be pressed".
+            // The modal IS the warning notification. So pressing "Proceed" should execute.
+
+            try {
+                // Clear all data
+                localStorage.clear();
+                this.showToast(window.i18n.t('allDataClearedToast'));
+
+                // Reload app to reset state completely
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } catch (e) {
+                console.error('Delete data failed:', e);
+                alert('Failed to delete data: ' + e.message);
+            }
+        }
+    }
+
+    showDeleteDataModal() {
+        const modal = document.getElementById('deleteDataModal');
+        const confirmBtn = document.getElementById('confirmDeleteDataBtn');
+        const timerText = document.getElementById('deleteDataTimerText');
+
+        if (!modal || !confirmBtn || !timerText) return;
+
+        // Reset state
+        confirmBtn.disabled = true;
+        confirmBtn.style.opacity = '0.5';
+        confirmBtn.style.cursor = 'not-allowed';
+        modal.classList.add('active');
+
+        // Start Timer
+        this.startDeleteTimer(confirmBtn, timerText);
+    }
+
+    startDeleteTimer(btn, textSpan) {
+        let seconds = 5;
+        const proceedText = window.i18n.t('proceed');
+        const timerTemplate = window.i18n.t('proceedTimer');
+
+        // Initial text
+        textSpan.textContent = timerTemplate.replace('{s}', seconds);
+
+        this.deleteTimer = setInterval(() => {
+            seconds--;
+            if (seconds > 0) {
+                textSpan.textContent = timerTemplate.replace('{s}', seconds);
+            } else {
+                clearInterval(this.deleteTimer);
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                textSpan.textContent = proceedText;
+            }
+        }, 1000);
+    }
+
+    cancelDeleteData() {
+        const modal = document.getElementById('deleteDataModal');
+        if (modal) modal.classList.remove('active');
+        if (this.deleteTimer) clearInterval(this.deleteTimer);
+    }
+
+    confirmDeleteData() {
+        try {
+            // Clear all data
+            localStorage.clear();
+            this.showToast(window.i18n.t('allDataClearedToast'));
+
+            // Reload app to reset state completely
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        } catch (e) {
+            console.error('Delete data failed:', e);
+            alert('Failed to delete data: ' + e.message);
+        }
     }
 
     importData(file) {
@@ -561,7 +841,7 @@ class MoneyManagerApp {
                     transactionManager.updateCategoryDropdown();
                     transactionManager.renderSettingsCategoryList();
 
-                    this.showToast('✅ Data imported successfully!');
+                    this.showToast(window.i18n.t('importSuccess'));
                 } else {
                     alert('❌ Failed to import data. Please check the file format.');
                 }
@@ -597,6 +877,11 @@ class MoneyManagerApp {
             // Refresh Analytics date if switching to analytics
             if (view === 'analytics' && window.transactionManager) {
                 window.transactionManager.refreshAnalyticsDate();
+            }
+
+            // Reset Transaction History pagination if switching to transactions
+            if (view === 'transactions' && window.transactionManager) {
+                window.transactionManager.resetPagination();
             }
         }
     }
@@ -655,7 +940,7 @@ class MoneyManagerApp {
             transactionManager.render();
             transactionManager.renderAnalytics();
             transactionManager.updateWalletDropdown();
-            this.showToast('✅ All data cleared!');
+            this.showToast(window.i18n.t('allDataClearedToast'));
         }
     }
 }

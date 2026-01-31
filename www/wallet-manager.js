@@ -82,7 +82,7 @@ class WalletManager {
 
         if (walletId) {
             // Edit mode
-            title.textContent = 'Edit Wallet';
+            title.textContent = window.i18n?.t('editWallet') || 'Edit Wallet';
             const wallet = this.dataManager.getWalletById(walletId);
             document.getElementById('walletName').value = wallet.name;
             document.getElementById('walletCurrency').value = wallet.currency;
@@ -94,7 +94,7 @@ class WalletManager {
             if (deleteBtn) deleteBtn.style.display = 'block';
         } else {
             // Add mode
-            title.textContent = 'Add Wallet';
+            title.textContent = window.i18n?.t('addWallet') || 'Add Wallet';
             document.getElementById('walletForm').reset();
 
             // Hide delete button in add mode
@@ -138,9 +138,11 @@ class WalletManager {
         if (this.editingWalletId) {
             // Update existing wallet
             this.dataManager.updateWallet(this.editingWalletId, walletData);
+            if (window.app) window.app.showToast(window.i18n.t('walletUpdated'));
         } else {
             // Add new wallet
             this.dataManager.addWallet(walletData);
+            if (window.app) window.app.showToast(window.i18n.t('walletCreated'));
         }
 
         this.closeWalletModal();
@@ -159,7 +161,7 @@ class WalletManager {
     }
 
     deleteWallet(walletId) {
-        if (confirm('Are you sure you want to delete this wallet? This action cannot be undone.')) {
+        if (confirm(window.i18n.t('confirmDeleteWallet'))) {
             this.dataManager.deleteWallet(walletId);
             this.render();
 
@@ -168,9 +170,14 @@ class WalletManager {
                 window.app.updateNetWorth();
             }
 
-            // Update transaction wallet dropdown
+            // Refresh all related views
             if (window.transactionManager) {
+                window.transactionManager.render();
+                window.transactionManager.renderAnalytics();
                 window.transactionManager.updateWalletDropdown();
+            }
+            if (window.recurringManager) {
+                window.recurringManager.renderList();
             }
 
             this.closeWalletModal();

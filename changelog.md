@@ -4,13 +4,73 @@ All notable changes to the **Smart Money Tracker** app will be documented in thi
 
 ---
 
+## [1.5.0] - 2026-01-31
+### 📱 Major Update: Smart Notifications, UI Refinements, Bug Fixes, and Stability
+
+#### 🆕 New Features
+- **Smart Notifications System**:
+  - Daily Reminder Notifications: Optional evening reminders to log transactions  
+  - Quick Actions Notification: Persistent notification with shortcuts for instant Income/Expense entry
+  
+#### 🎨 User Interface Improvements
+- **Settings UI Overhaul**:
+  - Refactored to separate emoji icons from text labels  
+  - Scoped translation updates prevent UI glitches
+  
+- **Analytics Enhancements**:
+  - Compact view showing only categories and totals
+  - Detail modal for individual transactions per category  
+  - Pagination (7 items/page) for smooth performance
+
+- **Recurring UI Cleanup**:
+  - Fixed category field visibility in Edit Recurring modal
+
+- **Form Improvements**:
+  - Better visual feedback when interacting with inputs
+  - Calculator when inputting amount
+
+#### 🐛 Bug Fixes & Stability
+- Fixed cascading wallet deletion - transactions properly removed  
+- Fixed wallet dropdown sync after deletions
+- Improved focus behavior when scrolling
+
+#### 🌐 Localization & Translation
+- All system alerts now properly localized
+- Full date localization in Analytics and lists
+- Everything dynamically translated
+
+## [1.4.4] - 2026-01-28
+### 📊 Advanced Analytics: Compact Lists & Detail Modals
+- **Compact Analytics**: Refactored the Income/Expense breakdown to show only categories and totals, significantly decluttering the view.
+- **Detail Modal**: Added a new "Detail Sheet" that opens when clicking a category, displaying individual transactions with notes and dates.
+- **Modal Pagination**: Implemented 7-item pagination within the category detail modal to ensure smooth performance even with hundreds of transactions.
+- **Scroll Memory**: Modal automatically scrolls to top when navigating pages for better UX.
+
+## [1.4.3] - 2026-01-28
+### 🐛 Layout Fixes & Full Localization
+- **Layout Repair**: Fixed critical bug where Settings cards (Security, Category Management, etc.) were incorrectly visible in Wallets, History, and Analytics sections.
+- **Full Date Localization**: Analytics and Transaction lists now correctly display month and day names in Bahasa, Chinese, or English based on the selected app language.
+- **Soothing Theme**: Refined Light Mode with a "Soft Yellow/Parchment" palette to further reduce eye strain and improve readability.
+
+## [1.4.2] - 2026-01-27
+### 🎨 Visual Comfort & Transparency
+- **Soft Light Mode**: Replaced harsh pure white backgrounds with a more comfortable Cream/Light Yellow palette to reduce eye strain.
+- **Analytics Transparency**: Added "Converted from [Source]" notes to breakdown items in the global "ALL" view.
+- **Default Currency**: Set IDR as the standard default base currency for new users.
+
+## [1.4.1] - 2026-01-27
+### 🌐 Localization Refinement & Base Currency
+- **Base Currency Setting**: Added option in Settings to choose preferred pivot currency (USD, NTD, IDR) for global Analytics.
+- **Full Translation Standard**: Removed hardcoded "All" labels and hacky string splits. All tabs and buttons are now dynamically localized.
+- **Localized System Alerts**: Standardized all `confirm()` and `alert()` dialogs across English, Bahasa, and Mandarin.
+- **Sync Fix**: Ensuring transaction wallet dropdowns siempre show up-to-date balances after deletions.
+
 ## [1.4.0] - 2026-01-18
 ### 💱 Manual Currency Management & Precision Scheduling
 - **Manual Currency Ratios**: Introduced a new "Currency Rates" section in Settings. Users can now manually define exact ratios for `USD/NTD`, `USD/IDR`, and `NTD/IDR`.
 - **Smart Transfer Logic**: Transaction forms now dynamically suggest the correct conversion rate based on the source/target wallet's currency hierarchy (Strong-to-Weak logic).
 - **Precision Recurring Schedules**: Added "Next Occurrence" date-time selector to recurring templates. Users can now specify the exact hour, date, or month for their automated transactions.
-- **Improved UI Formatting**: Implemented automatic thousands separators (e.g., 16,900) for all currency rate inputs, maintaining a premium feel throughout the settings and forms.
-- **Real-time Localization**: Conversion prompts and recurrence labels now update instantly when the app language is switched.
+
 
 ---
 

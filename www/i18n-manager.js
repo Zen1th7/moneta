@@ -6,6 +6,17 @@ const translations = {
         analytics: "Analytics",
         settings: "Settings",
 
+        // Validation & Placeholders
+        selectOccurrence: "Select occurrence...",
+        selectType: "Select type...",
+        selectCategory: "Select category...",
+        pleaseSelectWallet: "Please select a wallet",
+        pleaseSelectOccurrence: "Please select an occurrence",
+        pleaseSelectType: "Please select a type",
+        pleaseSelectCategory: "Please select a category",
+        pleaseSelectDestination: "Please select a destination wallet",
+        pleaseEnterValidAmount: "Please enter a valid amount",
+
         // Wallets View
         netWorth: "Total Net Worth",
         addWallet: "Add Wallet",
@@ -28,6 +39,14 @@ const translations = {
         date: "Date",
         submit: "Add Transaction",
         saveChanges: "Save Changes",
+        close: "Close",
+        categoryDetail: "Category Detail",
+        transferAmount: "Transfer Amount",
+        noOtherWallets: "No other wallets available",
+        exportInstruction: "💡 Tip: Save directly to 'Files' to keep .json format. Messaging apps (WA/Line) may rename it to .txt.",
+        add: "Add",
+        editWallet: "Edit Wallet",
+        editTransaction: "Edit Transaction",
 
         // History View
         transactionHistory: "Transaction History",
@@ -63,6 +82,8 @@ const translations = {
         custom: "Custom",
         to: "to",
         selectDateRange: "Please select a valid date range.",
+        enterYear: "Enter Year (YYYY):",
+        invalidYear: "Invalid year entered.",
 
         // Settings View
         language: "Language",
@@ -164,7 +185,67 @@ const translations = {
         balanceTrend: "Balance Trend",
         jan: "Jan", feb: "Feb", mar: "Mar", apr: "Apr", may: "May", jun: "Jun",
         jul: "Jul", aug: "Aug", sep: "Sep", oct: "Oct", nov: "Nov", dec: "Dec",
-        dayPrefix: "Day", daySuffix: ""
+        dayPrefix: "Day", daySuffix: "",
+        all: "All",
+        confirmDeleteWallet: "Are you sure you want to delete this wallet? This will also delete all associated transaction history and recurring schedules.",
+        confirmDeleteTransaction: "Are you sure you want to delete this transaction?",
+        confirmDeleteRecurring: "Are you sure you want to delete this recurring schedule?",
+        confirmDeleteAllData: "Are you sure you want to delete ALL data? This cannot be undone!",
+        baseCurrency: "Base Currency",
+        baseCurrencyDesc: "Default currency for global Analytics & Net Worth summaries.",
+        searchTransactions: "Search transactions...",
+
+        // New Toast & Confirm keys (v1.4.6)
+        filterAppliedToast: "📊 Filter Applied: {range}",
+        rangeAllTime: "All Time",
+        rangeCustom: "Custom Range",
+        rangeLastDays: "Last {days} Days",
+        biometricEnabledToast: "🔐 Biometric lock enabled",
+        biometricDisabledToast: "🔓 Biometric lock disabled",
+        biometricSimulationToast: "🔐 Biometric lock enabled (Simulation)",
+        baseCurrencySetToast: "✅ Base currency set to {currency}",
+        invalidRatesToast: "❌ Invalid rate values",
+        dataExportedToast: "✅ Data exported successfully!",
+        exportProcessedToast: "✅ Export processed!",
+        exportFinishedToast: "✅ Export finished",
+        excelExportedToast: "✅ Excel file exported successfully!",
+        allDataClearedToast: "✅ All data cleared!",
+        recurringScheduledToast: "✅ Recurring transaction scheduled!",
+        recurringUpdatedToast: "✅ Recurring schedule updated!",
+        confirmDeleteCategory: "Delete category \"{name}\"? This won't affect existing transactions.",
+        categoryAlreadyExists: "❌ Category already exists in this list!",
+        categoryCreated: "✅ Category created!",
+
+        // Excel Export
+        reportSection: "Report Section",
+        details: "Details",
+        value: "Value",
+        totalNetWorth: "TOTAL NET WORTH",
+        walletList: "WALLET LIST",
+        walletNamePlatform: "Wallet Name (Platform)",
+        summary: "Summary",
+        transactions: "Transactions",
+        deletedWallet: "Deleted Wallet",
+        unknown: "Unknown",
+
+        // Delete Data
+        dangerZone: "Danger Zone",
+        deleteAllData: "Delete All Data",
+        deleteAllDataConfirmTitle: "Delete All Data?",
+        deleteAllDataConfirmMessage: "This action cannot be undone. All your wallets and transactions will be permanently lost.",
+        proceed: "Proceed",
+        proceedTimer: "Proceed ({s}s)",
+        calculator: "Calculator",
+        done: "Done",
+        notifications: "Notifications",
+        dailyReminder: "Daily Tracking Reminder",
+        dailyReminderDesc: "Get a friendly nudge to log your transactions every evening.",
+        quickActions: "Quick Action Notification",
+        quickActionsDesc: "Keep a persistent notification to quickly add income or expenses.",
+        addIncome: "Add Income",
+        addExpense: "Add Expense",
+        reminderTitle: "Time to track! 👛",
+        reminderBody: "Don't forget to log your transactions for today to keep your records accurate."
     },
     id: {
         // Bottom Nav
@@ -172,6 +253,17 @@ const translations = {
         history: "Transaksi",
         analytics: "Analitik",
         settings: "Pengaturan",
+
+        // Validation & Placeholders
+        selectOccurrence: "Pilih frekuensi...",
+        selectType: "Pilih tipe...",
+        selectCategory: "Pilih kategori...",
+        pleaseSelectWallet: "Pilih dompet terlebih dahulu",
+        pleaseSelectOccurrence: "Pilih frekuensi terlebih dahulu",
+        pleaseSelectType: "Pilih tipe terlebih dahulu",
+        pleaseSelectCategory: "Pilih kategori terlebih dahulu",
+        pleaseSelectDestination: "Pilih dompet tujuan",
+        pleaseEnterValidAmount: "Masukkan jumlah yang valid",
 
         // Wallets View
         netWorth: "Total Kekayaan Bersih",
@@ -195,6 +287,14 @@ const translations = {
         date: "Tanggal",
         submit: "Tambah Transaksi",
         saveChanges: "Simpan Perubahan",
+        close: "Tutup",
+        categoryDetail: "Rincian Kategori",
+        transferAmount: "Jumlah Transfer",
+        noOtherWallets: "Tidak ada dompet lain",
+        exportInstruction: "💡 Tip: Simpan langsung ke 'File' agar tetap .json. Aplikasi pesan (WA/Line) mungkin mengubahnya menjadi .txt.",
+        add: "Tambah",
+        editWallet: "Edit Dompet",
+        editTransaction: "Edit Transaksi",
 
         // History View
         transactionHistory: "Riwayat Transaksi",
@@ -202,8 +302,8 @@ const translations = {
         filter: "Filter",
         page: "Halaman",
         of: "dari",
-        prev: "Seb",
-        next: "Sel",
+        prev: "Sebelum",
+        next: "Berikut",
         timePeriod: "Periode Waktu",
         allTime: "Semua Waktu",
         last7Days: "7 Hari Terakhir",
@@ -213,7 +313,7 @@ const translations = {
         startDate: "Tanggal Mulai",
         endDate: "Tanggal Selesai",
         applyFilter: "Terapkan Filter",
-        financialHealth: "Kesehatan Keuangan",
+        financialHealth: "Keadaan Keuangan",
         cashFlowTrend: "Tren Arus Kas",
         spendingAnalysis: "Analisis Pengeluaran",
         netSavings: "Tabungan Bersih",
@@ -230,6 +330,8 @@ const translations = {
         custom: "Kustom",
         to: "sampai",
         selectDateRange: "Pilih rentang tanggal yang valid.",
+        enterYear: "Masukkan Tahun (YYYY):",
+        invalidYear: "Tahun tidak valid.",
 
         // Settings View
         language: "Bahasa",
@@ -331,7 +433,67 @@ const translations = {
         balanceTrend: "Tren Saldo",
         jan: "Jan", feb: "Feb", mar: "Mar", apr: "Apr", mei: "Mei", jun: "Jun",
         jul: "Jul", agt: "Agt", sep: "Sep", okt: "Okt", nov: "Nov", des: "Des",
-        dayPrefix: "Tgl", daySuffix: ""
+        dayPrefix: "Tgl", daySuffix: "",
+        all: "Semua",
+        confirmDeleteWallet: "Apakah Anda yakin ingin menghapus dompet ini? Semua riwayat transaksi dan jadwal berulang terkait juga akan dihapus.",
+        confirmDeleteTransaction: "Apakah Anda yakin ingin menghapus transaksi ini?",
+        confirmDeleteRecurring: "Apakah Anda yakin ingin menghapus jadwal berulang ini?",
+        confirmDeleteAllData: "Apakah Anda yakin ingin menghapus SEMUA data? Tindakan ini tidak dapat dibatalkan!",
+        baseCurrency: "Mata Uang Dasar",
+        baseCurrencyDesc: "Mata uang standar untuk ringkasan Analitik & Kekayaan Bersih global.",
+        searchTransactions: "Cari transaksi...",
+
+        // New Toast & Confirm keys (v1.4.6)
+        filterAppliedToast: "📊 Filter Diterapkan: {range}",
+        rangeAllTime: "Semua Waktu",
+        rangeCustom: "Rentang Kustom",
+        rangeLastDays: "{days} Hari Terakhir",
+        biometricEnabledToast: "🔐 Kunci biometrik diaktifkan",
+        biometricDisabledToast: "🔓 Kunci biometrik dinonaktifkan",
+        biometricSimulationToast: "🔐 Kunci biometrik diaktifkan (Simulasi)",
+        baseCurrencySetToast: "✅ Mata uang dasar diatur ke {currency}",
+        invalidRatesToast: "❌ Nilai kurs tidak valid",
+        dataExportedToast: "✅ Data berhasil diekspor!",
+        exportProcessedToast: "✅ Ekspor diproses!",
+        exportFinishedToast: "✅ Ekspor selesai",
+        excelExportedToast: "✅ File Excel berhasil diekspor!",
+        allDataClearedToast: "✅ Semua data dihapus!",
+        recurringScheduledToast: "✅ Transaksi berulang dijadwalkan!",
+        recurringUpdatedToast: "✅ Jadwal berulang diperbarui!",
+        confirmDeleteCategory: "Hapus kategori \"{name}\"? Ini tidak akan memengaruhi transaksi yang sudah ada.",
+        categoryAlreadyExists: "❌ Kategori sudah ada di daftar ini!",
+        categoryCreated: "✅ Kategori dibuat!",
+
+        // Excel Export
+        reportSection: "Bagian Laporan",
+        details: "Rincian",
+        value: "Nilai",
+        totalNetWorth: "TOTAL KEKAYAAN BERSIH",
+        walletList: "DAFTAR DOMPET",
+        walletNamePlatform: "Nama Dompet (Platform)",
+        summary: "Ringkasan",
+        transactions: "Transaksi",
+        deletedWallet: "Dompet Terhapus",
+        unknown: "Tidak Diketahui",
+
+        // Delete Data
+        dangerZone: "Zona Bahaya",
+        deleteAllData: "Hapus Semua Data",
+        deleteAllDataConfirmTitle: "Hapus Semua Data?",
+        deleteAllDataConfirmMessage: "Tindakan ini tidak dapat dibatalkan. Semua dompet dan transaksi Anda akan hilang permanen.",
+        proceed: "Lanjutkan",
+        proceedTimer: "Lanjutkan ({s}d)",
+        calculator: "Kalkulator",
+        done: "Selesai",
+        notifications: "Notifikasi",
+        dailyReminder: "Pengingat Harian",
+        dailyReminderDesc: "Dapatkan pengingat setiap malam untuk mencatat transaksi Anda.",
+        quickActions: "Notifikasi Akses Cepat",
+        quickActionsDesc: "Tampilkan notifikasi tetap untuk menambah pemasukan atau pengeluaran dengan cepat.",
+        addIncome: "Tambah Pemasukan",
+        addExpense: "Tambah Pengeluaran",
+        reminderTitle: "Waktunya mencatat! 👛",
+        reminderBody: "Jangan lupa catat transaksi hari ini agar laporan keuangan tetap akurat."
     },
     zh: {
         // Bottom Nav
@@ -339,6 +501,17 @@ const translations = {
         history: "交易",
         analytics: "分析",
         settings: "設置",
+
+        // Validation & Placeholders
+        selectOccurrence: "選擇頻率...",
+        selectType: "選擇類型...",
+        selectCategory: "選擇類別...",
+        pleaseSelectWallet: "請選擇錢包",
+        pleaseSelectOccurrence: "請選擇頻率",
+        pleaseSelectType: "請選擇類型",
+        pleaseSelectCategory: "請選擇類別",
+        pleaseSelectDestination: "請選擇目標錢包",
+        pleaseEnterValidAmount: "請輸入有效金額",
 
         // Wallets View
         netWorth: "總資產",
@@ -348,6 +521,7 @@ const translations = {
 
         // Transaction Form
         addTransaction: "添加交易",
+        done: "完成",
         type: "類型",
         income: "收入",
         expense: "支出",
@@ -362,6 +536,14 @@ const translations = {
         date: "日期",
         submit: "添加交易",
         saveChanges: "保存更改",
+        close: "關閉",
+        categoryDetail: "類別詳情",
+        transferAmount: "轉帳金額",
+        noOtherWallets: "無其他可用錢包",
+        exportInstruction: "💡 提示：請直接儲存至「檔案」以保持 .json 格式。通訊軟體 (WA/Line) 可能會將其重新命名為 .txt。",
+        add: "添加",
+        editWallet: "編輯錢包",
+        editTransaction: "編輯交易",
 
         // History View
         transactionHistory: "交易歷史",
@@ -397,6 +579,8 @@ const translations = {
         custom: "自定義",
         to: "至",
         selectDateRange: "請選擇有效的日期範圍。",
+        enterYear: "輸入年份 (YYYY):",
+        invalidYear: "無效年份。",
 
         // Settings View
         language: "語言",
@@ -498,7 +682,67 @@ const translations = {
         balanceTrend: "餘額趨勢",
         jan: "1月", feb: "2月", mar: "3月", apr: "4月", may: "5月", jun: "6月",
         jul: "7月", aug: "8月", sep: "9月", oct: "10月", nov: "11月", dec: "12月",
-        dayPrefix: "", daySuffix: "日"
+        dayPrefix: "", daySuffix: "日",
+        all: "全部",
+        confirmDeleteWallet: "您確定要刪除此錢包嗎？這將同時刪除所有相關的交易歷史和週期性交易。",
+        confirmDeleteTransaction: "您確定要刪除此交易嗎？",
+        confirmDeleteRecurring: "您確定要刪除此週期性交易嗎？",
+        confirmDeleteAllData: "您確定要刪除所有數據嗎？此操作無法撤銷！",
+        baseCurrency: "基準貨幣",
+        baseCurrencyDesc: "全局分析和總資產摘要的默認貨幣。",
+        searchTransactions: "搜尋交易...",
+
+        // New Toast & Confirm keys (v1.4.6)
+        filterAppliedToast: "📊 已套用篩選：{range}",
+        rangeAllTime: "全部時間",
+        rangeCustom: "自定義範圍",
+        rangeLastDays: "最近 {days} 天",
+        biometricEnabledToast: "🔐 生物識別鎖已啟用",
+        biometricDisabledToast: "🔓 生物識別鎖已停用",
+        biometricSimulationToast: "🔐 生物識別鎖已啟用 (模擬)",
+        baseCurrencySetToast: "✅ 基準貨幣已設置為 {currency}",
+        invalidRatesToast: "❌ 無效的匯率數值",
+        dataExportedToast: "✅ 數據導出成功！",
+        exportProcessedToast: "✅ 導出手續中！",
+        exportFinishedToast: "✅ 導出完成",
+        excelExportedToast: "✅ Excel 文件導出成功！",
+        allDataClearedToast: "✅ 所有數據已清除！",
+        recurringScheduledToast: "✅ 定期交易已排程！",
+        recurringUpdatedToast: "✅ 定期交易排程已更新！",
+        confirmDeleteCategory: "確定要刪除「{name}」類別嗎？這不會影響現有的交易記錄。",
+        categoryAlreadyExists: "❌ 此類別已存在於清單中！",
+        categoryCreated: "✅ 類別已創建！",
+
+        // Excel Export
+        reportSection: "報告部分",
+        details: "詳細信息",
+        value: "價值",
+        totalNetWorth: "總資產淨值",
+        walletList: "錢包列表",
+        walletNamePlatform: "錢包名稱 (平台)",
+        summary: "摘要",
+        transactions: "交易記錄",
+        deletedWallet: "已刪除的錢包",
+        unknown: "未知",
+
+        // Delete Data
+        dangerZone: "危險區域",
+        deleteAllData: "刪除所有數據",
+        deleteAllDataConfirmTitle: "刪除所有數據？",
+        deleteAllDataConfirmMessage: "此操作無法撤銷。您的所有錢包和交易記錄將永久丟失。",
+        proceed: "繼續",
+        proceedTimer: "繼續 ({s}秒)",
+        calculator: "計算器",
+        done: "完成",
+        notifications: "通知",
+        dailyReminder: "每日記帳提醒",
+        dailyReminderDesc: "每天晚上提醒您記錄當天的交易情況。",
+        quickActions: "快速操作通知",
+        quickActionsDesc: "在狀態欄保持通知，方便快速添加收入或支出。",
+        addIncome: "新增收入",
+        addExpense: "新增支出",
+        reminderTitle: "該記帳囉！👛",
+        reminderBody: "別忘了記錄今天的交易，保持財務數據準確。"
     }
 };
 
@@ -524,15 +768,15 @@ class I18nManager {
         return val !== undefined ? val : key;
     }
 
-    applyTranslations() {
+    applyTranslations(root = document) {
         // Apply to elements with data-i18n attribute
-        document.querySelectorAll('[data-i18n]').forEach(el => {
+        root.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.dataset.i18n;
             el.textContent = this.t(key);
         });
 
         // Apply to placeholders
-        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        root.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
             const key = el.dataset.i18nPlaceholder;
             el.placeholder = this.t(key);
         });
