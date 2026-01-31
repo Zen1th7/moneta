@@ -79,7 +79,7 @@ Smart Money Tracker helps you manage your finances across different currencies w
 - Localized system alerts in all languages
 - Date localization in Analytics and lists
 
-📖 See the full changelog: [CHANGELOG.md](./CHANGELOG.md)
+📖 See the full changelog: [changelog.md](./changelog.md)
 
 ---
 *Created by Zen1th7*
