@@ -61,11 +61,23 @@ Smart Money Tracker helps you manage your finances across different currencies w
    Open the `android` folder in Android Studio and click **Run**.
 
 ## 🎯 What's New in v1.5.0
-- **Daily Reminder Notifications**: Get gentle evening nudges to log your transactions.
-- **Quick Actions Notification**: Persistent notification with shortcuts to add Income/Expense instantly from your notification bar.
-- **Enhanced Settings UI**: Icons and labels now persist correctly during language changes.
-- **Improved Localization**: Faster, more reliable translation updates across all app sections.
-- **Bug Fixes**: Resolved double submission, notification flicker, and focus overlay issues.
+
+**Major Features:**
+- 📱 **Smart Notifications**: Daily reminders + persistent Quick Actions for instant transaction logging
+- 🌍 **Base Currency Analytics**: Choose your preferred pivot currency (USD/NTD/IDR) for global summaries
+- 📊 **Analytics Overhaul**: Compact view, category detail modals, and pagination for smooth performance
+- 💾 **Delete All Data**: Nuclear option to wipe everything and start fresh
+
+**UI/UX Improvements:**
+- 🎨 Soft Light Mode with warm parchment palette (reduced eye strain)
+- ⚙️ Enhanced Settings UI with persistent icons during language changes
+- 📈 Transaction history now sorted newest-first (latest at top)
+- 🔧 Fixed cash flow trend chart rendering
+
+**Localization:**
+- Full translation standard (no more hardcoded labels)
+- Localized system alerts in all languages
+- Date localization in Analytics and lists
 
 📖 See the full changelog: [CHANGELOG.md](./CHANGELOG.md)
 
