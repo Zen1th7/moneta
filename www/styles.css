@@ -10,22 +10,22 @@
    CSS VARIABLES & DESIGN TOKENS
    =================================== */
 :root {
-  /* Colors - Dark Theme */
-  --color-bg-primary: #0a0e27;
-  --color-bg-secondary: #111633;
-  --color-bg-tertiary: #1a1f3a;
+  /* Colors - Dark Theme (Black & Light Yellow) */
+  --color-bg-primary: #000000;
+  --color-bg-secondary: #0a0a0a;
+  --color-bg-tertiary: #141414;
 
   /* Glassmorphism */
-  --glass-bg: rgba(26, 31, 58, 0.7);
+  --glass-bg: rgba(20, 20, 20, 0.7);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-blur: 20px;
 
-  /* Accent Colors - Gradients */
-  --color-primary: #6366f1;
-  --color-primary-dark: #4f46e5;
-  --color-secondary: #8b5cf6;
-  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  --gradient-primary-hover: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+  /* Accent Colors - Light Yellow Gradients */
+  --color-primary: #facc15;
+  --color-primary-dark: #eab308;
+  --color-secondary: #fef08a;
+  --gradient-primary: linear-gradient(135deg, #facc15 0%, #fef08a 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #eab308 0%, #facc15 100%);
 
   /* Semantic Colors */
   --color-success: #10b981;
@@ -1398,6 +1398,51 @@ a:hover {
 
 .text-right {
   text-align: right;
+}
+
+/* ===================================
+   TEMPLATE CHIPS
+   =================================== */
+.template-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.template-chip:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.template-chip .template-name {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.template-chip .template-delete {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  padding: 0 0 0 4px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: -4px;
+}
+
+.template-chip .template-delete:hover {
+  color: var(--color-danger);
 }
 
 .mt-sm {

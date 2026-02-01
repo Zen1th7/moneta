@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0a0e27">
+  <meta name="theme-color" content="#000000">
   <meta name="description" content="Multi-currency money management app for tracking finances across IDR, USD, and NTD">
   <title>Smart Money Tracker</title>
   <link rel="stylesheet" href="styles.css">
@@ -18,7 +18,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(10, 14, 39, 0.95);
+      background: rgba(0, 0, 0, 0.95);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       z-index: 10000;
@@ -124,7 +124,8 @@
         <header class="app-header">
           <div class="app-header-content">
             <div class="header-center">
-              <div class="net-worth" id="dashboard">
+              <div class="net-worth" id="dashboard"
+                style="background: rgba(0,0,0,0.3); border-radius: var(--radius-lg); padding: var(--space-md); border: 1px solid var(--glass-border);">
                 <div class="net-worth-label" data-i18n="netWorth">Total Net Worth</div>
                 <div class="net-worth-grid">
                   <div class="net-worth-item">
@@ -196,6 +197,18 @@
         <h2 class="section-title" style="margin-bottom: var(--space-lg);"><span>⚡</span> <span
             data-i18n="addTransaction">Transaction</span></h2>
         <div class="card">
+          <!-- Templates Selection -->
+          <div id="templates-section" class="mb-lg"
+            style="padding: var(--space-md); background: var(--color-bg-secondary); border-radius: var(--radius-md); border: 1px dashed var(--glass-border);">
+            <div class="flex-between align-center mb-sm">
+              <label class="form-label m-0" data-i18n="templates">Transaction Templates</label>
+            </div>
+            <div id="templateButtons" class="flex flex-wrap gap-xs">
+              <!-- Templates will be populated here -->
+              <span class="text-xs color-text-muted" data-i18n="noTemplatesShort">No templates saved.</span>
+            </div>
+          </div>
+
           <form id="transactionForm">
             <div class="form-group" id="field-occurrence">
               <label class="form-label" for="transactionOccurrence" data-i18n="occurrence">Occurrence</label>
@@ -285,7 +298,10 @@
 
             <input type="hidden" id="editingTransactionId">
 
-            <div id="form-actions">
+            <div id="form-actions" class="grid gap-sm">
+              <button type="button" class="btn btn-secondary btn-block" id="saveTemplateBtn">
+                ⭐ <span data-i18n="saveAsTemplate">Save as Template</span>
+              </button>
               <button type="submit" class="btn btn-primary btn-block" data-i18n="submit">
                 Add Transaction
               </button>

@@ -16,7 +16,8 @@ class DataManager {
       BASE_CURRENCY: 'moneyManager_baseCurrency',
       RECURRING: 'moneyManager_recurringTransactions',
       NOTIF_REMINDER_ENABLED: 'moneyManager_notifReminderEnabled',
-      NOTIF_QUICK_ACTIONS_ENABLED: 'moneyManager_notifQuickActionsEnabled'
+      NOTIF_QUICK_ACTIONS_ENABLED: 'moneyManager_notifQuickActionsEnabled',
+      TEMPLATES: 'moneyManager_transactionTemplates'
     };
 
     this.init();
@@ -42,6 +43,9 @@ class DataManager {
     }
     if (!this.getRecurringTransactions()) {
       this.saveRecurringTransactions([]);
+    }
+    if (!localStorage.getItem(this.STORAGE_KEYS.TEMPLATES)) {
+      this.saveTemplates([]);
     }
   }
 
@@ -558,6 +562,34 @@ class DataManager {
 
   setQuickActionsEnabled(enabled) {
     localStorage.setItem(this.STORAGE_KEYS.NOTIF_QUICK_ACTIONS_ENABLED, enabled.toString());
+  }
+
+  /**
+   * TRANSACTION TEMPLATES
+   */
+  getTemplates() {
+    const data = localStorage.getItem(this.STORAGE_KEYS.TEMPLATES);
+    return data ? JSON.parse(data) : [];
+  }
+
+  saveTemplates(templates) {
+    localStorage.setItem(this.STORAGE_KEYS.TEMPLATES, JSON.stringify(templates));
+  }
+
+  addTemplate(template) {
+    const templates = this.getTemplates();
+    template.id = this.generateId();
+    template.createdAt = new Date().toISOString();
+    templates.push(template);
+    this.saveTemplates(templates);
+    return template;
+  }
+
+  deleteTemplate(id) {
+    const templates = this.getTemplates();
+    const filtered = templates.filter(t => t.id !== id);
+    this.saveTemplates(filtered);
+    return true;
   }
 }
 

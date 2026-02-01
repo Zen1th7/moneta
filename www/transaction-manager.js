@@ -112,6 +112,7 @@ class TransactionManager {
         try {
             this.setupEventListeners();
             this.setupSettingsEventListeners(); // New Settings listeners
+            this.renderTemplates(); // Initialize templates
             this.reloadCategories();
             this.updateCategoryDropdown();
             this.updateWalletDropdown();
@@ -252,6 +253,14 @@ class TransactionManager {
             this.updateCategoryDropdown();
             this.toggleTransferFields();
         });
+
+        // Save as template button
+        const saveTemplateBtn = document.getElementById('saveTemplateBtn');
+        if (saveTemplateBtn) {
+            saveTemplateBtn.addEventListener('click', () => {
+                this.saveAsTemplate();
+            });
+        }
 
         // Transaction form submit
         document.getElementById('transactionForm').addEventListener('submit', (e) => {
@@ -2098,5 +2107,106 @@ class TransactionManager {
             this.categories = JSON.parse(savedCategories);
             console.log('🔄 Categories reloaded from storage');
         }
+    }
+
+    /**
+     * TRANSACTION TEMPLATES
+     */
+    renderTemplates() {
+        const templateContainer = document.getElementById('templateButtons');
+        if (!templateContainer) return;
+
+        const templates = this.dataManager.getTemplates();
+        if (templates.length === 0) {
+            templateContainer.innerHTML = `<span class="text-xs color-text-muted" data-i18n="noTemplatesShort">${window.i18n ? window.i18n.t('noTemplatesShort') : 'No templates saved.'}</span>`;
+            return;
+        }
+
+        templateContainer.innerHTML = templates.map(template => `
+            <div class="template-chip" data-id="${template.id}">
+                <span class="template-name">${template.name}</span>
+                <button type="button" class="template-delete" data-id="${template.id}">&times;</button>
+            </div>
+        `).join('');
+
+        // Apply translations to the "No templates" text if needed
+        if (window.i18n) window.i18n.applyTranslations(templateContainer);
+
+        // Chip click to apply template
+        templateContainer.querySelectorAll('.template-chip').forEach(chip => {
+            chip.addEventListener('click', (e) => {
+                if (e.target.classList.contains('template-delete')) return;
+                const templateId = chip.dataset.id;
+                this.applyTemplate(templateId);
+            });
+        });
+
+        // Delete button logic
+        templateContainer.querySelectorAll('.template-delete').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const templateId = btn.dataset.id;
+                if (confirm((window.i18n ? window.i18n.t('deleteTemplate') : 'Delete Template') + '?')) {
+                    this.dataManager.deleteTemplate(templateId);
+                    this.renderTemplates();
+                }
+            });
+        });
+    }
+
+    applyTemplate(templateId) {
+        const templates = this.dataManager.getTemplates();
+        const template = templates.find(t => t.id === templateId);
+        if (!template) return;
+
+        const occurrence = document.getElementById('transactionOccurrence');
+        const type = document.getElementById('transactionType');
+        const category = document.getElementById('transactionCategory');
+        const wallet = document.getElementById('transactionWallet');
+
+        if (occurrence) occurrence.value = template.occurrence;
+        if (type) {
+            type.value = template.type;
+            this.updateCategoryDropdown();
+            this.toggleTransferFields();
+        }
+
+        setTimeout(() => {
+            if (category) category.value = template.category;
+            if (wallet) wallet.value = template.walletId;
+
+            if (type && type.value === 'transfer') {
+                this.updateTargetWalletDropdown();
+            }
+            this.checkConversionNeeded();
+            this.updateConversionPreview();
+        }, 50);
+    }
+
+    saveAsTemplate() {
+        const occurrence = document.getElementById('transactionOccurrence').value;
+        const type = document.getElementById('transactionType').value;
+        const category = document.getElementById('transactionCategory').value;
+        const walletId = document.getElementById('transactionWallet').value;
+
+        if (!occurrence || !type || !category || !walletId) {
+            if (window.app) window.app.showToast(window.i18n ? window.i18n.t('pleaseSelectType') : 'Please select all fields', 'error');
+            return;
+        }
+
+        const templateName = prompt(window.i18n ? window.i18n.t('enterTemplateName') : 'Enter template name:');
+        if (!templateName) return;
+
+        const template = {
+            name: templateName,
+            occurrence,
+            type,
+            category,
+            walletId
+        };
+
+        this.dataManager.addTemplate(template);
+        this.renderTemplates();
+        if (window.app) window.app.showToast(window.i18n ? window.i18n.t('templateSaved') : 'Template saved!');
     }
 }

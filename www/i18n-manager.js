@@ -37,16 +37,15 @@ const translations = {
         transferFee: "Transfer Fee",
         note: "Note",
         date: "Date",
-        submit: "Add Transaction",
-        saveChanges: "Save Changes",
-        close: "Close",
-        categoryDetail: "Category Detail",
-        transferAmount: "Transfer Amount",
-        noOtherWallets: "No other wallets available",
-        exportInstruction: "💡 Tip: Save directly to 'Files' to keep .json format. Messaging apps (WA/Line) may rename it to .txt.",
         add: "Add",
         editWallet: "Edit Wallet",
         editTransaction: "Edit Transaction",
+        templates: "Templates",
+        saveAsTemplate: "Save as Template",
+        noTemplatesShort: "No templates saved.",
+        enterTemplateName: "Enter template name:",
+        templateSaved: "Template saved!",
+        deleteTemplate: "Delete Template",
 
         // History View
         transactionHistory: "Transaction History",
@@ -295,6 +294,12 @@ const translations = {
         add: "Tambah",
         editWallet: "Edit Dompet",
         editTransaction: "Edit Transaksi",
+        templates: "Templat",
+        saveAsTemplate: "Simpan sebagai Templat",
+        noTemplatesShort: "Belum ada templat.",
+        enterTemplateName: "Masukkan nama templat:",
+        templateSaved: "Templat disimpan!",
+        deleteTemplate: "Hapus Templat",
 
         // History View
         transactionHistory: "Riwayat Transaksi",
@@ -544,6 +549,12 @@ const translations = {
         add: "添加",
         editWallet: "編輯錢包",
         editTransaction: "編輯交易",
+        templates: "模板",
+        saveAsTemplate: "保存為模板",
+        noTemplatesShort: "暫無模板。",
+        enterTemplateName: "輸入模板名稱:",
+        templateSaved: "模板已保存！",
+        deleteTemplate: "刪除模板",
 
         // History View
         transactionHistory: "交易歷史",
