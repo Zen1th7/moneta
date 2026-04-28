@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancel in-progress runs of this workflow on the same ref when a new
+# commit lands — keeps PR feedback fast and saves CI minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  moneta-v2:
+    name: Lint + Typecheck + Test + Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: moneta-v2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: moneta-v2/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npx vue-tsc --noEmit
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build web bundle
+        run: npx quasar build

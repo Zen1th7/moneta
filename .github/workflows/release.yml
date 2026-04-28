@@ -1,0 +1,77 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Only one release run at a time — never cancel mid-build because that
+# can leave a partial GitHub release in place.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  android-debug-apk:
+    name: Build Android debug APK + GitHub Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to create the GitHub Release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: moneta-v2/package-lock.json
+
+      - name: Set up JDK 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Install web dependencies
+        working-directory: moneta-v2
+        run: npm ci
+
+      - name: Install Capacitor dependencies
+        working-directory: moneta-v2/src-capacitor
+        run: npm ci
+
+      - name: Build web bundle
+        working-directory: moneta-v2
+        run: npx quasar build
+
+      # Quasar's Capacitor mode normally drives the next two steps, but
+      # it also tries to open Android Studio at the end which is
+      # meaningless on a headless runner. We invoke Capacitor and Gradle
+      # directly so CI is deterministic.
+      - name: Sync web bundle into Android project
+        working-directory: moneta-v2/src-capacitor
+        run: |
+          mkdir -p www
+          cp -r ../dist/spa/. www/
+          npx cap sync android
+
+      - name: Build debug APK
+        working-directory: moneta-v2/src-capacitor/android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Rename APK to include the tag
+        working-directory: moneta-v2/src-capacitor/android/app/build/outputs/apk/debug
+        run: mv app-debug.apk "moneta-${{ github.ref_name }}-debug.apk"
+
+      - name: Publish GitHub Release with APK
+        uses: softprops/action-gh-release@v2
+        with:
+          files: moneta-v2/src-capacitor/android/app/build/outputs/apk/debug/moneta-${{ github.ref_name }}-debug.apk
+          generate_release_notes: true
+          draft: false
+          prerelease: false
