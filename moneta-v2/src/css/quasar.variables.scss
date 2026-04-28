@@ -1,0 +1,25 @@
+// Quasar Sass Variables — Moneta · Midnight Gold
+// --------------------------------------------------
+// These map Quasar's built-in component colors onto the Midnight Gold
+// palette for dark mode (the app's default). Light-mode overrides for
+// $primary/$secondary live in app.scss via body.body--light.
+//
+// Source of truth for the full token set: src/css/app.scss
+
+// Brand — Midnight Gold (dark mode default)
+$primary   : #F59E0B; // Midnight Gold accent
+$secondary : #FBBF24; // Lifted gold (hover/highlight)
+$accent    : #D97706; // Deep amber (pressed/secondary)
+
+// Surfaces
+$dark      : #111827; // Card / secondary bg
+$dark-page : #0A0F1A; // App background — Midnight Navy
+
+// Semantic
+$positive  : #10B981; // Income / on-track
+$negative  : #EF4444; // Expense / over-budget
+$info      : #3B82F6; // Info / transfer
+$warning   : #F97316; // Warning / near-limit
+
+// Typography
+$typography-font-family : 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
