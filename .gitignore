@@ -24,3 +24,30 @@ backup/
 exported_files/
 apk/
 .DS_Store
+
+# Tool caches and AI agent artifacts
+.agent/
+.claude/
+.playwright-mcp/
+.superpowers/
+.graphify_python
+graphify-out/
+
+# Moneta v2 (Quasar/Vite build artifacts)
+moneta-v2/.quasar/
+moneta-v2/dist/
+
+# Moneta v2 Capacitor Android build output
+moneta-v2/src-capacitor/android/build/
+moneta-v2/src-capacitor/android/.gradle/
+moneta-v2/src-capacitor/android/local.properties
+moneta-v2/src-capacitor/android/captures/
+moneta-v2/src-capacitor/android/app/build/
+moneta-v2/src-capacitor/android/app/release/
+moneta-v2/src-capacitor/android/app/*.apk
+moneta-v2/src-capacitor/android/app/*.aab
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
