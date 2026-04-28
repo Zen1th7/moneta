@@ -208,7 +208,7 @@ class NotificationManager {
             await this.plugin.schedule({
                 notifications: [
                     {
-                        title: 'Smart Money Tracker',
+                        title: 'Moneta',
                         body: '', // Empty body as requested for the notification popup to keep it compact
                         id: this.QUICK_ACTIONS_ID,
                         ongoing: true,
@@ -230,6 +230,39 @@ class NotificationManager {
         await this.plugin.cancel({
             notifications: [{ id: this.QUICK_ACTIONS_ID }]
         });
+    }
+
+    /**
+     * Budget threshold alert — in-app toast + native push (Capacitor).
+     * Deduplicates per session so the same budget+threshold only fires once.
+     */
+    async sendBudgetAlert(budget, value, threshold) {
+        if (!this._budgetAlertSent) this._budgetAlertSent = new Set();
+        const key = `${budget.id}:${threshold}`;
+        if (this._budgetAlertSent.has(key)) return;
+        this._budgetAlertSent.add(key);
+
+        const category = budget.categoryId;
+        const msg = threshold === 'over'
+            ? `"${category}" budget exceeded your ${budget.currency} limit.`
+            : `"${category}" budget is ${Math.round(value)}% used — nearing limit.`;
+
+        window.app?.showToast((threshold === 'over' ? '⚠️ ' : '⚡ ') + msg);
+
+        if (this.plugin) {
+            try {
+                await this.plugin.schedule({
+                    notifications: [{
+                        id: 2000 + Math.floor(Math.random() * 1000),
+                        title: threshold === 'over' ? 'Budget Exceeded' : 'Budget Warning',
+                        body: msg,
+                        schedule: { at: new Date(Date.now() + 200) }
+                    }]
+                });
+            } catch (err) {
+                console.warn('Budget push notification failed:', err);
+            }
+        }
     }
 }
 

@@ -28,6 +28,9 @@ class MoneyManagerApp {
             window.securityManager = new SecurityManager(dataManager, window.i18n);
             window.recurringManager = new RecurringManager(dataManager);
             window.notificationManager = new NotificationManager(dataManager, window.i18n);
+            window.budgetManager = new BudgetManager(dataManager, window.transactionManager);
+            window.goalManager = new GoalManager(dataManager);
+            window.receiptManager = new ReceiptManager(dataManager);
 
             // Re-assign to the variables declared in other files
             walletManager = window.walletManager;
@@ -882,6 +885,16 @@ class MoneyManagerApp {
             // Reset Transaction History pagination if switching to transactions
             if (view === 'transactions' && window.transactionManager) {
                 window.transactionManager.resetPagination();
+            }
+
+            // Refresh budgets on switching to budgets view
+            if (view === 'budgets' && window.budgetManager) {
+                window.budgetManager.render();
+            }
+
+            // Refresh goals on switching to goals view
+            if (view === 'goals' && window.goalManager) {
+                window.goalManager.render();
             }
         }
     }

@@ -15,17 +15,26 @@ class RecurringManager {
         console.log('📅 Checking for due recurring transactions...');
         const recurringTransactions = this.dataManager.getRecurringTransactions();
         const now = new Date();
+        // 90-day catch-up cap: skip occurrences older than this
+        const cutoff = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
         let executionCount = 0;
 
         for (let recurring of recurringTransactions) {
+            // Skip paused templates
+            if (recurring.isPaused) continue;
+
             let nextRun = new Date(recurring.nextRunDate);
 
-            // While the next run date is in the past, keep executing and moving it forward
-            // (In case the user hasn't opened the app for a long time)
+            // If nextRun is before the 90-day cutoff, fast-forward it to the cutoff boundary
+            while (nextRun < cutoff) {
+                nextRun = this.calculateNextDate(nextRun, recurring.frequency);
+            }
+
+            let thisTemplateCount = 0;
+            // While the next run date is in the past, execute and advance
             while (nextRun <= now) {
                 console.log(`💸 Executing recurring transaction: ${recurring.note || 'Untitled'}`);
 
-                // 1. Create a real transaction from the recurring template
                 const transaction = {
                     type: recurring.type,
                     amount: recurring.amount,
@@ -33,19 +42,17 @@ class RecurringManager {
                     category: recurring.category,
                     walletId: recurring.walletId,
                     note: recurring.note + " (Auto)",
-                    date: nextRun.toISOString() // Use the scheduled date for the transaction
+                    date: nextRun.toISOString()
                 };
 
-                // 2. Save it to history and update wallet
                 this.dataManager.addTransaction(transaction);
                 executionCount++;
+                thisTemplateCount++;
 
-                // 3. Calculate next run date
                 nextRun = this.calculateNextDate(nextRun, recurring.frequency);
             }
 
-            // 4. Update the recurring transaction with the new nextRunDate
-            if (executionCount > 0) {
+            if (thisTemplateCount > 0) {
                 this.dataManager.updateRecurringTransaction(recurring.id, {
                     nextRunDate: nextRun.toISOString(),
                     lastRunDate: new Date().toISOString()
@@ -55,8 +62,10 @@ class RecurringManager {
 
         if (executionCount > 0) {
             console.log(`✅ Automated ${executionCount} transactions.`);
-            // Inform the app to refresh UI if needed
-            if (window.app) window.app.updateNetWorth();
+            if (window.app) {
+                window.app.updateNetWorth();
+                this._showCatchUpBanner(executionCount);
+            }
         } else {
             console.log('📅 No recurring transactions due.');
         }
@@ -74,6 +83,9 @@ class RecurringManager {
             case 'daily':
                 next.setDate(next.getDate() + 1);
                 break;
+            case 'weekly':
+                next.setDate(next.getDate() + 7);
+                break;
             case 'monthly':
                 next.setMonth(next.getMonth() + 1);
                 break;
@@ -82,6 +94,42 @@ class RecurringManager {
                 break;
         }
         return next;
+    }
+
+    _showCatchUpBanner(count) {
+        const existing = document.getElementById('recurringCatchUpBanner');
+        if (existing) existing.remove();
+
+        const banner = document.createElement('div');
+        banner.id = 'recurringCatchUpBanner';
+        banner.style.cssText = `
+            position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+            background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--color-primary); color: var(--color-text-primary);
+            padding: var(--space-sm) var(--space-md); border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl); z-index: var(--z-toast);
+            display: flex; align-items: center; gap: var(--space-sm);
+            font-size: 0.85rem; font-weight: 600; max-width: 90vw;
+        `;
+        banner.innerHTML = `
+            <span>⚡ ${count} recurring transaction${count > 1 ? 's' : ''} were automatically added</span>
+            <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--color-text-secondary);cursor:pointer;font-size:1rem;padding:0 4px;">&times;</button>
+        `;
+        document.body.appendChild(banner);
+        setTimeout(() => banner.remove(), 8000);
+    }
+
+    pauseRecurring(id) {
+        this.dataManager.updateRecurringTransaction(id, { isPaused: true });
+        this.renderList();
+    }
+
+    resumeRecurring(id) {
+        this.dataManager.updateRecurringTransaction(id, {
+            isPaused: false,
+            nextRunDate: new Date().toISOString()
+        });
+        this.renderList();
     }
 
     /**
@@ -228,22 +276,33 @@ class RecurringManager {
                 nextRunStr = nrDate.toLocaleDateString(lang) + ' ' + nrDate.toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' });
             }
 
+            const isPaused = !!r.isPaused;
+            const pausedBadge = isPaused
+                ? `<span style="font-size:0.65rem;font-weight:700;padding:1px 6px;border-radius:99px;background:rgba(245,158,11,0.15);color:var(--color-warning);margin-left:4px;">Paused</span>`
+                : '';
+            const pauseBtn = `
+                <button onclick="event.stopPropagation();recurringManager.${isPaused ? 'resume' : 'pause'}Recurring('${r.id}')"
+                    style="background:none;border:1px solid var(--glass-border);border-radius:var(--radius-sm);color:var(--color-text-secondary);cursor:pointer;font-size:0.7rem;padding:2px 7px;margin-top:2px;">
+                    ${isPaused ? '▶ Resume' : '⏸ Pause'}
+                </button>`;
+
             // MATCH TRANSACTION-ITEM STRUCTURE PERFECTLY
             return `
-                <div class="transaction-item animate-slide-up" data-id="${r.id}" onclick="recurringManager.editRecurring('${r.id}')" style="cursor: pointer;">
+                <div class="transaction-item animate-slide-up" data-id="${r.id}" onclick="recurringManager.editRecurring('${r.id}')" style="cursor: pointer; ${isPaused ? 'opacity:0.6' : ''}">
                     <div class="transaction-icon ${amountClass}" style="width: 44px; height: 44px; font-size: 1.25rem; flex-shrink: 0;">
                         ${icon}
                     </div>
                     <div class="transaction-details" style="flex: 1; min-width: 0;">
                         <div class="transaction-category" style="font-size: 0.95rem; font-weight: 600; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                            ${window.transactionManager ? window.transactionManager.getCategoryTranslation(r.category || 'Transfer') : r.category}
+                            ${window.transactionManager ? window.transactionManager.getCategoryTranslation(r.category || 'Transfer') : r.category}${pausedBadge}
                         </div>
                         <div class="transaction-note" style="font-size: 0.75rem; color: var(--color-text-tertiary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                             ${r.note || (wallet ? wallet.name : 'Unknown')} • 🔁 ${frequencyLabel}
                         </div>
                         <div class="next-run" style="font-size: 0.65rem; color: var(--color-warning); margin-top: 1px; font-weight: 500;">
-                            ${nextRunTitle}: ${nextRunStr}
+                            ${isPaused ? 'Paused' : nextRunTitle + ': ' + nextRunStr}
                         </div>
+                        ${pauseBtn}
                     </div>
                     <div class="transaction-amount ${amountClass}" style="font-size: 0.95rem; font-weight: 700; text-align: right; flex-shrink: 0; margin-left: var(--space-sm);">
                         ${prefix}${displayAmount}

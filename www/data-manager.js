@@ -15,6 +15,8 @@ class DataManager {
       BIOMETRIC_ENABLED: 'moneyManager_biometricEnabled',
       BASE_CURRENCY: 'moneyManager_baseCurrency',
       RECURRING: 'moneyManager_recurringTransactions',
+      BUDGETS: 'moneyManager_budgets',
+      GOALS: 'moneyManager_goals',
       NOTIF_REMINDER_ENABLED: 'moneyManager_notifReminderEnabled',
       NOTIF_QUICK_ACTIONS_ENABLED: 'moneyManager_notifQuickActionsEnabled',
       TEMPLATES: 'moneyManager_transactionTemplates'
@@ -46,6 +48,12 @@ class DataManager {
     }
     if (!localStorage.getItem(this.STORAGE_KEYS.TEMPLATES)) {
       this.saveTemplates([]);
+    }
+    if (!localStorage.getItem(this.STORAGE_KEYS.BUDGETS)) {
+      this.saveBudgets([]);
+    }
+    if (!localStorage.getItem(this.STORAGE_KEYS.GOALS)) {
+      this.saveGoals([]);
     }
   }
 
@@ -96,6 +104,11 @@ class DataManager {
     const recurring = this.getRecurringTransactions();
     const filteredRecurring = recurring.filter(r => r.walletId !== id && r.targetWalletId !== id);
     this.saveRecurringTransactions(filteredRecurring);
+
+    // 4. Cascading delete: Remove goals linked to this wallet
+    const goals = this.getGoals();
+    const filteredGoals = goals.filter(g => g.linkedWalletId !== id);
+    this.saveGoals(filteredGoals);
 
     return true;
   }
@@ -228,6 +241,84 @@ class DataManager {
   }
 
   /**
+   * BUDGETS
+   */
+  getBudgets() {
+    const data = localStorage.getItem(this.STORAGE_KEYS.BUDGETS);
+    return data ? JSON.parse(data) : [];
+  }
+
+  saveBudgets(budgets) {
+    localStorage.setItem(this.STORAGE_KEYS.BUDGETS, JSON.stringify(budgets));
+  }
+
+  addBudget(budget) {
+    const all = this.getBudgets();
+    budget.id = this.generateId();
+    budget.createdAt = new Date().toISOString();
+    all.push(budget);
+    this.saveBudgets(all);
+    return budget;
+  }
+
+  updateBudget(id, updated) {
+    const all = this.getBudgets();
+    const index = all.findIndex(b => b.id === id);
+    if (index !== -1) {
+      all[index] = { ...all[index], ...updated, updatedAt: new Date().toISOString() };
+      this.saveBudgets(all);
+      return all[index];
+    }
+    return null;
+  }
+
+  deleteBudget(id) {
+    const all = this.getBudgets();
+    this.saveBudgets(all.filter(b => b.id !== id));
+    return true;
+  }
+
+  /**
+   * GOALS
+   */
+  getGoals() {
+    const data = localStorage.getItem(this.STORAGE_KEYS.GOALS);
+    return data ? JSON.parse(data) : [];
+  }
+
+  saveGoals(goals) {
+    localStorage.setItem(this.STORAGE_KEYS.GOALS, JSON.stringify(goals));
+  }
+
+  addGoal(goal) {
+    const all = this.getGoals();
+    goal.id = this.generateId();
+    goal.savedAmount = 0;
+    goal.status = 'active';
+    goal.createdAt = new Date().toISOString();
+    all.push(goal);
+    this.saveGoals(all);
+    return goal;
+  }
+
+  updateGoal(id, updated) {
+    const all = this.getGoals();
+    const index = all.findIndex(g => g.id === id);
+    if (index !== -1) {
+      all[index] = { ...all[index], ...updated, updatedAt: new Date().toISOString() };
+      this.saveGoals(all);
+      return all[index];
+    }
+    return null;
+  }
+
+  deleteGoal(id) {
+    const all = this.getGoals();
+    this.saveGoals(all.filter(g => g.id !== id));
+    return true;
+  }
+
+  /**
    * Update wallet balance based on transaction
    */
   updateWalletBalance(transaction) {
@@ -348,8 +439,10 @@ class DataManager {
       conversionRates: this.getConversionRates(),
       categories: categoriesData ? JSON.parse(categoriesData) : null,
       recurring: this.getRecurringTransactions(),
+      budgets: this.getBudgets(),
+      goals: this.getGoals(),
       exportedAt: new Date().toISOString(),
-      version: '1.2.0'
+      version: '2.0.0'
     };
     return data;
   }
@@ -377,6 +470,14 @@ class DataManager {
       // Import recurring transactions if present
       if (data.recurring) {
         this.saveRecurringTransactions(data.recurring);
+      }
+
+      if (data.budgets) {
+        this.saveBudgets(data.budgets);
+      }
+
+      if (data.goals) {
+        this.saveGoals(data.goals);
       }
 
       return true;

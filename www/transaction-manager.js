@@ -67,7 +67,8 @@ class TransactionManager {
         this.charts = {
             donut: null,
             line: null,
-            bar: null
+            bar: null,
+            insightsBar: null
         };
 
         // Category Translation Map
@@ -105,6 +106,13 @@ class TransactionManager {
             if (editType && editType.value === 'transfer') {
                 this.checkConversionNeeded('edit_');
             }
+            // Re-render analytics if it's the active view (dynamic templates have inline i18n calls)
+            const analyticsView = document.getElementById('view-analytics');
+            if (analyticsView && analyticsView.classList.contains('active')) {
+                this.renderAnalytics();
+            }
+            // Re-render transaction list (category names use i18n)
+            this.render();
         });
     }
 
@@ -254,10 +262,40 @@ class TransactionManager {
             this.toggleTransferFields();
         });
 
-        // Save as template button
+        // Save as template button (Shortcut)
         const saveTemplateBtn = document.getElementById('saveTemplateBtn');
         if (saveTemplateBtn) {
             saveTemplateBtn.addEventListener('click', () => {
+                this.saveAsTemplate();
+            });
+        }
+
+        // Template Modal Listeners
+        const openTemplatesBtn = document.getElementById('openTemplatesBtn');
+        if (openTemplatesBtn) {
+            openTemplatesBtn.addEventListener('click', () => {
+                this.renderTemplates();
+                document.getElementById('templatesModal').classList.add('active');
+            });
+        }
+
+        const closeTemplatesBtn = document.getElementById('closeTemplatesBtn');
+        if (closeTemplatesBtn) {
+            closeTemplatesBtn.addEventListener('click', () => {
+                document.getElementById('templatesModal').classList.remove('active');
+            });
+        }
+
+        const closeTemplatesFooterBtn = document.getElementById('closeTemplatesFooterBtn');
+        if (closeTemplatesFooterBtn) {
+            closeTemplatesFooterBtn.addEventListener('click', () => {
+                document.getElementById('templatesModal').classList.remove('active');
+            });
+        }
+
+        const saveTemplateFromModalBtn = document.getElementById('saveTemplateFromModalBtn');
+        if (saveTemplateFromModalBtn) {
+            saveTemplateFromModalBtn.addEventListener('click', () => {
                 this.saveAsTemplate();
             });
         }
@@ -481,6 +519,9 @@ class TransactionManager {
             this.updateConversionPreview(prefix);
         }
 
+        // Load receipt photo into edit form
+        window.receiptManager?.loadReceiptForEdit(transaction);
+
         // Show Modal
         document.getElementById('transactionEditModal').classList.add('active');
     }
@@ -495,6 +536,9 @@ class TransactionManager {
 
                 if (window.walletManager) {
                     window.walletManager.render();
+                }
+                if (window.budgetManager) {
+                    window.budgetManager.recalculateAll();
                 }
                 if (window.app) {
                     window.app.updateNetWorth();
@@ -936,12 +980,16 @@ class TransactionManager {
                     currency: sourceWallet.currency,
                     walletId,
                     note,
-                    date
+                    date,
+                    receiptPhoto: window.receiptManager?.consumeAddPhoto() || null
                 };
 
                 this.dataManager.addTransaction(transaction);
                 this.resetPagination();
             }
+
+            // Reset receipt form state
+            window.receiptManager?.resetAddForm();
 
             // Reset Filter to "All Time"
             this.currentFilter = {
@@ -956,6 +1004,9 @@ class TransactionManager {
             });
             document.getElementById('filterStartDate').value = '';
             document.getElementById('filterEndDate').value = '';
+
+            // Recalculate budgets after new transaction
+            if (window.budgetManager) window.budgetManager.recalculateAll();
 
             // Switch to Transactions View
             if (window.app) {
@@ -1117,6 +1168,10 @@ class TransactionManager {
             }
 
             // Perform Update
+            // Carry over or update receipt photo
+            const editedPhoto = window.receiptManager?.consumeEditPhoto();
+            if (editedPhoto !== undefined) transaction.receiptPhoto = editedPhoto;
+
             this.dataManager.updateTransaction(editingId, transaction);
 
             // Close Modal
@@ -1128,6 +1183,7 @@ class TransactionManager {
             this.render();
             this.renderAnalytics();
             if (window.walletManager) window.walletManager.render();
+            if (window.budgetManager) window.budgetManager.recalculateAll();
             if (window.app) {
                 window.app.updateNetWorth();
                 window.app.showToast(window.i18n.t('transactionUpdated'));
@@ -1350,7 +1406,7 @@ class TransactionManager {
             ${this.getCategoryTranslation(transaction.category || 'Transfer')}
           </div>
           <div class="transaction-note" style="font-size: 0.75rem; color: var(--color-text-tertiary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-            ${transaction.note || walletName} • ${dateStr}
+            ${transaction.note || walletName} • ${dateStr}${transaction.receiptPhoto ? ' <span title="Has receipt" style="color:var(--color-primary);">📷</span>' : ''}
           </div>
         </div>
         <div class="transaction-amount ${amountClass}" style="font-size: 0.95rem; font-weight: 700; text-align: right; flex-shrink: 0; margin-left: var(--space-sm);">
@@ -1640,6 +1696,40 @@ class TransactionManager {
                         </div>
                     </div>
                 </div>
+
+                <!-- 4. SPENDING INSIGHTS -->
+                <div class="grid gap-md" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-top: var(--space-md);">
+                    <!-- Top 5 Spending Categories -->
+                    <div class="card">
+                        <div class="card-header" style="align-items: flex-start; padding-bottom: var(--space-sm);">
+                            <h3 class="card-title" style="font-size: 0.85rem;">🏆 ${window.i18n?.t('top5Spending') || 'Top 5 Spending'}</h3>
+                            ${this.renderMomBadge(currency, timeframeKey)}
+                        </div>
+                        <div style="padding: 0 var(--space-md) var(--space-md);">
+                            ${this.renderTop5Spending(expenseBreakdown, currency)}
+                        </div>
+                    </div>
+
+                    <!-- Net Cash Flow Summary -->
+                    <div class="card">
+                        <div class="card-header" style="align-items: flex-start; padding-bottom: var(--space-sm);">
+                            <h3 class="card-title" style="font-size: 0.85rem;">💹 ${window.i18n?.t('cashFlowSummary') || 'Cash Flow Summary'}</h3>
+                        </div>
+                        <div style="padding: 0 var(--space-md) var(--space-md);">
+                            ${this.renderCashFlowSummary(stats, currency)}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. LAST 6 PERIODS — Income vs Expense -->
+                <div class="card" style="margin-top: var(--space-md);">
+                    <div class="card-header pb-xs">
+                        <h3 class="card-title" style="font-size: 0.85rem;">📊 ${window.i18n?.t('last6Periods') || 'Last 6 Periods — Income vs Expense'}</h3>
+                    </div>
+                    <div class="chart-container" style="position: relative; height: 200px; width: 100%;">
+                        <canvas id="insightsBarChart"></canvas>
+                    </div>
+                </div>
             </div>
         `;
 
@@ -1657,7 +1747,112 @@ class TransactionManager {
             this.updateDonutChart(expenseBreakdown, currency);
             this.updateLineChart(timeframeKey, currency);
             this.updateBarChart(stats, currency);
+            this.updateInsightsBarChart(currency, this.analyticsTimeframe);
         }, 100);
+    }
+
+    renderTop5Spending(expenseBreakdown, currency) {
+        const entries = Object.entries(expenseBreakdown)
+            .map(([cat, d]) => ({ cat, total: d.total }))
+            .sort((a, b) => b.total - a.total)
+            .slice(0, 5);
+        if (entries.length === 0) return `<p style="color:var(--color-text-tertiary);font-size:0.85rem;">${window.i18n?.t('noExpenseData') || 'No expense data.'}</p>`;
+        const grandTotal = entries.reduce((s, e) => s + e.total, 0);
+        return entries.map((e, i) => {
+            const pct = grandTotal > 0 ? ((e.total / grandTotal) * 100).toFixed(1) : 0;
+            const icon = this.categoryIcons[e.cat] || '💸';
+            return `
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--glass-border);">
+                    <span style="font-size:0.75rem;color:var(--color-text-tertiary);min-width:14px;">${i + 1}</span>
+                    <span>${icon}</span>
+                    <span style="flex:1;font-size:0.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.cat}</span>
+                    <span style="font-size:0.75rem;color:var(--color-text-secondary);">${pct}%</span>
+                    <span style="font-size:0.82rem;font-weight:600;color:var(--color-danger);">${this.currencyManager.format(e.total, currency)}</span>
+                </div>`;
+        }).join('');
+    }
+
+    renderMomBadge(currency, timeframeKey) {
+        if (this.analyticsTimeframe !== 'monthly') return '';
+        const [year, month] = timeframeKey.split('-').map(Number);
+        const prevDate = new Date(year, month - 2, 1);
+        const prevKey = `${prevDate.getFullYear()}-${prevDate.getMonth() + 1}`;
+        const curr = this.dataManager.getStatsByTimeframe('monthly', timeframeKey, [])[currency];
+        const prev = this.dataManager.getStatsByTimeframe('monthly', prevKey, [])[currency];
+        if (!curr || !prev || prev.expense === 0) return '';
+        const change = ((curr.expense - prev.expense) / prev.expense) * 100;
+        const sign = change >= 0 ? '+' : '';
+        const color = change > 0 ? 'var(--color-danger)' : 'var(--color-success)';
+        const arrow = change > 0 ? '↑' : '↓';
+        return `<span style="font-size:0.7rem;font-weight:700;padding:2px 7px;border-radius:99px;background:${change > 0 ? 'rgba(220,38,38,0.1)' : 'rgba(5,150,105,0.1)'};color:${color};">${arrow} ${sign}${change.toFixed(1)}% ${window.i18n?.t('vsLastMonth') || 'vs last month'}</span>`;
+    }
+
+    renderCashFlowSummary(stats, currency) {
+        const net = stats.income - stats.expense;
+        const savingsRate = stats.income > 0 ? ((net / stats.income) * 100).toFixed(1) : 0;
+        const netColor = net >= 0 ? 'var(--color-success)' : 'var(--color-danger)';
+        const t = (k, fb) => window.i18n?.t(k) || fb;
+        const rows = [
+            [t('totalIncome', 'Total Income'), this.currencyManager.format(stats.income, currency), 'var(--color-success)'],
+            [t('totalExpenses', 'Total Expenses'), this.currencyManager.format(stats.expense, currency), 'var(--color-danger)'],
+            [t('netCashFlow', 'Net Cash Flow'), this.currencyManager.format(net, currency), netColor],
+            [t('savingsRate', 'Savings Rate'), `${savingsRate}%`, netColor],
+        ];
+        return rows.map(([label, value, color]) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--glass-border);">
+                <span style="font-size:0.82rem;color:var(--color-text-secondary);">${label}</span>
+                <span style="font-size:0.88rem;font-weight:700;color:${color};">${value}</span>
+            </div>`).join('');
+    }
+
+    updateInsightsBarChart(currency, timeframe) {
+        const canvas = document.getElementById('insightsBarChart');
+        if (!canvas || typeof Chart === 'undefined') return;
+        if (this.charts.insightsBar) this.charts.insightsBar.destroy();
+
+        const colors = this.getChartThemeColors();
+        const labels = [];
+        const incomeData = [];
+        const expenseData = [];
+
+        for (let i = 5; i >= 0; i--) {
+            let label, key;
+            if (timeframe === 'annual') {
+                const y = this.analyticsDate.getFullYear() - i;
+                label = String(y);
+                key = String(y);
+            } else {
+                const d = new Date(this.analyticsDate.getFullYear(), this.analyticsDate.getMonth() - i, 1);
+                label = d.toLocaleDateString(window.i18n?.currentLanguage || undefined, { month: 'short', year: '2-digit' });
+                key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+            }
+            const stats = this.dataManager.getStatsByTimeframe(timeframe === 'annual' ? 'annual' : 'monthly', key, []);
+            const s = currency === 'all'
+                ? Object.values(stats).reduce((acc, c) => ({ income: acc.income + (c?.income || 0), expense: acc.expense + (c?.expense || 0) }), { income: 0, expense: 0 })
+                : (stats[currency] || { income: 0, expense: 0 });
+            labels.push(label);
+            incomeData.push(s.income);
+            expenseData.push(s.expense);
+        }
+
+        this.charts.insightsBar = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    { label: window.i18n?.t('income') || 'Income', data: incomeData, backgroundColor: 'rgba(5,150,105,0.7)', borderRadius: 4 },
+                    { label: window.i18n?.t('expense') || 'Expense', data: expenseData, backgroundColor: 'rgba(220,38,38,0.7)', borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: colors.text, font: { size: 11 } } } },
+                scales: {
+                    x: { ticks: { color: colors.text, font: { size: 10 } }, grid: { color: colors.grid } },
+                    y: { ticks: { color: colors.text, font: { size: 10 } }, grid: { color: colors.grid } }
+                }
+            }
+        });
     }
 
     getChartThemeColors() {
@@ -2113,36 +2308,50 @@ class TransactionManager {
      * TRANSACTION TEMPLATES
      */
     renderTemplates() {
-        const templateContainer = document.getElementById('templateButtons');
-        if (!templateContainer) return;
+        const templateList = document.getElementById('templateModalList');
+        if (!templateList) return;
 
         const templates = this.dataManager.getTemplates();
         if (templates.length === 0) {
-            templateContainer.innerHTML = `<span class="text-xs color-text-muted" data-i18n="noTemplatesShort">${window.i18n ? window.i18n.t('noTemplatesShort') : 'No templates saved.'}</span>`;
+            templateList.innerHTML = `<p class="text-center color-text-muted py-lg" data-i18n="noTemplatesShort">${window.i18n ? window.i18n.t('noTemplatesShort') : 'No templates saved.'}</p>`;
             return;
         }
 
-        templateContainer.innerHTML = templates.map(template => `
-            <div class="template-chip" data-id="${template.id}">
-                <span class="template-name">${template.name}</span>
-                <button type="button" class="template-delete" data-id="${template.id}">&times;</button>
+        templateList.innerHTML = templates.map(template => {
+            const wallet = this.dataManager.getWalletById(template.walletId);
+            const walletName = wallet ? wallet.name : '-';
+            const details = `${this.getCategoryTranslation(template.category)} • ${walletName}`;
+
+            return `
+            <div class="template-item" data-id="${template.id}">
+                <div class="template-info">
+                    <span class="template-name">${template.name}</span>
+                    <span class="template-details">${details}</span>
+                </div>
+                <div class="template-actions">
+                    <button type="button" class="template-btn-delete" data-id="${template.id}">
+                        🗑️
+                    </button>
+                </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
 
-        // Apply translations to the "No templates" text if needed
-        if (window.i18n) window.i18n.applyTranslations(templateContainer);
+        // Apply translations
+        if (window.i18n) window.i18n.applyTranslations(templateList);
 
-        // Chip click to apply template
-        templateContainer.querySelectorAll('.template-chip').forEach(chip => {
-            chip.addEventListener('click', (e) => {
-                if (e.target.classList.contains('template-delete')) return;
-                const templateId = chip.dataset.id;
+        // Click to apply
+        templateList.querySelectorAll('.template-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('.template-btn-delete')) return;
+                const templateId = item.dataset.id;
                 this.applyTemplate(templateId);
+                document.getElementById('templatesModal').classList.remove('active');
             });
         });
 
-        // Delete button logic
-        templateContainer.querySelectorAll('.template-delete').forEach(btn => {
+        // Delete button
+        templateList.querySelectorAll('.template-btn-delete').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const templateId = btn.dataset.id;
