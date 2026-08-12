@@ -1,0 +1,85 @@
+name: Bug report
+description: Something in the Taraka app isn't working
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **This tracker is public** — anyone can read what
+        you post here.
+
+        Taraka handles money, so please don't paste real balances, account
+        numbers, or screenshots showing your actual figures. Blur them, or use
+        made-up numbers that still show the problem. For anything you'd rather
+        keep private, email **andrian.wu.7@gmail.com** instead.
+
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Settings → About. If you're not sure, say "unknown".
+      placeholder: "2.9.2"
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Phone and Android version
+      placeholder: "e.g. Pixel 7a, Android 15"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-source
+    attributes:
+      label: Where did you install it from?
+      options:
+        - Google Play
+        - Sideloaded APK from GitHub Releases
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you see, and what did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: If you can make it happen again, the exact taps help enormously.
+      placeholder: |
+        1. Open Wallets
+        2. Tap …
+        3. …
+    validations:
+      required: false
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: App language
+      options:
+        - English
+        - Bahasa Indonesia
+        - 繁體中文
+        - Not sure
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: features
+    attributes:
+      label: Were any of these turned on?
+      description: Only relevant if the bug might involve them.
+      options:
+        - label: Google sign-in
+        - label: Encrypted Drive backup
+        - label: PIN lock or biometric unlock
+        - label: Home-screen widget or quick-add notification

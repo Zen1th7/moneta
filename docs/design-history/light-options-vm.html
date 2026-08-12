@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Moneta — Velvet Midnight + 5 light options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px 16px 80px;
+    background: #08070a; color: #f5f5f7;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1200px; margin: 0 auto; }
+  h1.title { font-size: 28px; font-weight: 800; letter-spacing: -0.025em; margin: 0 0 8px; text-align: center; }
+  p.subtitle { text-align: center; color: #a1a1aa; margin: 0 auto 36px; max-width: 720px; line-height: 1.6; font-size: 14px; }
+  p.subtitle b { color: #e8c8a8; }
+
+  .grid { display: grid; grid-template-columns: 1fr; gap: 28px; justify-items: center; }
+
+  .opt { width: 100%; max-width: 420px; background: #131316; border: 1px solid #27272a; border-radius: 20px; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.45); }
+  .opt__head { padding: 18px 20px 14px; border-bottom: 1px solid #27272a; }
+  .opt__name { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; margin: 0; }
+  .opt__tag { display: inline-block; font-size: 10px; color: #d4a574; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; margin-bottom: 6px; }
+  .opt__ref { display: inline-block; font-size: 10px; color: #a1a1aa; margin-left: 8px; font-style: italic; }
+  .opt__desc { color: #a1a1aa; font-size: 12.5px; line-height: 1.55; margin: 6px 0 0; }
+  .opt__desc b { color: #e8c8a8; font-weight: 600; }
+  .opt__tokens { display: flex; align-items: center; gap: 14px; padding: 12px 20px; border-bottom: 1px solid #27272a; background: #0e0e10; }
+  .swatches { display: flex; gap: 5px; }
+  .sw { width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+  .opt__font { color: #d4d4d8; font-size: 11px; margin-left: auto; text-align: right; }
+  .opt__font b { color: #fff; font-weight: 600; }
+
+  .pair { padding: 16px; background: #0e0e10; }
+  .pair__lab { display: flex; align-items: center; gap: 8px; font-size: 10px; color: #a1a1aa; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; margin: 0 4px 8px; }
+  .pair__lab::after { content: ''; flex: 1; height: 1px; background: #27272a; }
+  .pair__lab + .pair__phone-wrap { margin-bottom: 22px; }
+  .pair__phone-wrap { display: flex; justify-content: center; }
+  .phone { width: 100%; max-width: 340px; height: auto; border-radius: 22px; overflow: hidden; position: relative; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+
+  /* ============================================================
+     SHARED Carbon Cream STRUCTURE — driven by CSS variables
+     so each light variant just overrides tokens.
+     ============================================================ */
+  .cc {
+    --cc-bg: #f5f0e1;
+    --cc-card: #ffffff;
+    --cc-card-shadow: 0 1px 2px rgba(45,36,24,0.04), 0 8px 24px rgba(45,36,24,0.06);
+    --cc-pill-bg: #faf6ec;
+    --cc-text: #2d2418;
+    --cc-text-muted: #8a7350;
+    --cc-brand: #6b3410;
+    --cc-cta-bg: #c67b5c;
+    --cc-cta-text: #ffffff;
+    --cc-sub: #6b7b3c;
+    --cc-dot-1: #6b7b3c;
+    --cc-dot-2: #c67b5c;
+    --cc-dot-3: #a89878;
+
+    background: var(--cc-bg);
+    color: var(--cc-text);
+    font-family: 'Inter', sans-serif;
+    padding: 18px;
+  }
+  .cc__brand { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--cc-brand); letter-spacing: -0.01em; }
+  .cc__hero { margin-top: 16px; background: var(--cc-card); border-radius: 22px; padding: 20px; box-shadow: var(--cc-card-shadow); }
+  .cc__lab { font-size: 10px; color: var(--cc-text-muted); letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; }
+  .cc__net { font-family: 'DM Serif Display', serif; font-size: 36px; color: var(--cc-text); margin-top: 4px; font-feature-settings: 'tnum'; letter-spacing: -0.01em; line-height: 1; }
+  .cc__sub { color: var(--cc-sub); font-size: 11.5px; margin-top: 8px; font-weight: 600; }
+  .cc__pills { display: flex; gap: 8px; margin-top: 14px; }
+  .cc__pill { flex: 1; background: var(--cc-pill-bg); border-radius: 12px; padding: 10px; text-align: center; }
+  .cc__pill-cur { font-size: 9.5px; color: var(--cc-text-muted); letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; }
+  .cc__pill-amt { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; margin-top: 2px; color: var(--cc-text); }
+  .cc__cta { margin-top: 16px; background: var(--cc-cta-bg); color: var(--cc-cta-text); padding: 14px; border-radius: 14px; text-align: center; font-weight: 600; font-size: 13px; }
+  .cc__row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; margin-top: 10px; background: var(--cc-card); border-radius: 14px; box-shadow: var(--cc-card-shadow); }
+  .cc__dot { width: 8px; height: 8px; border-radius: 50%; }
+  .cc__row-name { font-weight: 600; color: var(--cc-text); font-size: 14px; }
+  .cc__row-meta { font-size: 11px; color: var(--cc-text-muted); margin-top: 1px; }
+  .cc__row-amt { margin-left: auto; font-weight: 700; color: var(--cc-text); }
+
+  /* B · Carbon Cream Gilded — olive → gold-tan secondary */
+  .cc--gilded {
+    --cc-sub: #b88747;
+    --cc-dot-1: #c67b5c;
+    --cc-dot-2: #b88747;
+    --cc-dot-3: #a89878;
+  }
+
+  /* C · Pearl Vellum — direct inverse of Velvet Midnight */
+  .cc--vellum {
+    --cc-bg: #faf6ec;
+    --cc-card: #ffffff;
+    --cc-card-shadow: 0 1px 2px rgba(13,20,33,0.04), 0 8px 24px rgba(13,20,33,0.05);
+    --cc-pill-bg: #f0ebe0;
+    --cc-text: #0d1421;
+    --cc-text-muted: #6a7390;
+    --cc-brand: #0d1421;
+    --cc-cta-bg: #c67b5c;
+    --cc-cta-text: #ffffff;
+    --cc-sub: #d4a574;
+    --cc-dot-1: #c67b5c;
+    --cc-dot-2: #d4a574;
+    --cc-dot-3: #6a7390;
+  }
+
+  /* D · Linen Library — gold-tan brand, navy text, terracotta CTA */
+  .cc--linen {
+    --cc-bg: #f4eee0;
+    --cc-card: #ffffff;
+    --cc-card-shadow: 0 1px 2px rgba(13,20,33,0.04), 0 8px 24px rgba(13,20,33,0.06);
+    --cc-pill-bg: #ede4d2;
+    --cc-text: #0d1421;
+    --cc-text-muted: #6a7390;
+    --cc-brand: #b88747;
+    --cc-cta-bg: #0d1421;
+    --cc-cta-text: #f4eee0;
+    --cc-sub: #c67b5c;
+    --cc-dot-1: #b88747;
+    --cc-dot-2: #c67b5c;
+    --cc-dot-3: #6a7390;
+  }
+
+  /* E · Champagne Bank — antique-gold-led, espresso text */
+  .cc--champagne {
+    --cc-bg: #faf3e7;
+    --cc-card: #fffcf6;
+    --cc-card-shadow: 0 1px 2px rgba(45,36,24,0.04), 0 8px 24px rgba(184,135,71,0.10);
+    --cc-pill-bg: #f5ecd8;
+    --cc-text: #2d2418;
+    --cc-text-muted: #8a7a65;
+    --cc-brand: #b88747;
+    --cc-cta-bg: #b88747;
+    --cc-cta-text: #ffffff;
+    --cc-sub: #c67b5c;
+    --cc-dot-1: #b88747;
+    --cc-dot-2: #c67b5c;
+    --cc-dot-3: #8a7a65;
+  }
+
+  /* ============================================================
+     DARK — Velvet Midnight (locked-in, shown in every panel)
+     ============================================================ */
+  .vm {
+    background:
+      radial-gradient(500px 280px at 100% 0%, rgba(212,165,116,0.10), transparent 60%),
+      radial-gradient(420px 240px at 0% 100%, rgba(198,123,92,0.08), transparent 70%),
+      #0d1421;
+    color: #e8dcc4; font-family: 'Inter', sans-serif; padding: 18px; position: relative;
+  }
+  .vm__brand { font-family: 'DM Serif Display', serif; font-size: 22px; color: #d4a574; }
+  .vm__brand small { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: #6a7390; letter-spacing: 0.18em; margin-left: 8px; }
+  .vm__hero { margin-top: 16px; background: rgba(232,220,196,0.04); border: 1px solid rgba(212,165,116,0.18); border-radius: 22px; padding: 20px; backdrop-filter: blur(14px); position: relative; }
+  .vm__lab { font-size: 10px; color: #6a7390; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; }
+  .vm__net { font-family: 'DM Serif Display', serif; font-size: 36px; color: #e8dcc4; margin-top: 4px; letter-spacing: -0.02em; line-height: 1; }
+  .vm__sub { color: #c67b5c; font-size: 11.5px; margin-top: 8px; font-weight: 600; }
+  .vm__pills { display: flex; gap: 8px; margin-top: 14px; }
+  .vm__pill { flex: 1; background: rgba(232,220,196,0.04); border: 1px solid rgba(212,165,116,0.16); border-radius: 12px; padding: 10px; text-align: center; }
+  .vm__pill-cur { font-size: 9.5px; color: #6a7390; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; }
+  .vm__pill-amt { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; margin-top: 2px; color: #e8dcc4; }
+  .vm__cta { margin-top: 16px; background: #d4a574; color: #0d1421; padding: 14px; border-radius: 14px; text-align: center; font-weight: 700; font-size: 13px; box-shadow: 0 4px 18px rgba(212,165,116,0.18); }
+  .vm__row { margin-top: 10px; display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(232,220,196,0.04); border: 1px solid rgba(212,165,116,0.14); border-radius: 14px; backdrop-filter: blur(8px); }
+  .vm__dot { width: 8px; height: 8px; border-radius: 50%; }
+  .vm__row-name { font-weight: 600; font-size: 14px; color: #e8dcc4; }
+  .vm__row-meta { font-size: 11px; color: #6a7390; margin-top: 1px; }
+  .vm__row-amt { margin-left: auto; font-weight: 700; color: #e8dcc4; font-family: 'Inter', sans-serif; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1 class="title">Velvet Midnight + 5 light options</h1>
+  <p class="subtitle">Dark = <b>Velvet Midnight</b> (navy + gold-tan + terracotta + cool blue-gray + cream serif). Each panel pairs a light candidate above with VM below. Look for the light whose accents read as siblings of VM — same DNA, opposite time of day.</p>
+
+  <div class="grid">
+
+    <!-- ====================================================
+         A — CARBON CREAM (original — kept as reference)
+         ==================================================== -->
+    <div class="opt">
+      <div class="opt__head">
+        <span class="opt__tag">A · Original<span class="opt__ref">cream + terracotta + olive</span></span>
+        <h2 class="opt__name">Carbon Cream</h2>
+        <p class="opt__desc">Your locked-in original. Cream + terracotta CTA + olive secondary. Note: olive doesn't appear in Velvet Midnight, so the secondary palette doesn't fully bridge — but the warm cream + DM Serif still feel sibling.</p>
+      </div>
+      <div class="opt__tokens">
+        <div class="swatches">
+          <span class="sw" style="background:#f5f0e1"></span>
+          <span class="sw" style="background:#c67b5c"></span>
+          <span class="sw" style="background:#6b7b3c"></span>
+          <span class="sw" style="background:#2d2418"></span>
+          <span class="sw" style="background:#8a7350"></span>
+        </div>
+        <span class="opt__font">Type: <b>DM Serif Display</b><br/>+ <b>Inter</b></span>
+      </div>
+      <div class="pair">
+        <div class="pair__lab">Light · Carbon Cream</div>
+        <div class="pair__phone-wrap"><div class="phone cc">
+          <div class="cc__brand">Moneta</div>
+          <div class="cc__hero">
+            <div class="cc__lab">Total net worth</div>
+            <div class="cc__net">NT$ 5,234.57</div>
+            <div class="cc__sub">▲ +1.2% · this month</div>
+            <div class="cc__pills">
+              <div class="cc__pill"><div class="cc__pill-cur">NTD</div><div class="cc__pill-amt">5,234.57</div></div>
+              <div class="cc__pill"><div class="cc__pill-cur">USD</div><div class="cc__pill-amt">151.65</div></div>
+              <div class="cc__pill"><div class="cc__pill-cur">IDR</div><div class="cc__pill-amt">500K</div></div>
+            </div>
+            <div class="cc__cta">+ Add transaction</div>
+          </div>
+          <div class="cc__row"><span class="cc__dot" style="background:var(--cc-dot-1)"></span><div><div class="cc__row-name">Cash</div><div class="cc__row-meta">cash · NTD</div></div><span class="cc__row-amt">NT$ 5,234.57</span></div>
+          <div class="cc__row"><span class="cc__dot" style="background:var(--cc-dot-2)"></span><div><div class="cc__row-name">Bank USD</div><div class="cc__row-meta">bank · USD</div></div><span class="cc__row-amt">US$ 151.65</span></div>
+          <div class="cc__row"><span class="cc__dot" style="background:var(--cc-dot-3)"></span><div><div class="cc__row-name">BCA</div><div class="cc__row-meta">bank · IDR</div></div><span class="cc__row-amt">Rp 500,000</span></div>
+        </div></div>
+        <div class="pair__lab">Dark · Velvet Midnight</div>
+        <div class="pair__phone-wrap"><div class="phone vm">
+          <div class="vm__brand">Moneta<small>· LEDGER 005</small></div>
+          <div class="vm__hero">
+            <div class="vm__lab">Total net worth</div>
+            <div class="vm__net">NT$ 5,234.57</div>
+            <div class="vm__sub">▲ +1.2% · this month</div>
+            <div class="vm__pills">
+              <div class="vm__pill"><div class="vm__pill-cur">NTD</div><div class="vm__pill-amt">5,234.57</div></div>
+              <div class="vm__pill"><div class="vm__pill-cur">USD</div><div class="vm__pill-amt">151.65</div></div>
+              <div class="vm__pill"><div class="vm__pill-cur">IDR</div><div class="vm__pill-amt">500K</div></div>
+            </div>
+            <div class="vm__cta">+ Add transaction</div>
+          </div>
+          <div class="vm__row"><span class="vm__dot" style="background:#d4a574"></span><div><div class="vm__row-name">Cash</div><div class="vm__row-meta">cash · NTD</div></div><span class="vm__row-amt">NT$ 5,234.57</span></div>
+          <div class="vm__row"><span class="vm__dot" style="background:#c67b5c"></span><div><div class="vm__row-name">Bank USD</div><div class="vm__row-meta">bank · USD</div></div><span class="vm__row-amt">US$ 151.65</span></div>
+          <div class="vm__row"><span class="vm__dot" style="background:#6a7390"></span><div><div class="vm__row-name">BCA</div><div class="vm__row-meta">bank · IDR</div></div><span class="vm__row-amt">Rp 500,000</span></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ====================================================
+         B — CARBON CREAM GILDED (NEW — minimal tweak)
+         ==================================================== -->
+    <div class="opt">
+      <div class="opt__head">
+        <span class="opt__tag">B · Carbon Cream Gilded<span class="opt__ref">olive → gold-tan</span></span>
+        <h2 class="opt__name">Carbon Cream Gilded</h2>
+        <p class="opt__desc">Same Carbon Cream structure but the <b>olive secondary becomes antique gold</b> — directly bridging to VM's gold-tan brand. Smallest change, tightest VM compatibility. Best if you want to keep Carbon Cream's warmth but unify the palette.</p>
+      </div>
+      <div class="opt__tokens">
+        <div class="swatches">
+          <span class="sw" style="background:#f5f0e1"></span>
+          <span class="sw" style="background:#c67b5c"></span>
+          <span class="sw" style="background:#b88747"></span>
+          <span class="sw" style="background:#2d2418"></span>
+          <span class="sw" style="background:#8a7350"></span>
+        </div>
+        <span class="opt__font">Type: <b>DM Serif Display</b><br/>+ <b>Inter</b></span>
+      </div>
+      <div class="pair">
+        <div class="pair__lab">Light · Carbon Cream Gilded</div>
+        <div class="pair__phone-wrap"><div class="phone cc cc--gilded">
+          <div class="cc__brand">Moneta</div>
+          <div class="cc__hero">
+            <div class="cc__lab">Total net worth</div>
+            <div class="cc__net">NT$ 5,234.57</div>
+            <div class="cc__sub">▲ +1.2% · this month</div>
+            <div class="cc__pills">
+              <div class="cc__pill"><div class="cc__pill-cur">NTD</div><div class="cc__pill-amt">5,234.57</div></div>
+              <div class="cc__pill"><div class="cc__pill-cur">USD</div><div class="cc__pill-amt">151.65</div></div>
+              <div class="cc__pill"><div class="cc__pill-cur">IDR</div><div class="cc__pill-amt">500K</div></div>
+            </div>
+            <div class="cc__cta">+ Add transaction</div>
+          </div>
+          <div class="cc__row"><span class="cc__dot" style="background:var(--cc-dot-1)"></span><div><div class="cc__row-name">Cash</div><div class="cc__row-meta">cash · NTD</div></div><span class="cc__row-amt">NT$ 5,234.57</span></div>
+          <div class="cc__row"><span class="cc__dot" style="background:var(--cc-dot-2)"></span><div><div class="cc__row-name">Bank USD</div><div class="cc__row-meta">bank · USD</div></div><span class="cc__row-amt">US$ 151.65</span></div>
+          <div class="cc__row"><span class="cc__dot" style="background:var(--cc-dot-3)"></span><div><div class="cc__row-name">BCA</div><div class="cc__row-meta">bank · IDR</div></div><span class="cc__row-amt">Rp 500,000</span></div>
+        </div></div>
+        <div class="pair__lab">Dark · Velvet Midnight</div>
+        <div class="pair__phone-wrap"><div class="phone vm">
+          <div class="vm__brand">Moneta<small>· LEDGER 005</small></div>
+          <div class="vm__hero">
+            <div class="vm__lab">Total net worth</div>
+            <div class="vm__net">NT$ 5,234.57</div>
+            <div class="vm__sub">▲ +1.2% · this month</div>
+            <div class="vm__pills">
+              <div class="vm__pill"><div class="vm__pill-cur">NTD</div><div class="vm__pill-amt">5,234.57</div></div>
+              <div class="vm__pill"><div class="vm__pill-cur">USD</div><div class="vm__pill-amt">151.65</div></div>
+              <div class="vm__pill"><div class="vm__pill-cur">IDR</div><div class="vm__pill-amt">500K</div></div>
+            </div>
+            <div class="vm__cta">+ Add transaction</div>
+          </div>
+          <div class="vm__row"><span class="vm__dot" style="background:#d4a574"></span><div><div class="vm__row-name">Cash</div><div class="vm__row-meta">cash · NTD</div></div><span class="vm__row-amt">NT$ 5,234.57</span></div>
+          <div class="vm__row"><span class="vm__dot" style="background:#c67b5c"></span><div><div class="vm__row-name">Bank USD</div><div class="vm__row-meta">bank · USD</div></div><span class="vm__row-amt">US$ 151.65</span></div>
+          <div class="vm__row"><span class="vm__dot" style="background:#6a7390"></span><div><div class="vm__row-name">BCA</div><div class="vm__row-meta">bank · IDR</div></div><span class="vm__row-amt">Rp 500,000</span></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ====================================================
+         C — PEARL VELLUM (NEW — direct VM inverse)
+         ==================================================== -->
+    <div class="opt">
+      <div class="opt__head">
+        <span class="opt__tag">C · Pearl Vellum<span class="opt__ref">VM at noon</span></span>
+        <h2 class="opt__name">Pearl Vellum</h2>
+        <p class="opt__desc">Direct inverse of Velvet Midnight — <b>ivory paper + navy ink</b>. Same gold-tan and terracotta accents from VM. Reads as the same library at noon vs. midnight. Tightest visual sibling. Best if you want light/dark to feel like a literal day/night flip.</p>
+      </div>
+      <div class="opt__tokens">
+        <div class="swatches">
+          <span class="sw" style="background:#faf6ec"></span>
+          <span class="sw" style="background:#0d1421"></span>
+          <span class="sw" style="background:#d4a574"></span>
+          <span class="sw" style="background:#c67b5c"></span>
+          <span class="sw" style="background:#6a7390"></span>
+        </div>
+        <span class="opt__font">Type: <b>DM Serif Display</b><br/>+ <b>Inter</b></span>
+      </div>
+      <div class="pair">
+        <div class="pair__lab">Light · Pearl Vellum</div>
+        <div class="pair__phone-wrap"><div class="phone cc cc--vellum">
+          <div class="cc__brand">Moneta</div>
+          <div class="cc__hero">
+            <div class="cc__lab">Total net worth</div>
+            <div class="cc__net">NT$ 5,234.57</div>
+            <div class="cc__sub">▲ +1.2% · this month</div>
+            <div class="cc__pills">
+              <div class="cc__pill"><div class="cc__pill-cur">NTD</div><div class="cc__pill-amt">5,234.57</div></div>
+              <div class="cc__pill"><div class="cc__pill-cur">USD</div><div class="cc__pill-amt">151.65</div></div>
+              <div class="cc__pill"><div class="cc__pill-cur">IDR</div><div class="cc__pill-amt">500K</div></div>
+            </div>
+            <div class="cc__cta">+ Add transaction</div>
+          </div>
+          <div class="cc__row"><span class="cc__dot" style="background:var(--cc-dot-1)"></span><div><div class="cc__row-name">Cash</div><div class="cc__row-meta">cash · NTD</div></div><span class="cc__row-amt">NT$ 5,234.57</span></div>
+          <div class="cc__row"><span class="cc__dot" style="background:var(--cc-dot-2)"></span><div><div class="cc__row-name">Bank USD</div><div class="cc__row-meta">bank · USD</div></div><span class="cc__row-amt">US$ 151.65</span></div>
+          <div class="cc__row"><span class="cc__dot" style="background:var(--cc-dot-3)"></span><div><div class="cc__row-name">BCA</div><div class="cc__row-meta">bank · IDR</div></div><span class="cc__row-amt">Rp 500,000</span></div>
+        </div></div>
+        <div class="pair__lab">Dark · Velvet Midnight</div>
+        <div class="pair__phone-wrap"><div class="phone vm">
+          <div class="vm__brand">Moneta<small>· LEDGER 005</small></div>
+          <div class="vm__hero">
+            <div class="vm__lab">Total net worth</div>
+            <div class="vm__net">NT$ 5,234.57</div>
+            <div class="vm__sub">▲ +1.2% · this month</div>
+            <div class="vm__pills">
+              <div class="vm__pill"><div class="vm__pill-cur">NTD</div><div class="vm__pill-amt">5,234.57</div></div>
+              <div class="vm__pill"><div class="vm__pill-cur">USD</div><div class="vm__pill-amt">151.65</div></div>
+              <div class="vm__pill"><div class="vm__pill-cur">IDR</div><div class="vm__pill-amt">500K</div></div>
+            </div>
+            <div class="vm__cta">+ Add transaction</div>
+          </div>
+          <div class="vm__row"><span class="vm__dot" style="background:#d4a574"></span><div><div class="vm__row-name">Cash</div><div class="vm__row-meta">cash · NTD</div></div><span class="vm__row-amt">NT$ 5,234.57</span></div>
+          <div class="vm__row"><span class="vm__dot" style="background:#c67b5c"></span><div><div class="vm__row-name">Bank USD</div><div class="vm__row-meta">bank · USD</div></div><span class="vm__row-amt">US$ 151.65</span></div>
+          <div class="vm__row"><span class="vm__dot" style="background:#6a7390"></span><div><div class="vm__row-name">BCA</div><div class="vm__row-meta">bank · IDR</div></div><span class="vm__row-amt">Rp 500,000</span></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ====================================================
+         D — LINEN LIBRARY (NEW — gold serif brand, navy CTA)
+         ==================================================== -->
+    <div class="opt">
+      <div class="opt__head">
+        <span class="opt__tag">D · Linen Library<span class="opt__ref">gold serif + navy CTA</span></span>
+        <h2 class="opt__name">Linen Library</h2>
+        <p class="opt__desc">Warmer linen canvas, <b>gold-tan serif brand</b>, navy text body, terracotta sub-line, navy CTA. Reads like a private library by morning sunlight — flips Pearl Vellum's primary/accent so navy becomes the action color. Most elegant.</p>
+      </div>
+      <div class="opt__tokens">
+        <div class="swatches">
+          <span class="sw" style="background:#f4eee0"></span>
+          <span class="sw" style="background:#b88747"></span>
+          <span class="sw" style="background:#0d1421"></span>
+          <span class="sw" style="background:#c67b5c"></span>
+          <span class="sw" style="background:#6a7390"></span>
+        </div>
+        <span class="opt__font">Type: <b>DM Serif Display</b><br/>+ <b>Inter</b></span>
+      </div>
+      <div class="pair">
+        <div class="pair__lab">Light · Linen Library</div>
+        <div class="pair__phone-wrap"><div class="phone cc cc--linen">
+          <div class="cc__brand">Moneta</div>
+          <div class="cc__hero">
+            <div class="cc__lab">Total net worth</div>
+            <div class="cc__net">NT$ 5,234.57</div>
+            <div class="cc__sub">▲ +1.2% · this month</div>
+            <div class="cc__pills">
+              <div class="cc__pill"><div class="cc__pill-cur">NTD</div><div class="cc__pill-amt">5,234.57</div></div>
+              <div class="cc__pill"><div class="cc__pill-cur">USD</div><div class="cc__pill-amt">151.65</div></div>
+              <div class="cc__pill"><div class="cc__pill-cur">IDR</div><div class="cc__pill-amt">500K</div></div>
+            </div>
+            <div class="cc__cta">+ Add transaction</div>
+          </div>
+          <div class="cc__row"><span class="cc__dot" style="background:var(--cc-dot-1)"></span><div><div class="cc__row-name">Cash</div><div class="cc__row-meta">cash · NTD</div></div><span class="cc__row-amt">NT$ 5,234.57</span></div>
+          <div class="cc__row"><span class="cc__dot" style="background:var(--cc-dot-2)"></span><div><div class="cc__row-name">Bank USD</div><div class="cc__row-meta">bank · USD</div></div><span class="cc__row-amt">US$ 151.65</span></div>
+          <div class="cc__row"><span class="cc__dot" style="background:var(--cc-dot-3)"></span><div><div class="cc__row-name">BCA</div><div class="cc__row-meta">bank · IDR</div></div><span class="cc__row-amt">Rp 500,000</span></div>
+        </div></div>
+        <div class="pair__lab">Dark · Velvet Midnight</div>
+        <div class="pair__phone-wrap"><div class="phone vm">
+          <div class="vm__brand">Moneta<small>· LEDGER 005</small></div>
+          <div class="vm__hero">
+            <div class="vm__lab">Total net worth</div>
+            <div class="vm__net">NT$ 5,234.57</div>
+            <div class="vm__sub">▲ +1.2% · this month</div>
+            <div class="vm__pills">
+              <div class="vm__pill"><div class="vm__pill-cur">NTD</div><div class="vm__pill-amt">5,234.57</div></div>
+              <div class="vm__pill"><div class="vm__pill-cur">USD</div><div class="vm__pill-amt">151.65</div></div>
+              <div class="vm__pill"><div class="vm__pill-cur">IDR</div><div class="vm__pill-amt">500K</div></div>
+            </div>
+            <div class="vm__cta">+ Add transaction</div>
+          </div>
+          <div class="vm__row"><span class="vm__dot" style="background:#d4a574"></span><div><div class="vm__row-name">Cash</div><div class="vm__row-meta">cash · NTD</div></div><span class="vm__row-amt">NT$ 5,234.57</span></div>
+          <div class="vm__row"><span class="vm__dot" style="background:#c67b5c"></span><div><div class="vm__row-name">Bank USD</div><div class="vm__row-meta">bank · USD</div></div><span class="vm__row-amt">US$ 151.65</span></div>
+          <div class="vm__row"><span class="vm__dot" style="background:#6a7390"></span><div><div class="vm__row-name">BCA</div><div class="vm__row-meta">bank · IDR</div></div><span class="vm__row-amt">Rp 500,000</span></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ====================================================
+         E — CHAMPAGNE BANK (NEW — antique-gold-led)
+         ==================================================== -->
+    <div class="opt">
+      <div class="opt__head">
+        <span class="opt__tag">E · Champagne Bank<span class="opt__ref">antique gold-led</span></span>
+        <h2 class="opt__name">Champagne Bank</h2>
+        <p class="opt__desc">Champagne canvas with <b>antique gold</b> as both brand AND CTA color, terracotta sub, espresso text. Reads like a private bank's annual report. Warmest of the new options. Best if you want light to feel celebratory rather than minimal.</p>
+      </div>
+      <div class="opt__tokens">
+        <div class="swatches">
+          <span class="sw" style="background:#faf3e7"></span>
+          <span class="sw" style="background:#b88747"></span>
+          <span class="sw" style="background:#c67b5c"></span>
+          <span class="sw" style="background:#2d2418"></span>
+          <span class="sw" style="background:#8a7a65"></span>
+        </div>
+        <span class="opt__font">Type: <b>DM Serif Display</b><br/>+ <b>Inter</b></span>
+      </div>
+      <div class="pair">
+        <div class="pair__lab">Light · Champagne Bank</div>
+        <div class="pair__phone-wrap"><div class="phone cc cc--champagne">
+          <div class="cc__brand">Moneta</div>
+          <div class="cc__hero">
+            <div class="cc__lab">Total net worth</div>
+            <div class="cc__net">NT$ 5,234.57</div>
+            <div class="cc__sub">▲ +1.2% · this month</div>
+            <div class="cc__pills">
+              <div class="cc__pill"><div class="cc__pill-cur">NTD</div><div class="cc__pill-amt">5,234.57</div></div>
+              <div class="cc__pill"><div class="cc__pill-cur">USD</div><div class="cc__pill-amt">151.65</div></div>
+              <div class="cc__pill"><div class="cc__pill-cur">IDR</div><div class="cc__pill-amt">500K</div></div>
+            </div>
+            <div class="cc__cta">+ Add transaction</div>
+          </div>
+          <div class="cc__row"><span class="cc__dot" style="background:var(--cc-dot-1)"></span><div><div class="cc__row-name">Cash</div><div class="cc__row-meta">cash · NTD</div></div><span class="cc__row-amt">NT$ 5,234.57</span></div>
+          <div class="cc__row"><span class="cc__dot" style="background:var(--cc-dot-2)"></span><div><div class="cc__row-name">Bank USD</div><div class="cc__row-meta">bank · USD</div></div><span class="cc__row-amt">US$ 151.65</span></div>
+          <div class="cc__row"><span class="cc__dot" style="background:var(--cc-dot-3)"></span><div><div class="cc__row-name">BCA</div><div class="cc__row-meta">bank · IDR</div></div><span class="cc__row-amt">Rp 500,000</span></div>
+        </div></div>
+        <div class="pair__lab">Dark · Velvet Midnight</div>
+        <div class="pair__phone-wrap"><div class="phone vm">
+          <div class="vm__brand">Moneta<small>· LEDGER 005</small></div>
+          <div class="vm__hero">
+            <div class="vm__lab">Total net worth</div>
+            <div class="vm__net">NT$ 5,234.57</div>
+            <div class="vm__sub">▲ +1.2% · this month</div>
+            <div class="vm__pills">
+              <div class="vm__pill"><div class="vm__pill-cur">NTD</div><div class="vm__pill-amt">5,234.57</div></div>
+              <div class="vm__pill"><div class="vm__pill-cur">USD</div><div class="vm__pill-amt">151.65</div></div>
+              <div class="vm__pill"><div class="vm__pill-cur">IDR</div><div class="vm__pill-amt">500K</div></div>
+            </div>
+            <div class="vm__cta">+ Add transaction</div>
+          </div>
+          <div class="vm__row"><span class="vm__dot" style="background:#d4a574"></span><div><div class="vm__row-name">Cash</div><div class="vm__row-meta">cash · NTD</div></div><span class="vm__row-amt">NT$ 5,234.57</span></div>
+          <div class="vm__row"><span class="vm__dot" style="background:#c67b5c"></span><div><div class="vm__row-name">Bank USD</div><div class="vm__row-meta">bank · USD</div></div><span class="vm__row-amt">US$ 151.65</span></div>
+          <div class="vm__row"><span class="vm__dot" style="background:#6a7390"></span><div><div class="vm__row-name">BCA</div><div class="vm__row-meta">bank · IDR</div></div><span class="vm__row-amt">Rp 500,000</span></div>
+        </div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

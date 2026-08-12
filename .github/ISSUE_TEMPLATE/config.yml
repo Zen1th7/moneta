@@ -1,0 +1,10 @@
+# Blank issues stay enabled: feature ideas and questions shouldn't be forced
+# through a bug form.
+blank_issues_enabled: true
+contact_links:
+  - name: Something private (account, personal data, security)
+    url: mailto:andrian.wu.7@gmail.com
+    about: This tracker is public. Email instead for anything you don't want visible.
+  - name: Privacy policy
+    url: https://zen1th7.github.io/moneta/privacy.html
+    about: What Taraka stores, what leaves your device, and how to delete a Drive backup.

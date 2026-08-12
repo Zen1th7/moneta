@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Moneta — Carbon Cream + 2 dark finalists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px 16px 80px;
+    background: #08070a; color: #f5f5f7;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1200px; margin: 0 auto; }
+  h1.title { font-size: 28px; font-weight: 800; letter-spacing: -0.025em; margin: 0 0 8px; text-align: center; }
+  p.subtitle { text-align: center; color: #a1a1aa; margin: 0 auto 36px; max-width: 720px; line-height: 1.6; font-size: 14px; }
+  p.subtitle b { color: #e8c8a8; }
+
+  .grid { display: grid; grid-template-columns: 1fr; gap: 28px; justify-items: center; }
+
+  .opt { width: 100%; max-width: 420px; background: #131316; border: 1px solid #27272a; border-radius: 20px; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.45); }
+  .opt__head { padding: 18px 20px 14px; border-bottom: 1px solid #27272a; }
+  .opt__name { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; margin: 0; }
+  .opt__tag { display: inline-block; font-size: 10px; color: #c67b5c; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; margin-bottom: 6px; }
+  .opt__ref { display: inline-block; font-size: 10px; color: #a1a1aa; margin-left: 8px; font-style: italic; }
+  .opt__desc { color: #a1a1aa; font-size: 12.5px; line-height: 1.55; margin: 6px 0 0; }
+  .opt__desc b { color: #e8c8a8; font-weight: 600; }
+  .opt__tokens { display: flex; align-items: center; gap: 14px; padding: 12px 20px; border-bottom: 1px solid #27272a; background: #0e0e10; }
+  .swatches { display: flex; gap: 5px; }
+  .sw { width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+  .opt__font { color: #d4d4d8; font-size: 11px; margin-left: auto; text-align: right; }
+  .opt__font b { color: #fff; font-weight: 600; }
+
+  .pair { padding: 16px; background: #0e0e10; }
+  .pair__lab { display: flex; align-items: center; gap: 8px; font-size: 10px; color: #a1a1aa; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; margin: 0 4px 8px; }
+  .pair__lab::after { content: ''; flex: 1; height: 1px; background: #27272a; }
+  .pair__lab + .pair__phone-wrap { margin-bottom: 22px; }
+  .pair__phone-wrap { display: flex; justify-content: center; }
+  .phone { width: 100%; max-width: 340px; height: auto; border-radius: 22px; overflow: hidden; position: relative; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+
+  /* ============================================================
+     LIGHT — Carbon Cream (locked-in reference)
+     ============================================================ */
+  .cc { background: #f5f0e1; color: #2d2418; font-family: 'Inter', sans-serif; padding: 18px; }
+  .cc__brand { font-family: 'DM Serif Display', serif; font-size: 22px; color: #6b3410; letter-spacing: -0.01em; }
+  .cc__hero { margin-top: 16px; background: #ffffff; border-radius: 22px; padding: 20px; box-shadow: 0 1px 2px rgba(45,36,24,0.04), 0 8px 24px rgba(45,36,24,0.06); }
+  .cc__lab { font-size: 10px; color: #8a7350; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; }
+  .cc__net { font-family: 'DM Serif Display', serif; font-size: 36px; color: #2d2418; margin-top: 4px; font-feature-settings: 'tnum'; letter-spacing: -0.01em; line-height: 1; }
+  .cc__sub { color: #6b7b3c; font-size: 11.5px; margin-top: 8px; font-weight: 600; }
+  .cc__pills { display: flex; gap: 8px; margin-top: 14px; }
+  .cc__pill { flex: 1; background: #faf6ec; border-radius: 12px; padding: 10px; text-align: center; }
+  .cc__pill-cur { font-size: 9.5px; color: #8a7350; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; }
+  .cc__pill-amt { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; margin-top: 2px; color: #2d2418; }
+  .cc__cta { margin-top: 16px; background: #c67b5c; color: #fff; padding: 14px; border-radius: 14px; text-align: center; font-weight: 600; font-size: 13px; }
+  .cc__row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; margin-top: 10px; background: #ffffff; border-radius: 14px; }
+  .cc__dot { width: 8px; height: 8px; border-radius: 50%; }
+  .cc__row-name { font-weight: 600; color: #2d2418; font-size: 14px; }
+  .cc__row-meta { font-size: 11px; color: #8a7350; margin-top: 1px; }
+  .cc__row-amt { margin-left: auto; font-weight: 700; color: #2d2418; }
+
+  /* ============================================================
+     1 — HEARTH DIM  (warm brown canvas, NO bottom glow)
+     ============================================================ */
+  .gg { background: #1d1612; color: #f5ede0; font-family: 'Inter', sans-serif; padding: 20px; position: relative; }
+  .gg__brand { font-family: 'DM Serif Display', serif; font-size: 22px; color: #f5ede0; }
+  .gg__brand-dot { display: inline-block; width: 6px; height: 6px; background: #e8956b; border-radius: 50%; margin: 0 0 4px 4px; box-shadow: 0 0 12px rgba(232,149,107,0.6); }
+  .gg__hero { margin-top: 16px; background: #2a201a; border-radius: 24px; padding: 22px; border: 1px solid #3a2d24; }
+  .gg__lab { font-size: 10px; color: #a89888; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; }
+  .gg__net { font-family: 'DM Serif Display', serif; font-size: 36px; color: #f5ede0; margin-top: 4px; letter-spacing: -0.02em; line-height: 1; }
+  .gg__pills { display: flex; gap: 8px; margin-top: 14px; }
+  .gg__pill { flex: 1; background: rgba(245,237,224,0.04); border: 1px solid rgba(245,237,224,0.08); border-radius: 12px; padding: 10px; text-align: center; }
+  .gg__pill-cur { font-size: 9.5px; color: #a89888; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; }
+  .gg__pill-amt { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; margin-top: 2px; color: #f5ede0; }
+  .gg__cta { margin-top: 14px; background: #e8956b; color: #1d1612; padding: 13px; border-radius: 14px; text-align: center; font-weight: 700; font-size: 13px; box-shadow: 0 0 24px rgba(232,149,107,0.35); }
+  .gg__row { margin-top: 12px; display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(42,32,26,0.7); border: 1px solid rgba(245,237,224,0.06); border-radius: 14px; backdrop-filter: blur(8px); }
+  .gg__dot { width: 8px; height: 8px; border-radius: 50%; }
+  .gg__row-name { font-weight: 600; font-size: 14px; color: #f5ede0; }
+  .gg__row-meta { font-size: 11px; color: #a89888; margin-top: 1px; }
+  .gg__row-amt { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; color: #f5ede0; }
+
+  /* ============================================================
+     2 — VELVET MIDNIGHT  (deep navy private library)
+     ============================================================ */
+  .vm {
+    background:
+      radial-gradient(500px 280px at 100% 0%, rgba(212,165,116,0.10), transparent 60%),
+      radial-gradient(420px 240px at 0% 100%, rgba(198,123,92,0.08), transparent 70%),
+      #0d1421;
+    color: #e8dcc4; font-family: 'Inter', sans-serif; padding: 18px; position: relative;
+  }
+  .vm__brand { font-family: 'DM Serif Display', serif; font-size: 22px; color: #d4a574; }
+  .vm__brand small { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: #6a7390; letter-spacing: 0.18em; margin-left: 8px; }
+  .vm__hero { margin-top: 16px; background: rgba(232,220,196,0.04); border: 1px solid rgba(212,165,116,0.18); border-radius: 22px; padding: 20px; backdrop-filter: blur(14px); position: relative; }
+  .vm__lab { font-size: 10px; color: #6a7390; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; }
+  .vm__net { font-family: 'DM Serif Display', serif; font-size: 36px; color: #e8dcc4; margin-top: 4px; letter-spacing: -0.02em; line-height: 1; }
+  .vm__sub { color: #c67b5c; font-size: 11.5px; margin-top: 8px; font-weight: 600; }
+  .vm__pills { display: flex; gap: 8px; margin-top: 14px; }
+  .vm__pill { flex: 1; background: rgba(232,220,196,0.04); border: 1px solid rgba(212,165,116,0.16); border-radius: 12px; padding: 10px; text-align: center; }
+  .vm__pill-cur { font-size: 9.5px; color: #6a7390; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; }
+  .vm__pill-amt { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; margin-top: 2px; color: #e8dcc4; }
+  .vm__cta { margin-top: 16px; background: #d4a574; color: #0d1421; padding: 14px; border-radius: 14px; text-align: center; font-weight: 700; font-size: 13px; box-shadow: 0 4px 18px rgba(212,165,116,0.18); }
+  .vm__row { margin-top: 10px; display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(232,220,196,0.04); border: 1px solid rgba(212,165,116,0.14); border-radius: 14px; backdrop-filter: blur(8px); }
+  .vm__dot { width: 8px; height: 8px; border-radius: 50%; }
+  .vm__row-name { font-weight: 600; font-size: 14px; color: #e8dcc4; }
+  .vm__row-meta { font-size: 11px; color: #6a7390; margin-top: 1px; }
+  .vm__row-amt { margin-left: auto; font-weight: 700; color: #e8dcc4; font-family: 'Inter', sans-serif; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1 class="title">Carbon Cream · 2 dark finalists</h1>
+  <p class="subtitle">Light = <b>Carbon Cream</b>. Two darks left. Hearth Dim's bottom radial glow has been removed — now it's a clean warm-brown canvas with the terracotta CTA halo as the only glowing element.</p>
+
+  <div class="grid">
+
+    <!-- ====================================================
+         1 — HEARTH DIM (no bottom glow)
+         ==================================================== -->
+    <div class="opt">
+      <div class="opt__head">
+        <span class="opt__tag">1 · Warm brown<span class="opt__ref">cozy / lifted cards</span></span>
+        <h2 class="opt__name">Hearth Dim</h2>
+        <p class="opt__desc">Solid warm-brown canvas. Lifted brown cards with a subtle blur, glass currency pills, and the <b>terracotta CTA's soft halo</b> as the only glowing element. Reads as a calm evening session — warm but no theatrics.</p>
+      </div>
+      <div class="opt__tokens">
+        <div class="swatches">
+          <span class="sw" style="background:#1d1612"></span>
+          <span class="sw" style="background:#e8956b"></span>
+          <span class="sw" style="background:#2a201a"></span>
+          <span class="sw" style="background:#f5ede0"></span>
+          <span class="sw" style="background:#a89888"></span>
+        </div>
+        <span class="opt__font">Type: <b>DM Serif Display</b><br/>+ <b>Inter</b></span>
+      </div>
+      <div class="pair">
+        <div class="pair__lab">Light · Carbon Cream</div>
+        <div class="pair__phone-wrap"><div class="phone cc">
+          <div class="cc__brand">Moneta</div>
+          <div class="cc__hero">
+            <div class="cc__lab">Total net worth</div>
+            <div class="cc__net">NT$ 5,234.57</div>
+            <div class="cc__sub">▲ +1.2% · this month</div>
+            <div class="cc__pills">
+              <div class="cc__pill"><div class="cc__pill-cur">NTD</div><div class="cc__pill-amt">5,234.57</div></div>
+              <div class="cc__pill"><div class="cc__pill-cur">USD</div><div class="cc__pill-amt">151.65</div></div>
+              <div class="cc__pill"><div class="cc__pill-cur">IDR</div><div class="cc__pill-amt">500K</div></div>
+            </div>
+            <div class="cc__cta">+ Add transaction</div>
+          </div>
+          <div class="cc__row"><span class="cc__dot" style="background:#6b7b3c"></span><div><div class="cc__row-name">Cash</div><div class="cc__row-meta">cash · NTD</div></div><span class="cc__row-amt">NT$ 5,234.57</span></div>
+          <div class="cc__row"><span class="cc__dot" style="background:#c67b5c"></span><div><div class="cc__row-name">Bank USD</div><div class="cc__row-meta">bank · USD</div></div><span class="cc__row-amt">US$ 151.65</span></div>
+          <div class="cc__row"><span class="cc__dot" style="background:#a89878"></span><div><div class="cc__row-name">BCA</div><div class="cc__row-meta">bank · IDR</div></div><span class="cc__row-amt">Rp 500,000</span></div>
+        </div></div>
+        <div class="pair__lab">Dark · Hearth Dim</div>
+        <div class="pair__phone-wrap"><div class="phone gg">
+          <div class="gg__brand">Moneta<span class="gg__brand-dot"></span></div>
+          <div class="gg__hero">
+            <div class="gg__lab">Total net worth</div>
+            <div class="gg__net">NT$ 5,234.57</div>
+            <div class="gg__pills">
+              <div class="gg__pill"><div class="gg__pill-cur">NTD</div><div class="gg__pill-amt">5,234.57</div></div>
+              <div class="gg__pill"><div class="gg__pill-cur">USD</div><div class="gg__pill-amt">151.65</div></div>
+              <div class="gg__pill"><div class="gg__pill-cur">IDR</div><div class="gg__pill-amt">500K</div></div>
+            </div>
+          </div>
+          <div class="gg__cta">+ Add transaction</div>
+          <div class="gg__row"><span class="gg__dot" style="background:#9aac5f"></span><div><div class="gg__row-name">Cash</div><div class="gg__row-meta">cash · NTD</div></div><span class="gg__row-amt">NT$ 5,234.57</span></div>
+          <div class="gg__row"><span class="gg__dot" style="background:#e8956b"></span><div><div class="gg__row-name">Bank USD</div><div class="gg__row-meta">bank · USD</div></div><span class="gg__row-amt">US$ 151.65</span></div>
+          <div class="gg__row"><span class="gg__dot" style="background:#c8a890"></span><div><div class="gg__row-name">BCA</div><div class="gg__row-meta">bank · IDR</div></div><span class="gg__row-amt">Rp 500,000</span></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ====================================================
+         2 — VELVET MIDNIGHT
+         ==================================================== -->
+    <div class="opt">
+      <div class="opt__head">
+        <span class="opt__tag">2 · Private library<span class="opt__ref">cool-warm tension</span></span>
+        <h2 class="opt__name">Velvet Midnight</h2>
+        <p class="opt__desc">Deep midnight-navy canvas with a faint gold glow top-right and terracotta glow bottom-left. <b>Cool dark with warm cream content</b>. Gold-tan brand, terracotta sub-line, gold CTA with soft halo. Reads as a private library at midnight. Most refined / regal.</p>
+      </div>
+      <div class="opt__tokens">
+        <div class="swatches">
+          <span class="sw" style="background:#0d1421"></span>
+          <span class="sw" style="background:#d4a574"></span>
+          <span class="sw" style="background:#c67b5c"></span>
+          <span class="sw" style="background:#e8dcc4"></span>
+          <span class="sw" style="background:#6a7390"></span>
+        </div>
+        <span class="opt__font">Type: <b>DM Serif Display</b><br/>+ <b>Inter</b></span>
+      </div>
+      <div class="pair">
+        <div class="pair__lab">Light · Carbon Cream</div>
+        <div class="pair__phone-wrap"><div class="phone cc">
+          <div class="cc__brand">Moneta</div>
+          <div class="cc__hero">
+            <div class="cc__lab">Total net worth</div>
+            <div class="cc__net">NT$ 5,234.57</div>
+            <div class="cc__sub">▲ +1.2% · this month</div>
+            <div class="cc__pills">
+              <div class="cc__pill"><div class="cc__pill-cur">NTD</div><div class="cc__pill-amt">5,234.57</div></div>
+              <div class="cc__pill"><div class="cc__pill-cur">USD</div><div class="cc__pill-amt">151.65</div></div>
+              <div class="cc__pill"><div class="cc__pill-cur">IDR</div><div class="cc__pill-amt">500K</div></div>
+            </div>
+            <div class="cc__cta">+ Add transaction</div>
+          </div>
+          <div class="cc__row"><span class="cc__dot" style="background:#6b7b3c"></span><div><div class="cc__row-name">Cash</div><div class="cc__row-meta">cash · NTD</div></div><span class="cc__row-amt">NT$ 5,234.57</span></div>
+          <div class="cc__row"><span class="cc__dot" style="background:#c67b5c"></span><div><div class="cc__row-name">Bank USD</div><div class="cc__row-meta">bank · USD</div></div><span class="cc__row-amt">US$ 151.65</span></div>
+          <div class="cc__row"><span class="cc__dot" style="background:#a89878"></span><div><div class="cc__row-name">BCA</div><div class="cc__row-meta">bank · IDR</div></div><span class="cc__row-amt">Rp 500,000</span></div>
+        </div></div>
+        <div class="pair__lab">Dark · Velvet Midnight</div>
+        <div class="pair__phone-wrap"><div class="phone vm">
+          <div class="vm__brand">Moneta<small>· LEDGER 005</small></div>
+          <div class="vm__hero">
+            <div class="vm__lab">Total net worth</div>
+            <div class="vm__net">NT$ 5,234.57</div>
+            <div class="vm__sub">▲ +1.2% · this month</div>
+            <div class="vm__pills">
+              <div class="vm__pill"><div class="vm__pill-cur">NTD</div><div class="vm__pill-amt">5,234.57</div></div>
+              <div class="vm__pill"><div class="vm__pill-cur">USD</div><div class="vm__pill-amt">151.65</div></div>
+              <div class="vm__pill"><div class="vm__pill-cur">IDR</div><div class="vm__pill-amt">500K</div></div>
+            </div>
+            <div class="vm__cta">+ Add transaction</div>
+          </div>
+          <div class="vm__row"><span class="vm__dot" style="background:#d4a574"></span><div><div class="vm__row-name">Cash</div><div class="vm__row-meta">cash · NTD</div></div><span class="vm__row-amt">NT$ 5,234.57</span></div>
+          <div class="vm__row"><span class="vm__dot" style="background:#c67b5c"></span><div><div class="vm__row-name">Bank USD</div><div class="vm__row-meta">bank · USD</div></div><span class="vm__row-amt">US$ 151.65</span></div>
+          <div class="vm__row"><span class="vm__dot" style="background:#6a7390"></span><div><div class="vm__row-name">BCA</div><div class="vm__row-meta">bank · IDR</div></div><span class="vm__row-amt">Rp 500,000</span></div>
+        </div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

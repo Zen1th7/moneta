@@ -1,0 +1,46 @@
+# Deploys docs/ (landing page + privacy policy) to GitHub Pages via the
+# actions pipeline. Replaces the repo-settings "Deploy from a branch"
+# path, whose managed "pages build and deployment" runs began failing
+# opaquely at the deploy step on 2026-07-02 (runs #59-#61; build always
+# green, deploy "failed, try again later", no diagnostics anywhere —
+# including the public deployments API). This workflow does the same
+# publish with inspectable logs and a manual trigger.
+#
+# One-time repo setting: Settings → Pages → Build and deployment →
+# Source = "GitHub Actions". The configure-pages `enablement` input
+# below attempts to flip that automatically on first run; if the token
+# lacks permission for it, flip the dropdown by hand and re-run.
+name: Deploy Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ['docs/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never cancel a deploy mid-flight; queue instead.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - id: deployment
+        uses: actions/deploy-pages@v4

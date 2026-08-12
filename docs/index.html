@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taraka — Your wealth, elevated.</title>
+<meta name="description" content="Taraka (formerly Moneta) is a local-first multi-currency personal finance app for Android. No ads, no analytics, no tracking — with optional encrypted Google Drive backup and sign-in.">
+<link rel="canonical" href="https://zen1th7.github.io/moneta/">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d1421;
+    --bg-card: #131a2d;
+    --bg-pill: #1c2438;
+    --brand: #d4a574;
+    --cta: #c67b5c;
+    --text: #e8dcc4;
+    --muted: #b0a890;
+    --faint: #6a7390;
+    --radius: 14px;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body { min-height: 100vh; padding: 64px 20px; }
+
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+
+  .logo {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 16px;
+    color: var(--brand);
+    filter: drop-shadow(0 0 14px rgba(212, 165, 116, 0.40));
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 3rem;
+    font-weight: 400;
+    color: var(--brand);
+    margin-bottom: 8px;
+  }
+
+  .tagline {
+    font-style: italic;
+    color: var(--muted);
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+
+  .renamed {
+    color: var(--faint);
+    font-size: 0.85rem;
+    margin-bottom: 28px;
+  }
+
+  .badges {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .badge {
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: rgba(212, 165, 116, 0.14);
+    color: var(--brand);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  section {
+    background: var(--bg-card);
+    border: 1px solid rgba(212, 165, 116, 0.12);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    margin-bottom: 18px;
+  }
+
+  section h2 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    color: var(--brand);
+    font-size: 1.5rem;
+    margin-bottom: 14px;
+  }
+
+  section p {
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  section p:last-child { margin-bottom: 0; }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  ul li {
+    padding-left: 24px;
+    position: relative;
+    color: var(--muted);
+  }
+
+  ul li::before {
+    content: '·';
+    color: var(--brand);
+    position: absolute;
+    left: 8px;
+    top: -2px;
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+
+  a {
+    color: var(--brand);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(212, 165, 116, 0.30);
+    transition: border-color 0.15s;
+  }
+
+  a:hover { border-bottom-color: var(--brand); }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .links a {
+    padding: 10px 18px;
+    border: 1px solid rgba(212, 165, 116, 0.30);
+    border-radius: var(--radius);
+    background: transparent;
+  }
+
+  .links a:hover {
+    background: rgba(212, 165, 116, 0.10);
+    border-color: var(--brand);
+  }
+
+  footer {
+    text-align: center;
+    color: var(--faint);
+    font-size: 0.82rem;
+    margin-top: 40px;
+  }
+
+  @media (max-width: 480px) {
+    body { padding: 40px 16px; }
+    h1 { font-size: 2.2rem; }
+    section { padding: 22px 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <svg class="logo" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="22" cy="22" r="19" stroke="currentColor" stroke-width="1.5" fill="rgba(212,165,116,0.12)"></circle>
+      <circle cx="22" cy="22" r="16" stroke="currentColor" stroke-opacity="0.5" stroke-width="0.6" fill="none"></circle>
+      <path d="M22 11 Q25 19 33 22 Q25 25 22 33 Q19 25 11 22 Q19 19 22 11 Z" fill="currentColor"></path>
+    </svg>
+    <h1>Taraka</h1>
+    <p class="tagline">Your wealth, elevated.</p>
+    <p class="renamed">Previously published as <strong>Moneta</strong> — same app, same developer, new name.</p>
+    <div class="badges">
+      <span class="badge">Multi-currency</span>
+      <span class="badge">Local-first</span>
+      <span class="badge">No ads</span>
+      <span class="badge">No tracking</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>What is Taraka?</h2>
+    <p>Taraka is a private, multi-currency personal finance app for Android. Track wallets, transactions, budgets, goals, and recurring bills — stored on your device by default, with optional encrypted backup to your own Google Drive. No ads, no analytics, no tracking.</p>
+    <ul>
+      <li>Multi-currency wallets (NTD, USD, IDR) with cross-currency net worth</li>
+      <li>Budgets with real-time progress and monthly reset</li>
+      <li>Goals with visual progress ring and goal-completion celebration</li>
+      <li>Recurring transactions (daily / weekly / monthly / yearly)</li>
+      <li>Analytics: net worth trend, category breakdown, custom date ranges</li>
+      <li>Quick Add notification for one-tap logging from the notification shade</li>
+      <li>Trilingual: English, Bahasa Indonesia, 繁體中文</li>
+      <li>Biometric lock, JSON / Excel export, dark and light themes</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Links</h2>
+    <div class="links">
+      <a href="./privacy.html">Privacy Policy</a>
+      <a href="./terms.html">Terms of Use</a>
+    </div>
+  </section>
+
+  <footer>
+    Made by Zenith / Andrian Wu.
+  </footer>
+
+</div>
+</body>
+</html>

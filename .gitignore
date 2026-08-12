@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+
+# Android build/local files
+android/build/
+android/app/build/
+android/.gradle/
+android/local.properties
+android/captures/
+android/app/*.apk
+android/app/*.aab
+android/app/src/main/assets/public/
+android/app/src/main/jniLibs/
+android/app/src/main/res/raw/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.log
+
+# Project specific
+backup/
+exported_files/
+apk/
+.DS_Store
+
+# Moneta v2 (Quasar/Vite build artifacts)
+moneta-v2/.quasar/
+moneta-v2/dist/
+
+# Moneta v2 Capacitor Android build output
+moneta-v2/src-capacitor/android/build/
+moneta-v2/src-capacitor/android/.gradle/
+moneta-v2/src-capacitor/android/local.properties
+moneta-v2/src-capacitor/android/captures/
+moneta-v2/src-capacitor/android/app/build/
+moneta-v2/src-capacitor/android/app/release/
+moneta-v2/src-capacitor/android/app/*.apk
+moneta-v2/src-capacitor/android/app/*.aab
+
+# Moneta v2 Capacitor iOS — generated on macOS via `cap add ios` on
+# every CI run. Keeping it out of source keeps macOS-only Pod artifacts
+# out of the Windows tree and forces the workflow to test fresh
+# platform-add each run.
+moneta-v2/src-capacitor/ios/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Android signing — keystores must never enter the repo. The signing
+# config in src-capacitor/android/app/build.gradle reads paths +
+# passwords from environment variables; see docs/play-store-launch.md.
+*.jks
+*.keystore
+keystore.properties

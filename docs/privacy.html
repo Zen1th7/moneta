@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — Taraka</title>
+<meta name="description" content="Taraka's privacy policy (Taraka was previously called Moneta). Local-first: your data lives on your device. A few optional features (Google sign-in, encrypted Drive backup, emailed PIN recovery) connect out only when you turn them on. No ads, no analytics, no tracking.">
+<link rel="canonical" href="https://zen1th7.github.io/moneta/privacy.html">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d1421;
+    --bg-card: #131a2d;
+    --brand: #d4a574;
+    --text: #e8dcc4;
+    --muted: #b0a890;
+    --faint: #6a7390;
+    --radius: 14px;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body { min-height: 100vh; padding: 48px 20px; }
+
+  .wrap { max-width: 720px; margin: 0 auto; }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+    transition: color 0.15s;
+  }
+  .back:hover { color: var(--brand); }
+
+  header {
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(212, 165, 116, 0.18);
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 2.4rem;
+    font-weight: 400;
+    color: var(--brand);
+    margin-bottom: 6px;
+  }
+
+  .updated {
+    color: var(--faint);
+    font-size: 0.85rem;
+  }
+
+  section { margin-bottom: 28px; }
+
+  h2 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    color: var(--brand);
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+  }
+
+  p {
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  p:last-child { margin-bottom: 0; }
+
+  ul {
+    color: var(--muted);
+    margin: 0 0 12px;
+    padding-left: 1.25rem;
+  }
+  li { margin-bottom: 6px; }
+  li:last-child { margin-bottom: 0; }
+
+  strong { color: var(--text); }
+
+  a {
+    color: var(--brand);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(212, 165, 116, 0.30);
+  }
+  a:hover { border-bottom-color: var(--brand); }
+
+  footer {
+    text-align: center;
+    color: var(--faint);
+    font-size: 0.82rem;
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(212, 165, 116, 0.18);
+  }
+
+  @media (max-width: 480px) {
+    body { padding: 32px 16px; }
+    h1 { font-size: 1.8rem; }
+    h2 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="./">← Back to Taraka</a>
+
+  <header>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: 28 July 2026</p>
+    <p class="updated">Taraka is developed and operated by <strong>Zenith7</strong> (the developer named on the Google Play listing). Privacy contact: <a href="mailto:andrian.wu.7@gmail.com">andrian.wu.7@gmail.com</a>.</p>
+    <p class="updated">Taraka was previously called <strong>Moneta</strong>. Only the name changed — it is the same app from the same developer, and nothing in this policy changed with the rename.</p>
+  </header>
+
+  <section>
+    <h2>The short version</h2>
+    <p>Taraka is local-first: your data lives on your device and the app works fully without an account. A few <strong>optional</strong> features connect to outside services only when you use them — Google Sign-In, encrypted Google Drive backup, emailed PIN-recovery codes, and voice entry (all detailed below). Signing in also asks Google for permission to Taraka's private app-data folder in your Drive and performs a one-time, read-only check for an existing backup so we can offer to restore it — nothing is uploaded unless you enable Drive sync or explicitly replace the backup. There are no ads, no analytics, no tracking, and no Taraka server — ever.</p>
+  </section>
+
+  <section>
+    <h2>What we collect</h2>
+    <p>Signed out, Taraka collects nothing. The optional features collect only what they need:</p>
+    <ul>
+      <li><strong>Google Sign-In:</strong> your Google account name, email address, profile photo, and account ID — used to enable Drive backup and PIN recovery.</li>
+      <li><strong>PIN recovery:</strong> the recovery email address you nominate — used to send you a one-time code.</li>
+    </ul>
+    <p>Your financial records (wallets, transactions, amounts, notes, receipt photos) are entered by you and stay on your device unless you enable Drive backup.</p>
+  </section>
+
+  <section>
+    <h2>Where your data lives</h2>
+    <p><strong>On your device:</strong> all wallets, transactions, budgets, goals, recurring schedules, templates, categories, receipt photos, and preferences live in your phone's local storage.</p>
+    <p><strong>In your own Google Drive</strong> (only if you enable Drive sync or explicitly upload a backup): an encrypted backup of that data, kept in a private app-only folder that is hidden from your normal Drive view. It is encrypted on your device before upload. The encryption key is derived from your Google account identity, so treat your Google account's security as the backup's security boundary — anyone with full control of your Google account (and, in principle, Google itself) could access it. The backup file is labeled with your account email in its unencrypted file metadata so the restore prompt can show which account it belongs to; the financial data itself is always encrypted. We recommend also exporting a JSON/Excel backup periodically.</p>
+  </section>
+
+  <section>
+    <h2>How long we keep it</h2>
+    <p>Because there is no Taraka server, we don't hold your data on a schedule of our own — <strong>you</strong> control how long it lives. Your on-device records stay until you delete them in the app or uninstall Taraka. An encrypted Drive backup, if you turn sync on, stays in your Google Drive until you delete it (see "Deleting your data"). A PIN-recovery code sent through EmailJS is single-use and short-lived, and we store only a one-way hash of it on your device, never the code itself.</p>
+  </section>
+
+  <section>
+    <h2>Where processing happens</h2>
+    <p>Taraka itself runs on your device. The optional providers it can call — Google (Sign-In &amp; Drive), EmailJS, and ExchangeRate-API — are operated by third parties that may process the request on servers outside your country, under their own privacy policies. Using an optional feature is your consent for that request to be made; if you don't use it, no such transfer happens.</p>
+  </section>
+
+  <section>
+    <h2>Who we share data with</h2>
+    <p>Taraka has no server or backend and never sells or shares your data for advertising. Optional features use these providers:</p>
+    <ul>
+      <li><strong>Google (Sign-In &amp; Drive)</strong> — signs you in and stores your encrypted backup in your <strong>own</strong> Google Drive; handled under Google's privacy policy. Signing in requests access to Taraka's private Drive folder and checks (read-only) whether a backup already exists, so the app can offer to restore it; no data is uploaded by signing in alone.</li>
+      <li><strong>EmailJS</strong> — when you request a PIN-recovery code, your recovery email address and the code are sent through EmailJS (and Gmail) to reach your inbox.</li>
+      <li><strong>ExchangeRate-API</strong> — fetches public currency rates if you enable auto-update; no account or financial data is sent (like any web request, the service sees your device's IP address under its own privacy policy).</li>
+    </ul>
+    <p>If you never sign in or turn these features on, none of them are contacted.</p>
+  </section>
+
+  <section>
+    <h2>Phone permissions</h2>
+    <p>Taraka requests these Android permissions, and only when you actively use the corresponding feature:</p>
+    <ul>
+      <li><strong>Camera</strong> — only when you attach a receipt photo. It stays in the transaction on your device, and in your encrypted Drive backup if sync is on.</li>
+      <li><strong>Microphone</strong> — only when you use the optional voice entry and tap the mic. Audio is captured only while you're actively speaking, and only to turn your words into a draft transaction you then review; see "Voice entry" under Network usage.</li>
+      <li><strong>Notifications</strong> — only when you enable reminders or Quick Add.</li>
+      <li><strong>Biometric</strong> — only when you turn on the biometric lock. Taraka never reads or stores your fingerprint; we only ask the OS to verify it.</li>
+      <li><strong>Internet</strong> — for the optional features above (Google Sign-In, Drive backup, the PIN-recovery email, and currency rates).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Network usage</h2>
+    <p>All network calls use HTTPS. They are: Google Sign-In, Google's token-validation endpoint, and Google Drive (only if you sign in / enable sync); the <a href="https://www.emailjs.com">EmailJS</a> API (only when you request a PIN-recovery code); and currency rates from <a href="https://open.er-api.com">open.er-api.com</a> (only if auto-update is on — no account or financial data is sent, though the service sees your device's IP address like any web request). Receipt photos and their text recognition are processed entirely on your device (the on-device recognition model is downloaded once by Google Play services).</p>
+    <p><strong>Voice entry (optional).</strong> When you tap the microphone in voice entry, your speech is transcribed by your device's speech-recognition service. Where your device supports on-device recognition for the chosen language, the audio never leaves your phone; otherwise the audio may be sent to your device's speech service (for example, Google's) to transcribe it, under that provider's privacy policy — the same service your device uses for other voice input. Taraka never records, stores, or sends your voice audio to a Taraka server, and only the resulting text is used, on your device, to pre-fill the transaction for you to review.</p>
+  </section>
+
+  <section id="deleting-your-data">
+    <h2>Deleting your data</h2>
+    <p>Taraka has no account of its own — you sign in with your existing Google account, and no separate Taraka profile is created on any server. To remove the data tied to your use of Taraka, follow these steps:</p>
+    <p><strong>On-device:</strong> Settings → Reset → "Delete all data" wipes everything stored on this device (and uninstalling removes the app's local storage).</p>
+    <p><strong>Cloud backup:</strong> if you turned on Drive sync, your encrypted backup stays in your Google Drive even after a reset or uninstall. To delete it, use Settings → Account &amp; Security → Drive sync → "Delete cloud backup &amp; sign out", which removes the backup and signs you out.</p>
+    <p><strong>Without the app installed:</strong> you can delete the backup yourself at any time — open Google Drive → Settings → Manage apps → Taraka (it may still be listed under the app's former name, Moneta) → "Delete hidden app data". Revoking Taraka's access from your Google Account (Security → Third-party access) stops future access but does <strong>not</strong> delete the stored backup — use the Drive step above for that.</p>
+  </section>
+
+  <section>
+    <h2>Children</h2>
+    <p>Taraka is not directed at children under 13 and does not knowingly collect personal information from children under 13. The optional sign-in features described above are the only personal information Taraka handles.</p>
+  </section>
+
+  <section>
+    <h2>Changes to this policy</h2>
+    <p>Material changes will show up in the in-app "What's new" modal on the version that introduces them, and the date at the top of this page will update. Past versions are visible in the in-app Notifications log.</p>
+  </section>
+
+  <section>
+    <h2>Your rights</h2>
+    <p>Because your data lives on your device, you can exercise most rights directly in the app: <strong>access / export</strong> it any time (Settings → Data Management → Export JSON or Excel), <strong>correct</strong> it by editing records in the app, and <strong>delete</strong> it using the steps in "Deleting your data" above. For anything else — including questions, complaints, or requests you can't complete in-app — email <a href="mailto:andrian.wu.7@gmail.com">andrian.wu.7@gmail.com</a> and we'll respond as soon as we can.</p>
+    <p><strong>We do not sell or "share" your personal information</strong> as those terms are used under laws such as the California Consumer Privacy Act (CCPA/CPRA), and there is no advertising or cross-context behavioural tracking to opt out of. Where a law such as the GDPR applies, our legal basis for the limited processing above is your <strong>consent</strong>, given by choosing to use each optional feature, which you can withdraw at any time by turning the feature off. These rights apply regardless of where you live; residents of regions with specific data-protection laws (EEA/UK, California, and others) may also contact us using the email above to exercise them.</p>
+  </section>
+
+  <section>
+    <h2>Questions</h2>
+    <p>Email <a href="mailto:andrian.wu.7@gmail.com">andrian.wu.7@gmail.com</a>, or file a GitHub issue at <a href="https://github.com/Zen1th7/moneta/issues">github.com/Zen1th7/moneta</a> (note that GitHub issues are public — use email for anything private).</p>
+  </section>
+
+  <footer>
+    Taraka · Your wealth, elevated.
+  </footer>
+
+</div>
+</body>
+</html>
